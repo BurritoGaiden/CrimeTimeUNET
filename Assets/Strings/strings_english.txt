@@ -1,0 +1,6 @@
+#mainmenu_start {Start Lobby}
+#mainmenu_join {Join Lobby}
+
+#lobby_readyup	{READY?}
+
+
