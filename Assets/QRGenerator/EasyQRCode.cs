@@ -4,9 +4,8 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 public class EasyQRCode : MonoBehaviour {
-
-	[SyncVar]
-    public string textToEncode = "Hello World!";
+	
+	public string textToEncode;
     public Color darkColor = Color.black;
     public Color lightColor = Color.white;
 	
