@@ -8,6 +8,13 @@ public class ConnectionDisplay : NetworkBehaviour {
 	[SerializeField]
 	private Image[] playerPips = new Image[5];
 
+	[SerializeField]
+	private Color notJoinedColor;
+	
+	[SerializeField]
+	private Color joinedColor;
+
+
 	[SyncVar(hook="updateDisplay")]
 	private int numberConnected = 0;
 
@@ -26,10 +33,10 @@ public class ConnectionDisplay : NetworkBehaviour {
 	{
 		numberConnected = incoming;
 		for (int i = 0; i < numberConnected; i++) {
-			playerPips[i].color = Color.white;
+			playerPips[i].color = joinedColor;
 		}
 		for (int i = numberConnected; i < 5; i++) {
-			playerPips[i].color = Color.grey;
+			playerPips[i].color = notJoinedColor;
 		}
 	}
 
