@@ -23,7 +23,7 @@ public class txtLookup : MonoBehaviour {
 
 	void OnLevelWasLoaded(int level)
 	{
-		parseStrings ();
+		//parseStrings ();
 	}
 
 	void parseStrings()

@@ -3,4 +3,7 @@
 
 #lobby_readyup	{READY?}
 
+#sniper_firstname	{Josephine}
+#sniper_lastname	{Graves}
+#sniper_helptext	{She shoot good. Like, real good.}
 
