@@ -19,13 +19,16 @@ public class CharacterPanel : NetworkBehaviour {
 	[SerializeField]
 	private GameObject associatedCharacter;
 	private CharacterBehavior associatedCharacterBehavior;
-
-	private GameObject nullPlayer;
-
+	
 	[SerializeField]
 	private GameObject helpMenu;
 
 	// --- Card Elements ---
+	[SerializeField]
+	private Color32 offColor;
+	[SerializeField]
+	private Color32 onColor;
+	
 	[SerializeField]
 	private Text firstName, lastName;
 
@@ -34,11 +37,15 @@ public class CharacterPanel : NetworkBehaviour {
 
 	private Image[] healthPips, movePips, gunPips, CQCPips;
 
+	[SerializeField]
+	private bool debugReady = false;
+
 	// Use this for initialization
 	void Start () 
 	{
+
+
 		initCardInfo ();
-		nullPlayer = GameObject.FindGameObjectWithTag ("DummyPlayer");
 
 		childToggle = transform.parent.GetComponentInChildren<Toggle> ();
 		updateColor (currentColor);
@@ -48,18 +55,36 @@ public class CharacterPanel : NetworkBehaviour {
 
 	void initCardInfo()
 	{
-	Color32 faded = new Color32 (167, 167, 167, 128);
 
-	if (firstName != null && lastName != null) {
+	if (debugReady) {
+
+			//
 			associatedCharacterBehavior = associatedCharacter.GetComponent<CharacterBehavior> ();
 			associatedCharacterBehavior.initCharacter ();
 
 			firstName.text = associatedCharacterBehavior.getFirstName ().ToUpper();
 			lastName.text = associatedCharacterBehavior.getLastName ().ToUpper();
 
-			healthPips = healthBar.gameObject.GetComponentsInSiblings<Image>();
-			healthPips.updatePips(associatedCharacterBehavior.getHP(), Color.white, faded);
+			// -- Intitialize the stat bars on the card --
+
+				Color32 faded = new Color32 (167, 167, 167, 128);
+
+				healthPips = healthBar.gameObject.GetComponentsInSiblings<Image>();
+				healthPips.updatePips(associatedCharacterBehavior.getHP(), Color.white, faded);
+
+				movePips = moveBar.gameObject.GetComponentsInSiblings<Image>();
+				movePips.updatePips(associatedCharacterBehavior.getMoveStat(), Color.white, faded);
+
+				gunPips = gunBar.gameObject.GetComponentsInSiblings<Image>();
+				gunPips.updatePips(associatedCharacterBehavior.getGunStat(), Color.white, faded);
+
+				CQCPips = CQCBar.gameObject.GetComponentsInSiblings<Image>();
+				CQCPips.updatePips(associatedCharacterBehavior.getCQCStat(), Color.white, faded);
 		}
+
+			onColor = Color.white;
+			offColor = Color.grey;
+			currentColor = offColor;
 	}
 	
 
@@ -67,10 +92,10 @@ public class CharacterPanel : NetworkBehaviour {
 	// otherwise, only allow the owning player to press and de-select
 	public void clickButton()
 	{
-		if (!this.isServer) {
+		//if (this.isServer) {
 			GameObject localPlayer = MainMenuManager.singleton.client.connection.playerControllers [0].gameObject;
 			localPlayer.GetComponent<LobbyToken> ().CmdCheckOwnership (this.gameObject);
-		}
+		//}
 	} 
 
 	public void clickToggle()
@@ -94,17 +119,30 @@ public class CharacterPanel : NetworkBehaviour {
 	public void CheckOwnership (GameObject playerToCheck)
 	{
 		if (associatedPlayer == playerToCheck) {
-			associatedPlayer.GetComponent<LobbyToken>().setCharacter(nullPlayer);
-			associatedPlayer.GetComponent<LobbyToken>().selectedButton = nullPlayer;
-			associatedPlayer = nullPlayer;
-			currentColor = Color.white;
+			associatedPlayer.GetComponent<LobbyToken> ().setCharacter (null);
+			associatedPlayer.GetComponent<LobbyToken> ().selectedButton = null;
+			associatedPlayer = null;
+			currentColor = offColor;
+		/*
+			foreach (GameObject s in gameObject.GetSiblings())
+			{
+				foreach(CanvasRenderer c in s.GetComponentsInChildren<CanvasRenderer>())
+					c.SetColor(offColor);
+			}
+		*/
 			toggleState = false;
-		}else if (associatedPlayer == nullPlayer) {
+		} else if (associatedPlayer == null) {
+			// -- un-select the button held by a player if they select a new one
+			if (playerToCheck.GetComponent<LobbyToken> ().selectedButton != null)
+				playerToCheck.GetComponent<LobbyToken> ().selectedButton.GetComponent<CharacterPanel> ().CheckOwnership (playerToCheck);
 			associatedPlayer = playerToCheck;
 			associatedPlayer.GetComponent<LobbyToken> ().setCharacter (associatedCharacter);
-			associatedPlayer.GetComponent<LobbyToken>().selectedButton = this.gameObject;
-			currentColor = Color.grey;
+			associatedPlayer.GetComponent<LobbyToken> ().selectedButton = this.gameObject;
+			currentColor = onColor;
+		} else {
+			Debug.Log("Character already selected by another player");
 		}
+		Debug.Log (associatedPlayer);
 	}
 
 	// called when the holding player 
@@ -137,7 +175,7 @@ public class CharacterPanel : NetworkBehaviour {
 
 	public void updateColor(Color c)
 	{
-		GetComponentInParent<CanvasRenderer> ().SetColor (c);
+		GetComponentInParent<CanvasRenderer> ().SetColor(c);
 		//GameObject localPlayer = MainMenuManager.singleton.client.connection.playerControllers [0].gameObject;
 	}
 	
