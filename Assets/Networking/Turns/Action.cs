@@ -33,8 +33,15 @@ public class Movement : Action{
 
 	public IEnumerator Execute(){
 		foreach (Vector3 v in path) {
-			actor.transform.position = new Vector3 (v.x, 0.125f, v.z);
-			yield return new WaitForSeconds (0.5f);
+			float t = 0.0f;
+			while (t < 1.0f) {
+				t += Time.deltaTime / 0.25f; // Sweeps from 0 to 1 in time seconds
+				actor.transform.LookAt(Vector3.Lerp(actor.transform.position, new Vector3 (v.x, 0.125f, v.z), t));
+				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (v.x, 0.125f, v.z), t);
+				yield return 0;
+			}
+			//actor.transform.position = new Vector3 (v.x, 0.125f, v.z);
+			yield return null;
 		}
 	}
 

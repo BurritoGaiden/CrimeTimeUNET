@@ -60,7 +60,7 @@ public class CommandPanel : MonoBehaviour {
 					Debug.Log ("Removing: " + queuedPath[i].x + "," + queuedPath[i].z);
 					queuedPath.RemoveAt (i);
 				}
-			} else if (((dx == distanceBetweenTiles && dz == 0f) || (dx == 0f && dz == distanceBetweenTiles)) && (dx + dz <= 1f)){
+			} else if (((dx == distanceBetweenTiles && dz == 0f) || (dx == 0f && dz == distanceBetweenTiles)) && (dx + dz <= distanceBetweenTiles)){
 				queuedPath.Add (tilePos);
 			}
 
