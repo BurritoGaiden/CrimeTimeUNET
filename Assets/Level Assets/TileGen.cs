@@ -30,6 +30,8 @@ public class TileGen : MonoBehaviour {
 			tileArray[position].transform.Rotate(new Vector3(90,0,0));
 			if (position%2 == 0)
 				tileArray[position].GetComponent<MeshRenderer>().material.color = Color.grey;
+			tileArray[position].GetComponent<TileBehavior>().X = i;
+			tileArray[position].GetComponent<TileBehavior>().Z = j;
 		}
 
 	}

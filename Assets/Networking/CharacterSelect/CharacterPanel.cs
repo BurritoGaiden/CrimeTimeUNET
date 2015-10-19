@@ -16,14 +16,18 @@ public class CharacterPanel : NetworkBehaviour {
 	[SyncVar(hook="enableToggle")]
 	private GameObject associatedPlayer;
 
+	[Header("Designated Character")] 
 	[SerializeField]
 	private GameObject associatedCharacter;
 	private CharacterBehavior associatedCharacterBehavior;
-	
+
+	[Header("Scene Elements")]
+
 	[SerializeField]
 	private GameObject helpMenu;
 
 	// --- Card Elements ---
+	[Header("Card Elements")]
 	[SerializeField]
 	private Color32 offColor;
 	[SerializeField]
