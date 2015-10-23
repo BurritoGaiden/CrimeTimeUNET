@@ -12,14 +12,11 @@ public interface Action {
 public class Movement : Action{
 
 	private List<Vector3> path;
-
 	// what object is doing the action
 	private GameObject actor;
-	
 	// what object is targeted by the action
 	private GameObject target;
-	
-	// did the action work, or did it faail? 
+	// did the action work, or did it fail? 
 	private bool success;
 
 	public Movement(GameObject a, List<Vector3> p, bool s){
@@ -27,10 +24,7 @@ public class Movement : Action{
 		path = new List<Vector3>(p);
 		success = s;
 	}
-
-
-
-
+	
 	public IEnumerator Execute(){
 		foreach (Vector3 v in path) {
 			float t = 0.0f;
@@ -46,3 +40,29 @@ public class Movement : Action{
 	}
 
 }
+
+public class Attack : Action{
+	
+
+	private GameObject actor;
+	// what object is targeted by the action
+	private GameObject target;
+	// did the action work, or did it fail? 
+	private bool success;
+	
+	public Attack(GameObject a, GameObject t, bool s){
+		actor = a;
+		target = t;
+		success = s;
+	}
+	
+	public IEnumerator Execute(){
+		actor.GetComponent<LineRenderer>().SetPosition(0,actor.transform.position);
+		actor.GetComponent<LineRenderer>().SetPosition(1,target.transform.position);
+		yield return new WaitForSeconds(0.25f);
+		actor.GetComponent<LineRenderer>().SetPosition(0,actor.transform.position);
+		actor.GetComponent<LineRenderer>().SetPosition(1,actor.transform.position);
+	}
+}
+
+

@@ -32,11 +32,8 @@ public class FieldReporter : MonoBehaviour {
 	public IEnumerator crunchTurns(){
 		int i;
 		for (i = 0; i < Record[turnNumber].Count; i++) {
-			Debug.Log ("GETTIN' IN THERE!");
 			yield return StartCoroutine(Record[turnNumber][i].Execute());
 		}
-
-		//yield return new StartCoroutine(
 	}
 
 }
