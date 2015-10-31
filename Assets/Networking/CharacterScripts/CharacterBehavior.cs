@@ -12,6 +12,13 @@ public class CharacterBehavior : MonoBehaviour {
 	[SerializeField]
 	private int HP, MoveStat, GunStat, CQCStat;
 
+	private bool finishedMoving = false;
+	public bool FinishedMoving
+	{
+		get {return finishedMoving; }
+		set {finishedMoving = value;}
+	}
+
 	// Use this for initialization
 	void Start () {
 

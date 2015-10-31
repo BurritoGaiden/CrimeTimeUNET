@@ -33,8 +33,7 @@ public class Movement : Action{
 				actor.transform.LookAt(Vector3.Lerp(actor.transform.position, new Vector3 (v.x, 0.125f, v.z), t));
 				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (v.x, 0.125f, v.z), t);
 				yield return 0;
-			}
-			//actor.transform.position = new Vector3 (v.x, 0.125f, v.z);
+			} 
 			yield return null;
 		}
 	}

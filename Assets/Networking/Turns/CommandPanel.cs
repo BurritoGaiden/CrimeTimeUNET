@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -13,30 +14,37 @@ public class CommandPanel : MonoBehaviour {
 
 	[SerializeField]
 	private GameObject unit;
+	private CharacterBehavior unitBehavior;
 	public GameObject SelectedUnit
 	{
 		get {return unit; }
-		set {unit = value;}
+		set {unit = value;
+			reset();}
 	}
 
 	[SerializeField]
 	private float distanceBetweenTiles = 1f;
+	
+	private List<Vector3> queuedPath = new List<Vector3>();
 
 	[SerializeField]
-	private GameObject waypoint;
-
-	private List<Vector3> queuedPath = new List<Vector3>();
-	private List<GameObject> queuedWaypoints = new List<GameObject>();
+	private Text movesLeft;
 
 	// Use this for initialization
 	void Start () {
-	
+		this.SelectedUnit = unit;
 		MoveSelectEnabled = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 	
+	}
+
+	void reset(){
+		unitBehavior = unit.GetComponent<CharacterBehavior>();
+		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
+		queuedPath.Clear ();
 	}
 
 	public void pathSelection(Vector3 tilePos){
@@ -48,7 +56,7 @@ public class CommandPanel : MonoBehaviour {
 		*/
 			// if the list is empty, set the start at where you're at, idiot
 			if(queuedPath.Count == 0)
-				queuedPath.Add(unit.transform.position);
+				queuedPath.Add(new Vector3(unit.transform.position.x, 0f, unit.transform.position.z));
 			int currentPos = queuedPath.Count;
 			// checks the distance between the selected tiles 
 			float dx = Mathf.Abs(queuedPath [currentPos - 1].x - tilePos.x);
@@ -60,22 +68,28 @@ public class CommandPanel : MonoBehaviour {
 					Debug.Log ("Removing: " + queuedPath[i].x + "," + queuedPath[i].z);
 					queuedPath.RemoveAt (i);
 				}
-			} else if (((dx == distanceBetweenTiles && dz == 0f) || (dx == 0f && dz == distanceBetweenTiles)) && (dx + dz <= distanceBetweenTiles)){
-				queuedPath.Add (tilePos);
+			} else if ((((dx == distanceBetweenTiles && dz == 0f) || (dx == 0f && dz == distanceBetweenTiles)) 
+			            && (dx + dz <= distanceBetweenTiles))
+			            && queuedPath.Count-1 < unitBehavior.getMoveStat()){
+				queuedPath.Add (tilePos); 
 			}
 
 			foreach (Vector3 v in queuedPath) {
 				Debug.Log ("Next Step: " + v.x + "," + v.z);
 			}
 
-			Debug.Log (queuedPath.Count);
+			updateMovesLeft();
 		}
 	}
 
 	public void commitToMove(){
+
 		Movement move = new Movement (unit, queuedPath, true);
-		Execute (move);
-		queuedPath.Clear ();
+		StartCoroutine(Execute (move));
+	}
+
+	void updateMovesLeft(){
+		movesLeft.text = (unitBehavior.getMoveStat() - (queuedPath.Count-1)).ToString();
 	}
 
 	public void targetAttack(GameObject target){
@@ -99,13 +113,15 @@ public class CommandPanel : MonoBehaviour {
 
 	public void commitToAttack(GameObject target){
 		Attack attack = new Attack (unit, target, true);
-		Execute (attack);
+		StartCoroutine(Execute (attack));
 	}
 
-	public void Execute(Action action){
+	public IEnumerator Execute(Action action){
 		Debug.Log ("Executing...");
 		FindObjectOfType<FieldReporter> ().addActionToTurn(action);
-		StartCoroutine(action.Execute());
+		yield return StartCoroutine(action.Execute());
+		reset ();
+		FindObjectOfType<FieldReporter> ().checkToIncrememt ();
 	}
 
 
