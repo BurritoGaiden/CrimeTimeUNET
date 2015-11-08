@@ -5,22 +5,24 @@
 		<style>
 			body {
 				height: 100vh;
+				background-color: black;
 			}
 			table {
 				border: 1px black solid;
 			}
 
 			.hud {
+				border: 1px black solid;
 				width: 100%;
 				position: fixed;
-				height: 100px;
-				background-color: blue;
+				height: 150px;
+				background-color: gray;
 			}
 
 			#mid{
 				width: 100%;
 				height: 100%;
-				/*z-index: -5;*/
+				z-index: -5;
 				position: relative;
 				border: 1px black solid;
 				text-align: center;
@@ -29,8 +31,8 @@
 			#mid table {
 				border-collapse: collapse;
 				position: absolute;
-				left: 45%;
-				top: 45%;
+				left: 50%;
+				top: 50%;
 			}
 
 			tr {
@@ -43,11 +45,11 @@
 				width: 50px;
 				border: 1px black solid;
 				padding: 0;
-				background-color: red;
+				background-color: white;
 			}
 
-			#mid td:hover{
-				background-color: green;
+			#mid >td:hover{
+				background-color: gray;
 			}
 
 			#bottom {
@@ -68,8 +70,14 @@
 		</div>
 
 	<script>
-		var rows = 4;
-		var columns = 4;
+		function MapRefresh(){
+		 $.get("MapRule", function(data, status){
+        console.log("Data: " + data + "\nStatus: " + status);});
+		}
+		setInterval(MapRefresh, 600);
+
+		var rows = 5;
+		var columns = 5;
 		for (var i = 0; i < rows; i++) {
 			$("#map").append("<tr></tr>");
 		};
@@ -84,7 +92,8 @@
 		});
 	
 
-		var ws = new WebSocket("ws://example.com");
+
+		//var ws = new WebSocket("ws://example.com");
 	</script>
 
 	</body>

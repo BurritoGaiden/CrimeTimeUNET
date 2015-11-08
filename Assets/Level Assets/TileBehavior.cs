@@ -23,6 +23,6 @@ public class TileBehavior : MonoBehaviour {
 
 	void OnMouseDown(){
 		Debug.Log ("This tile is: " + x + "," + z);
-		FindObjectOfType<CommandPanel> ().pathSelection (transform.position);
+		FindObjectOfType<CommandPanel> ().pathSelection (this.gameObject);
 	}
 }

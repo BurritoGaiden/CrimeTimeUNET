@@ -15,6 +15,8 @@ public class FieldReporter : MonoBehaviour {
 	[SerializeField]
 	private Text turnDisplay; 
 	[SerializeField]
+	private Text scaleDisplay; 
+	[SerializeField]
 	private Button replayButton; 
 	[SerializeField]
 	private Button pauseButton;  
@@ -23,6 +25,7 @@ public class FieldReporter : MonoBehaviour {
 	void Start () {
 		incrementTurn ();
 		pauseButton.interactable = false;
+		scaleDisplay.text = Time.timeScale.ToString("0.00") + "x";
 	}
 	
 	// Update is called once per frame
@@ -48,6 +51,7 @@ public class FieldReporter : MonoBehaviour {
 		timescale = Mathf.Pow (2f, t);
 		Debug.Log (timescale);
 		Time.timeScale = timescale;
+		scaleDisplay.text = Time.timeScale.ToString("0.00") + "x";
 	}
 
 	public void pause(){
@@ -60,6 +64,7 @@ public class FieldReporter : MonoBehaviour {
 			pauseToggle = true;
 			Time.timeScale = timescale;
 		}
+		scaleDisplay.text = Time.timeScale.ToString("0.00") + "x";
 	}
 
 	public void startReplay(){

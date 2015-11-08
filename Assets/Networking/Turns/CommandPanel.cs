@@ -47,7 +47,8 @@ public class CommandPanel : MonoBehaviour {
 		queuedPath.Clear ();
 	}
 
-	public void pathSelection(Vector3 tilePos){
+	public void pathSelection(GameObject tile){
+		Vector3 tilePos = tile.transform.position;
 		if (moveSelectEnabled) {
 			/*
 		if (currentPos > unit.GetComponent<CharacterBehavior> ().getMoveStat ()) {
