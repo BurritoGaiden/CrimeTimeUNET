@@ -44,7 +44,18 @@ public class MapRule : WebServerRule
 	protected override IEnumerator OnRequest(HttpListenerContext context)
 	{
 		string html = inputField;
+
+		HttpListenerRequest request = context.Request;
 		
+		StreamReader reader = new StreamReader(request.InputStream);
+		string s = reader.ReadToEnd();
+
+		JSONWrapper j = new JSONWrapper(s);
+		// TODO: rewrite this becase holy shit it uses a public accessor
+		FindObjectOfType<CommandPanel> ().pathSelection (FindObjectOfType<TileGen> ().tileArray [int.Parse(j ["x"]), int.Parse(j ["z"])]);
+		Debug.Log("x:" + j["x"] + "," + "z:" + j["z"]);
+
+
 		byte[] data = Encoding.ASCII.GetBytes(html);
 		
 		yield return null;
@@ -66,6 +77,7 @@ public class MapRule : WebServerRule
 			responseStream.Write(data, i, writeLength);
 			i += writeLength;
 		}
+
 	}
 	
 	#endif

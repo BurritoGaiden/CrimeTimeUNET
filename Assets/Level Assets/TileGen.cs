@@ -7,7 +7,7 @@ public class TileGen : MonoBehaviour {
 	[SerializeField]
 	private GameObject tilePrefab;
 
-	private GameObject[] tileArray;
+	public GameObject[,] tileArray;
 
 	[SerializeField]
 	private int fieldSize;
@@ -21,17 +21,17 @@ public class TileGen : MonoBehaviour {
 	}
 
 	void generateTiles(){
-		tileArray = new GameObject[fieldSize*fieldSize];
+		tileArray = new GameObject[fieldSize,fieldSize];
 		int position;
 		for (int i = 0; i< fieldSize; i++)
 		for(int j = 0; j< fieldSize; j++){
 			position = (i*fieldSize + j);
-			tileArray[position] = (GameObject)Instantiate(tilePrefab, new Vector3(i, 0, j), Quaternion.identity);
-			tileArray[position].transform.Rotate(new Vector3(90,0,0));
+			tileArray[i,j] = (GameObject)Instantiate(tilePrefab, new Vector3(i, 0, j), Quaternion.identity);
+			tileArray[i,j].transform.Rotate(new Vector3(90,0,0));
 			if (position%2 == 0)
-				tileArray[position].GetComponent<MeshRenderer>().material.color = Color.grey;
-			tileArray[position].GetComponent<TileBehavior>().X = i;
-			tileArray[position].GetComponent<TileBehavior>().Z = j;
+				tileArray[i,j].GetComponent<MeshRenderer>().material.color = Color.grey;
+			tileArray[i,j].GetComponent<TileBehavior>().X = i;
+			tileArray[i,j].GetComponent<TileBehavior>().Z = j;
 		}
 
 	}
