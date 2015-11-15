@@ -33,7 +33,6 @@ public class TileGen : MonoBehaviour {
 			tileArray[i,j].GetComponent<TileBehavior>().X = i;
 			tileArray[i,j].GetComponent<TileBehavior>().Z = j;
 		}
-
 	}
 	void spawnPlayer(){
 

@@ -32,8 +32,9 @@ public class CommandPanel : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		this.SelectedUnit = unit;
+		//this.SelectedUnit = unit;
 		MoveSelectEnabled = true;
+		this.SelectedUnit = FindObjectOfType<CharacterBehavior> ().gameObject;
 	}
 	
 	// Update is called once per frame
@@ -43,7 +44,7 @@ public class CommandPanel : MonoBehaviour {
 
 	void reset(){
 		unitBehavior = unit.GetComponent<CharacterBehavior>();
-		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
+//		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
 		queuedPath.Clear ();
 	}
 
@@ -90,7 +91,7 @@ public class CommandPanel : MonoBehaviour {
 	}
 
 	void updateMovesLeft(){
-		movesLeft.text = (unitBehavior.getMoveStat() - (queuedPath.Count-1)).ToString();
+//		movesLeft.text = (unitBehavior.getMoveStat() - (queuedPath.Count-1)).ToString();
 	}
 
 	public void targetAttack(GameObject target){

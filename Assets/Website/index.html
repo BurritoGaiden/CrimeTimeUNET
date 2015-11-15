@@ -8,6 +8,7 @@
 			body {
 				height: 100vh;
 				width: 100%;
+				margin: 0px;
 			}
 			table {
 				border: 1px black solid;
@@ -17,6 +18,8 @@
 				width: 100%;
 				position: fixed;
 				height: 100px;
+				margin: 0px;
+				border: 1px white solid;
 				background-color: gray;
 			}
 
@@ -25,6 +28,7 @@
 				height: 100%;
 				/*z-index: -5;*/
 				border: 1px black solid;
+				background-color: black;
 			}
 
 			#mid table {
@@ -40,7 +44,7 @@
 			}
 
 			tr:nth-child(odd) > td:nth-child(even){
-				background-color: black;
+				background-color: white;
 			}
 
 			tr:nth-child(odd) > td:nth-child(odd){
@@ -52,12 +56,12 @@
 			}
 
 			tr:nth-child(even) > td:nth-child(odd){
-				background-color: black;
+				background-color: white;
 			}
 			#mid td {
 				height: 50px;
 				width: 50px;
-				border: 1px black solid;
+				border: 1px white solid;
 				padding: 0;
 			}
 
@@ -67,6 +71,13 @@
 
 			#bottom {
 				bottom: 0;
+			}
+
+			#move {
+ 				width: 10%;
+     			height: 75%;
+				margin-left: 5%;
+				margin-top: 15px;
 			}
 
 		</style>
@@ -80,6 +91,7 @@
 		</div>
 
 		<div id="bottom" class="hud">
+			<button id="move" type="button">MOVE</button>
 		</div>
 
 	<script>
@@ -89,6 +101,10 @@
 			*/
 		});
 	
+		$.get("init", function(data, status){
+        console.log("GET Data: " + data + "\nStatus: " + status);});
+		
+
 		function MapRefresh(){
 		$.get("MapRule", function(data, status){
         console.log("GET Data: " + data + "\nStatus: " + status);});
@@ -111,11 +127,16 @@
 			$.post("MapRule", 
 				{x: $(this).index(), 
 				 z: (rows-1) - $(this).closest('tr').index()});
-			console.log("Hello! My position is: " + $(this).index() + ", " + (rows - 1 - $(this).closest('tr').index()));
+			console.log("Tile position is: " + $(this).index() + ", " + (rows - 1 - $(this).closest('tr').index()));
+		});
+
+		$("#move").click(function(e){
+			//e.preventDefault();
+			console.log("Command sent: Moving!");
+			$.post("init", "commitMove");
 		});
 	
 
-		//var ws = new WebSocket("ws://example.com");
 	</script>
 
 	</body>

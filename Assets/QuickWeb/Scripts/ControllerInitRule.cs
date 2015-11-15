@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Net;
 using System.IO;
 
-public class MapRule : WebServerRule
+public class ControllerInitRule : WebServerRule
 {
-
+	
 	[Serializable]
 	public struct HtmlKeyValue
 	{
@@ -17,7 +18,7 @@ public class MapRule : WebServerRule
 		{
 			get { return key; }
 		}
-
+		
 		[SerializeField]
 		private string value;
 		public string Value
@@ -25,14 +26,12 @@ public class MapRule : WebServerRule
 			get { return value; }
 			set { this.value = value; }
 		}
-
+		
 		public HtmlKeyValue(string key, string value)
 		{
 			this.key = key;
 			this.value = value;
-		}
-
-
+		}	
 	}
 	
 	#if UNITY_STANDALONE || UNITY_EDITOR
@@ -48,48 +47,36 @@ public class MapRule : WebServerRule
 
 		HttpListenerRequest request = context.Request;
 		StreamReader reader = new StreamReader(request.InputStream);
-		string s = reader.ReadToEnd();
+		string command = reader.ReadToEnd();
 		string ID = request.RemoteEndPoint.Address.ToString();
 
-		JSONWrapper j = new JSONWrapper(s);
+		if ((!WebServer.controllerRoster.ContainsKey (ID)) && (WebServer.controllerRoster.Count < 5)) {
+			GameObject newController = (GameObject)Instantiate (controllerPrefab, Vector3.zero, Quaternion.identity);
+			newController.name = ID;
+			WebServer.controllerRoster.Add (ID, newController);
+		} else if (WebServer.controllerRoster.ContainsKey (ID)) {
+			CommandPanel cp = WebServer.controllerRoster[ID].GetComponent<CommandPanel>();
 
-		if (WebServer.controllerRoster.ContainsKey (ID)) {
-			CommandPanel cp = WebServer.controllerRoster [ID].GetComponent<CommandPanel> ();
-			Debug.Log("Processing tile data");
-			// TODO: rewrite this because holy shit it uses a public accessor
-			cp.pathSelection (FindObjectOfType<TileGen> ().tileArray [int.Parse (j ["x"]), int.Parse (j ["z"])]);
-			Debug.Log ("x:" + j ["x"] + "," + "z:" + j ["z"]);
+			if(command.Equals("commitMove")){
+				cp.commitToMove();
+			}
 		}
 
-		byte[] data = Encoding.ASCII.GetBytes(dataString);
-		
 		yield return null;
-		
-		HttpListenerResponse response = context.Response;
-		
-		response.ContentType = "text/plain";
-		
-		Stream responseStream = response.OutputStream;
-		
-		int count = data.Length;
-		int i = 0;
-		while(i < count)
-		{
-			if (i != 0)
-				yield return null;
-			
-			int writeLength = Math.Min((int)writeStaggerCount, count - i);
-			responseStream.Write(data, i, writeLength);
-			i += writeLength;
-		}
 	}
 	
 	#endif
-	
+
+	[SerializeField]
+	private GameObject controllerPrefab;
+
+	[SerializeField]
+	private int charSelectIndex;
+
 	[SerializeField]
 	private HtmlKeyValue[] substitutions;
 	
 	[SerializeField]
 	[Tooltip("How many bytes to write before waiting a frame to continue.")]
-	private uint writeStaggerCount = 4096;
+	private int writeStaggerCount = 4096;
 }
