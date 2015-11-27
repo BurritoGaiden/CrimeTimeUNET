@@ -44,12 +44,10 @@ public class LobbyReadyUp : NetworkBehaviour {
 			countdown = 5;
 			countdownPanel.SetActive(true);
 			StartCoroutine ("countdownCoroutine");
-			FindObjectOfType<Jukebox>().ChangeTrack(0);
 		}
 		else {
 			countdownPanel.SetActive(false);
 			StopCoroutine("countdownCoroutine");
-			FindObjectOfType<Jukebox>().ChangeTrack(1);
 		}
 	}
 	

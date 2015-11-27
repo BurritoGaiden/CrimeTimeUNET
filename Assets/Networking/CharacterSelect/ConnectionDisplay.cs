@@ -5,8 +5,8 @@ using UnityEngine.Networking;
 
 public class ConnectionDisplay : NetworkBehaviour {
 
-	[SerializeField]
-	private Image[] playerPips = new Image[5];
+
+	private Image[] playerPips;
 
 	[SerializeField]
 	private Color notJoinedColor;
@@ -25,19 +25,15 @@ public class ConnectionDisplay : NetworkBehaviour {
 			i.color = Color.grey;
 		}
 		*/
+		playerPips = gameObject.GetComponentsInSiblings<Image>();
 		updateDisplay (numberConnected);
 	
 	}
 
 	private void updateDisplay(int incoming)
 	{
-		numberConnected = incoming;
-		for (int i = 0; i < numberConnected; i++) {
-			playerPips[i].color = joinedColor;
-		}
-		for (int i = numberConnected; i < 5; i++) {
-			playerPips[i].color = notJoinedColor;
-		}
+		if (numberConnected >= 0)
+			playerPips.updatePips (incoming, joinedColor, notJoinedColor);
 	}
 
 	[Command]

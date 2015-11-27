@@ -26,6 +26,7 @@ public class MainMenuManager : NetworkManager {
 
 	}
 
+	// pulls the IP from a local webserver URL
 	string regexParseURL()
 	{
 		ipParser = new Regex ("^(http|https)\\:\\/\\/(?<ip>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}).*$");

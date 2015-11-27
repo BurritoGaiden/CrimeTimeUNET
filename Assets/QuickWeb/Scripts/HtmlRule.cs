@@ -7,8 +7,6 @@ using System.IO;
 
 public class HtmlRule : WebServerRule
 {
-
-
     [Serializable]
     public struct HtmlKeyValue
     {
@@ -44,6 +42,8 @@ public class HtmlRule : WebServerRule
 
     protected override IEnumerator OnRequest(HttpListenerContext context)
     {
+		Debug.Log("Hello:" + context.Request.UserHostAddress);
+
         string html = htmlPage.text;
 
         foreach(HtmlKeyValue pair in substitutions)

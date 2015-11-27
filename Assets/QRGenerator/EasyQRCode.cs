@@ -16,7 +16,7 @@ public class EasyQRCode : MonoBehaviour {
         // Example usage of QR Generator
         // The text can be any string, link or other QR Code supported string
 
-		textToEncode = "http://"+(Network.player.ipAddress)+":8080/QuickServer/WebPlayer.html";
+		textToEncode = "http://"+(Network.player.ipAddress)+":8080/HeistNight/index";
         Texture2D qrTexture = QRGenerator.EncodeString(textToEncode, darkColor, lightColor);
 
 
