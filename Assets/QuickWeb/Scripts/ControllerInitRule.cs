@@ -43,7 +43,6 @@ public class ControllerInitRule : WebServerRule
 	
 	protected override IEnumerator OnRequest(HttpListenerContext context)
 	{
-		string dataString = "";
 
 		HttpListenerRequest request = context.Request;
 		StreamReader reader = new StreamReader(request.InputStream);

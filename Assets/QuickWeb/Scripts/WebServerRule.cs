@@ -26,7 +26,7 @@ public abstract class WebServerRule : MonoBehaviour
     {
         string url = context.Request.RawUrl;
 
-		Debug.Log (url);
+		//Debug.Log (url);
 
         bool match = false;
         foreach(Regex regex in regexList)

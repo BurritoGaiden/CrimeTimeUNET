@@ -22,7 +22,7 @@ public class WebSocketManager : MonoBehaviour {
 		reiliableChannelId  = config.AddChannel(QosType.Reliable);
 		HostTopology topology = new HostTopology(config, 5);
 
-		hostId = NetworkTransport.AddWebsocketHost(topology, 8887, null);
+		hostId = NetworkTransport.AddWebsocketHost(topology, 8081, null);
 	
 	}
 	
@@ -42,7 +42,7 @@ public class WebSocketManager : MonoBehaviour {
 		case NetworkEventType.Nothing:         //1
 			break;
 		case NetworkEventType.ConnectEvent:    //2
-			connectionCheck(connectionId);
+			Debug.Log("Connection ID: " + connectionId); 
 			break;
 		case NetworkEventType.DataEvent:       //3
 			break;
