@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<link rel="stylesheet" type="text/css" href="./css/skeleton.css"/>
-		<link rel="stylesheet" type="text/css" href="./css/normalize.css"/>
+		<link rel="stylesheet" type="text/css" href="./Resources/www/css/skeleton.css"/>
+		<link rel="stylesheet" type="text/css" href="./Resources/www/css/normalize.css"/>
 		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 		<style>
 			body {
@@ -12,6 +12,16 @@
 			}
 			table {
 				border: 1px black solid;
+			}
+
+			@font-face{
+				font-family: daypbl;
+				src: url(./Resources/www/fonts/DAYPBL.ttf);
+			}
+
+			@font-face{
+				font-family: cinzel-r;
+				src: url(./Resources/www/fonts/Cinzel-Regular.otf);
 			}
 
 			.hud {
@@ -78,6 +88,8 @@
      			height: 75%;
 				margin-left: 5%;
 				margin-top: 15px;
+				font-family: "cinzel-r";
+				font-size: 24pt;
 			}
 
 		</style>
@@ -93,10 +105,10 @@
 		<div id="bottom" class="hud">
 			<button id="move" type="button">MOVE</button>
 			<!-- <img id="player1" src="./sprites/324.png"/> -->
-			<img id="player1" src="./Resources/sprites/158.png"/>
+			<img id="player1" src="./Resources/www/sprites/158.png"/>
 		</div>
 
-	<script src="./Resources/js/velocity.js"></script>
+	<script src="./Resources/www/js/velocity.js"></script>
 	<script>
 		var rows = 5;
 		var columns = 5;

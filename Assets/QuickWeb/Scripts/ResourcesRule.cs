@@ -37,41 +37,39 @@ public class ResourcesRule : WebServerRule
 	
 	protected override IEnumerator OnRequest(HttpListenerContext context)
 	{
-	
 		HttpListenerRequest request = context.Request;
-		TextAsset textItem = new TextAsset ();
-
+		TextAsset textItem;
+		byte[] data = new byte[0];
 		string url = request.RawUrl;
-		Debug.Log ("RAW: " + url);
-
-
+		//Debug.Log ("RAW: " + url);
+		
 		string subFolder = "";
 		string[] directories = url.Split ('/');
-		for (int s = 3; s< directories.Length - 1; s++) {
+		for (int s = urlRegexList [0].Split('/').Length - 1; s < directories.Length - 1; s++)
 			subFolder += directories [s]+"/";
-		}
 
 		string item = url.Substring(url.LastIndexOf('/') + 1);
-		Debug.Log ("ITEM: " + item);
-
+		//Debug.Log ("ITEM: " + item);
+		
 		string itemName = item.Substring(0, item.IndexOf('.'));
-		Debug.Log ("NAME: " + itemName);
+		//Debug.Log ("NAME: " + itemName);
 
-
-
-		// "HesitNight/sprites -> "Resources/www/sprites/asset"
-		string path = string.Format ("www/Website/{0}{1}", subFolder, itemName);
+		string path = string.Format ("{0}{1}", subFolder, itemName);
 		Debug.Log ("PATH: " + path);
 
-		textItem = Resources.Load(path) as TextAsset;
+		try {
+			//Debug.Log (Resources.Load (path).GetType ().ToString ());
+			textItem = Resources.Load(path) as TextAsset;
+			data = textItem.bytes;
+		} catch (Exception e){
+			Debug.Log("Cannot produce asset at path: " + path + " with Exception: " + e.Message);
+		}
 
 		yield return null;
 
 		///
 		
 		HttpListenerResponse response = context.Response;
-
-		byte[] data = textItem.bytes;
 		
 		response.ContentType = "text/html";
 		
@@ -88,8 +86,9 @@ public class ResourcesRule : WebServerRule
 			responseStream.Write(data, i, writeLength);
 			i += writeLength;
 		}
+
 	}
-	
+
 	#endif
 
 	[SerializeField]

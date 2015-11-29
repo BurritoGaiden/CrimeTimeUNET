@@ -61,7 +61,7 @@ public abstract class WebServerRule : MonoBehaviour
 
     [SerializeField]
     [Tooltip("Allows you to specify a number of regex expressions to perform on the url. If any create a match on a request then this rule will run for the request.")]
-    private string[] urlRegexList = new string[]{"^*"};
+    protected string[] urlRegexList = new string[]{"^*"};
 
     [SerializeField]
     [Tooltip("If true then if this rule executes it will stop execution to further rules.")]
