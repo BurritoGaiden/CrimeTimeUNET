@@ -93,84 +93,85 @@
 		<div id="bottom" class="hud">
 			<button id="move" type="button">MOVE</button>
 			<!-- <img id="player1" src="./sprites/324.png"/> -->
-			<img id="player2" src="./Resources/sprites/158.png"/>
+			<img id="player1" src="./Resources/sprites/158.png"/>
 		</div>
 
 	<script src="./Resources/js/velocity.js"></script>
 	<script>
 		var rows = 5;
 		var columns = 5;
+		var moveQueue = [];
 		$(document).ready(function(){
 			/*
 			$("#map table").css("top", "50% - " + $("#map table").outerHeight() + "px;");
 			*/
 
-			for (var i = 0; i < rows; i++) {
-				$("#map").append("<tr></tr>");
-			};
+			for (var i = 0; i < rows; i++) { $("#map").append("<tr></tr>"); };
+			for (var j = 0; j < columns; j++) { $("#map > tbody > tr").append("<td></td>"); };
 
-			for (var j = 0; j < columns; j++) {
-				$("#map > tbody > tr").append("<td></td>");
-			};
-
-
-		});
-
-		$("#player1").css("left", 0);
-		$("#player1").css("top", 0);
-	
-		$.get("init", function(data, status){
-        console.log("GET Data: " + data + "\nStatus: " + status);});
+			$("#player1").css("left", 0);
+			$("#player1").css("top", 0);
 		
+			$.get("init", function(data, status){
+	        	console.log("GET Data: " + data + "\nStatus: " + status);
+	    	});
+				
 
-		function MapRefresh(){
-		$.get("MapRule", function(data, status){
-        console.log("GET Data: " + data + "\nStatus: " + status);});
-		}
-
-    	var moveQueue = [];
-
-		var ws = new WebSocket("ws://localhost:8081/");
-		ws.onopen = function(){
-			console.log("Connection opened");
-			ws.send("Hello");
-		}
-
-		ws.onmessage = function(msg){
-			//do message-y things
-		}
-
-		ws.onclose = function(){
-			console.log("Connection closed");
-		}
-
-		ws.onerror = function(error){
-			console.log("Error: " + error);
-		}
-
-		$("td").click(function(e){
-			e.preventDefault();
-			$.post("MapRule", 
-				{x: $(this).index(), 
-				 z: (rows-1) - $(this).closest('tr').index()});
-			console.log("Tile position is: " + $(this).index() + ", " + (rows - 1 - $(this).closest('tr').index()));
-			console.log("Tile pixel position is: " + $(this).offset().left + ", " + $(this).offset().top);
-			moveQueue.push({x: $(this).offset().left + "px", y: $(this).offset().top + "px"});
-		});
-
-		$("#move").click(function(e){
-			//e.preventDefault();
-			for(var i = 0; i < moveQueue.length; i++){
-				$("#player1").velocity({
-					translateX: moveQueue[i].x,
-					translateY: moveQueue[i].y,
-				});
+			function MapRefresh(){
+				$.get("MapRule", function(data, status){
+	        		console.log("GET Data: " + data + "\nStatus: " + status);
+	        	});
 			}
-			moveQueue = [];
-			console.log("Command sent: Moving!");
-			$.post("init", "commitMove");
+
+			var ws = new WebSocket("ws://localhost:8081/");
+			ws.onopen = function(){
+				console.log("Connection opened");
+				ws.send("Hello");
+			}
+
+			ws.onmessage = function(msg){
+				//do message-y things
+			}
+
+			ws.onclose = function(){
+				console.log("Connection closed");
+			}
+
+			ws.onerror = function(error){
+				console.log("Error: " + error);
+			}
+
+			$("td").click(function(e){
+				e.preventDefault();
+				$.post("MapRule", 
+					{x: $(this).index(), 
+					 z: ((rows-1) - $(this).closest('tr').index())
+					});
+				console.log("Tile position is: " 
+					+ $(this).index() 
+					+ ", " 
+					+ ((rows-1) - $(this).closest('tr').index()));
+				console.log("Tile pixel position is: " 
+					+ $(this).offset().left 
+					+ ", " 
+					+ $(this).offset().top);
+				moveQueue.push({x: $(this).offset().left + "px", y: $(this).offset().top + "px"});
+			});
+
+			$("#move").click(function(e){
+				//e.preventDefault();
+				for(var i = 0; i < moveQueue.length; i++){
+					$("#player1").velocity({
+						translateX: moveQueue[i].x,
+						translateY: moveQueue[i].y,
+					});
+				}
+				moveQueue = [];
+				console.log("Command sent: Moving!");
+				$.post("init", "commitMove");
+			});
+
 		});
-	
 
 	</script>
 
