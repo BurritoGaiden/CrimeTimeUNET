@@ -5,6 +5,14 @@ using System.Collections.Generic;
 
 public class CommandPanel : MonoBehaviour {
 
+    private string playerName;
+    public string PlayerName
+    {
+        get { return playerName; }
+        set { playerName = value.Trim().ToLower(); }
+    }
+
+
 	private bool moveSelectEnabled;
 		public bool MoveSelectEnabled
 	{

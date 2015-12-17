@@ -9,7 +9,8 @@ public class WebSocketManager : MonoBehaviour {
 	private int reiliableChannelId = 0;
 	private int hostId = 0;
 
-	private Dictionary<string, GameObject> playerRegistry = new Dictionary<string, GameObject>();
+	private Dictionary<int, CommandPanel> playerRegistry = new Dictionary<int, CommandPanel>();
+
 	[SerializeField]
 	private GameObject controllerPrefab;
 
@@ -42,10 +43,17 @@ public class WebSocketManager : MonoBehaviour {
 		case NetworkEventType.Nothing:         //1
 			break;
 		case NetworkEventType.ConnectEvent:    //2
-			Debug.Log("Connection ID: " + connectionId); 
+			Debug.Log("Connection ID: " + connectionId);
 			break;
 		case NetworkEventType.DataEvent:       //3
-			break;
+                
+            foreach(byte b in recBuffer)
+                {
+                    if (!b.ToString().Equals("0"))
+                    Debug.Log(b.ToString());
+                }
+                NetworkTransport.Send(hostId, connectionId, channelId, recBuffer, bufferSize, out error);
+                break;
 		case NetworkEventType.DisconnectEvent: //4
 			break;
 		}
@@ -53,8 +61,22 @@ public class WebSocketManager : MonoBehaviour {
 	}
 
 	//TODO: 
-	void connectionCheck(int connectionID){
+	IEnumerator checkRegistryForPlayer(int connectionId, byte[] nameBytes){
 
+        string parsedName = "";
+        parsedName = parsedName.Trim().ToLower();
+        foreach(int existingId in playerRegistry.Keys)
+        {
+            CommandPanel tempCP = playerRegistry[existingId];
+            if (tempCP.PlayerName.Equals(parsedName))
+            {
+                playerRegistry.Remove(existingId);
+                playerRegistry.Add(connectionId, tempCP);
+                return null;
+            }
+        }
+        //else, if playercount is also less than max, create a new one
+        return null;
 	}
 
 	// TODO: write JSONObject class abstract

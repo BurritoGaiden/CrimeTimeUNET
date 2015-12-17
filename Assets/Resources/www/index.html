@@ -91,6 +91,14 @@
 				font-family: "cinzel-r";
 				font-size: 24pt;
 			}
+			#username_button {
+ 				width: 10%;
+     			height: 75%;
+				margin-left: 5%;
+				margin-top: 15px;
+				font-family: "cinzel-r";
+				font-size: 24p	
+			}
 
 		</style>
 	</head>
@@ -106,10 +114,18 @@
 			<button id="move" type="button">MOVE</button>
 			<!-- <img id="player1" src="./sprites/324.png"/> -->
 			<img id="player1" src="./Resources/www/sprites/158.png"/>
+
+			<!-- Nickname Field -->
+  			<input id="username_input" type="text" name="input">
+  			<button id="username_button" type="button">ENTER</button>
+
 		</div>
 
 	<script src="./Resources/www/js/velocity.js"></script>
 	<script>
+
+		var username = "";
+
 		var rows = 5;
 		var columns = 5;
 		var moveQueue = [];
@@ -134,15 +150,19 @@
 	        		console.log("GET Data: " + data + "\nStatus: " + status);
 	        	});
 			}
-
-			var ws = new WebSocket("ws://localhost:8081/");
+			var hostIP = window.location.host.split(":")[0];
+			console.log(hostIP);
+			var ws = new WebSocket("ws://"+hostIP+":8081/");
 			ws.onopen = function(){
 				console.log("Connection opened");
-				ws.send("Hello");
+				ws.send(JSON.stringify({
+					'command':'hello'
+				}));
+				//ws.send("bye");
 			}
 
 			ws.onmessage = function(msg){
-				//do message-y things
+				console.log(JSON.stringify('{'+ msg.data));
 			}
 
 			ws.onclose = function(){
@@ -155,6 +175,7 @@
 
 			$("td").click(function(e){
 				e.preventDefault();
+
 				$.post("MapRule", 
 					{x: $(this).index(), 
 					 z: ((rows-1) - $(this).closest('tr').index())
@@ -182,6 +203,14 @@
 				console.log("Command sent: Moving!");
 				$.post("init", "commitMove");
 			});
+
+
+			$("#username_button").click(function(e){
+			//e.preventDefault();
+			username = document.getElementById("username_input").value;
+			console.log(username);
+			ws.send(username);
+		});
 
 		});
 
