@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CrimeTime!</title>
+	<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+	<!--script src="./Resources/www/js/easeljs.js"/-->
+	<style>
+		html, body {
+			width: 100%;
+			margin: 0px;
+			height: 100%;
+		}
+	</style>
+</head>
+<body onresize="canvasResize();" onload="init();">
+	<canvas id="canvas" width="1000" height="500"></canvas>
+	<!-- Script stuff to draw on canvas -->
+	<script type="text/javascript">
+		var rows = 5;
+		var columns = 5;
+		var tilesize = 100;
+		var w, h, midXOffset, midYOffset;
+		var canvas, topc, botc;
+		var stage, top_stage, bot_stage;
+		function init(){
+			canvas = document.getElementById("canvas");
+			stage = new createjs.Stage(canvas);
+			top_stage = new createjs.Stage(canvas);
+			bot_stage = new createjs.Stage(canvas);
+			createjs.Touch.enable(stage);
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			w = canvas.width;
+			h = canvas.height;
+			drawTileMap(rows, columns);
+			setup();
+		}
+		function setup(){
+			var top = new createjs.Shape();
+			var bot = new createjs.Shape();
+			top.graphics.beginFill("Gray").drawRect(0, 0, w, h/5);
+			bot.graphics.beginFill("Gray").drawRect(0, h-(h/5), w, h/5);
+			stage.addChild(top);
+			stage.addChild(bot);
+			stage.update();
+			setupBotHud();
+		}
+		function canvasResize(){
+			//TODO: update w/h values and tell canvas to rerender.
+		}
+
+		function setupBotHud(){
+			var player_icon = new createjs.Shape();
+			player_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 100, 100);
+			player_icon.x = 120;
+			player_icon.y = h-(h/5) + 50;
+			//add mask for player sprite/portrait
+			var player_stats = new createjs.Container();
+			var name = new createjs.Text("Player 1", "bold 30px Impact", "Black");
+			var health = new createjs.Container();
+			var range = new createjs.Container();
+			generatePips(health, 5);
+			generatePips(range, 8);
+			health.y = 40;
+			range.y = 70;
+			player_stats.addChild(name, health, range);
+			player_stats.x = 230;
+			player_stats.y = h-(h/5) + 10;
+			stage.addChild(player_icon, player_stats);
+			stage.update();
+		}
+
+		function generatePips(stat, pipAmt){
+			for(var i = 0; i < pipAmt; i++){
+				var pip = new createjs.Shape();
+				pip.graphics.beginFill("DimGray").drawRoundRect(11*i, 0, 10, 25, 5);
+				stat.addChild(pip);
+			}
+		}
+
+		function drawTileMap(rows, columns){
+			midXOffset = (tilesize*columns)/2;
+			midYOffset = h/5;
+			for(var row = 0; row < rows; row++){
+				for(var col = 0; col < columns; col++){
+					var tile = new createjs.Shape();
+					if(row % 2 === 0 && col % 2 === 0) tile.graphics.beginFill("DeepSkyBlue");
+					else if(row % 2 !== 0 && col % 2 !== 0) tile.graphics.beginFill("DeepSkyBlue");
+					else tile.graphics.beginFill("AliceBlue");
+					tile.graphics.drawRect(0, 0, tilesize, tilesize);
+					tile.x = row*tilesize + midXOffset;
+					tile.y = col*tilesize + midYOffset;
+					tile.addEventListener("click", tileSelect);
+					stage.addChild(tile);
+					stage.update();
+				}	
+			}
+		}
+
+		function tileSelect(e){
+			var t = e.currentTarget;
+			console.log("Selected : " + (t.x - midXOffset)/tilesize + ", " + (columns - (t.y-midYOffset)/tilesize - 1));
+		}
+	</script>
+</body>
+</html>
