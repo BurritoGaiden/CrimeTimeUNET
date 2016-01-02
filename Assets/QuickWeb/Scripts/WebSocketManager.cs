@@ -3,6 +3,8 @@ using System.Collections;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
+using System.Text;
 
 public class WebSocketManager : MonoBehaviour {
 
@@ -43,16 +45,20 @@ public class WebSocketManager : MonoBehaviour {
 		case NetworkEventType.Nothing:         //1
 			break;
 		case NetworkEventType.ConnectEvent:    //2
-			Debug.Log("Connection ID: " + connectionId);
-			break;
+			//Debug.Log("Connection ID: " + connectionId);
+                Byte[] toSend = Encoding.ASCII.GetBytes("Ping from server!");
+                NetworkTransport.Send(hostId, connectionId, channelId, toSend, bufferSize, out error);
+                break;
 		case NetworkEventType.DataEvent:       //3
-                
+
+            Debug.Log(Encoding.ASCII.GetString(recBuffer));
+                /*
             foreach(byte b in recBuffer)
                 {
                     if (!b.ToString().Equals("0"))
                     Debug.Log(b.ToString());
                 }
-                NetworkTransport.Send(hostId, connectionId, channelId, recBuffer, bufferSize, out error);
+                */
                 break;
 		case NetworkEventType.DisconnectEvent: //4
 			break;

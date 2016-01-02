@@ -179,7 +179,7 @@
 	        	username = document.getElementById("username_input").value;
 				console.log(username);
 				$("#username").text(username);
-				//ws.send(username);
+				ws.send(username);
 	        	//after username is sent, exit out of popup.
 	        	//should probably do stuff w/r/t validating username and whatnot too
 	        	$("#cover-message").css("display", "none");
@@ -213,6 +213,7 @@
 				// }));
 				//ws.send("bye");
 				ws.send("HI");
+				ws.send("BYE");
 				ws.send("abcdefg");
 			}
 
