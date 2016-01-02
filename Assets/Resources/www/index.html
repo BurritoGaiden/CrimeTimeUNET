@@ -1,285 +1,412 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<link rel="stylesheet" type="text/css" href="./Resources/www/css/skeleton.css"/>
-		<link rel="stylesheet" type="text/css" href="./Resources/www/css/normalize.css"/>
-		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-		<style>
-
-			 #page-cover {
-		        opacity: 0;
-		        position: fixed;
-		        width: 100%;
-		        height: 100%;
-		        background-color: black;
-		        top: 0;
-		        left: 0;
-		        z-index: 500;
-		      }
-
-		      #cover-message {
-		        text-align: center;
-		        width: 500px;
-		        z-index: 600;
-		        position: fixed;
-		        border-radius: 5px;
-		        padding: 50px;
-		        margin:-100px 0 0 -150px;
-		        background-color: white;
-		        top: 50%;
-		        left: 43%;
-		      }
-
-			body {
-				height: 100vh;
-				width: 100%;
-				margin: 0px;
-			}
-			table {
-				border: 1px black solid;
-			}
-
-			@font-face{
-				font-family: daypbl;
-				src: url(./Resources/www/fonts/DAYPBL.ttf);
-			}
-
-			@font-face{
-				font-family: cinzel-r;
-				src: url(./Resources/www/fonts/Cinzel-Regular.otf);
-			}
-
-			.hud {
-				width: 100%;
-				position: fixed;
-				height: 100px;
-				margin: 0px;
-				border: 1px white solid;
-				background-color: gray;
-			}
-
-			#mid{
-				width: 100%;
-				height: 100%;
-				/*z-index: -5;*/
-				border: 1px black solid;
-				background-color: black;
-			}
-
-			#mid table {
-				border-collapse: collapse;
-				position: relative;
-				top: 50%;
-				margin-top: -125px;
-			}
-
-			tr {
-				padding: 0;
-				margin: 0;
-			}
-
-			tr:nth-child(odd) > td:nth-child(even){
-				background-color: white;
-			}
-
-			tr:nth-child(odd) > td:nth-child(odd){
-				background-color: gray;
-			}
-
-			tr:nth-child(even) > td:nth-child(even){
-				background-color: gray;
-			}
-
-			tr:nth-child(even) > td:nth-child(odd){
-				background-color: white;
-			}
-			#mid td {
-				height: 50px;
-				width: 50px;
-				border: 1px white solid;
-				padding: 0;
-			}
-
-			#mid td:hover{
-				background-color: green;
-			}
-
-			#bottom {
-				bottom: 0;
-			}
-
-			#move {
- 				width: 10%;
-     			height: 75%;
-				margin-left: 5%;
-				margin-top: 15px;
-				font-family: "cinzel-r";
-				font-size: 24pt;
-			}
-			#username_button {
- 				width: 10%;
-     			height: 75%;
-				margin-left: 5%;
-				margin-top: 15px;
-				font-family: "cinzel-r";
-				font-size: 24p	
-			}
-
-		</style>
-	</head>
-	<body>
-		<!-- page-cover dims the background -->
-		<div id="page-cover"></div>
-		<!-- pop-up msg -->
-		<div id="cover-message">
-	      	<h2>Enter a name:</h2>
-	      	<input id="username_input" type="text" name="input"/>
-	      	<button id="submit_username">Enter</button>
-	    </div>
-
-		<div id="top" class="hud">
-			<h1>Player <span id="username"></span></h1>
-		</div>	
-
-		<div id="mid" align="center">
-			<table id="map"></table>
-		</div>
-
-		<div id="bottom" class="hud">
-			<button id="move" type="button">MOVE</button>
-			<!-- <img id="player1" src="./sprites/324.png"/> -->
-			<img id="player1" src="./Resources/www/sprites/158.png"/>
-
-			<!-- Nickname Field -->
-  			<input id="username_input" type="text" name="input">
-  			<button id="username_button" type="button">ENTER</button>
-
-		</div>
-
-	<script src="./Resources/www/js/velocity.js"></script>
-	<script>
-
-		var username = "";
-
+<head>
+	<meta name="viewport" content="width=320" initial-scale="1.0" maximum-scale="1.0" user-scalable="0">
+	<title>CrimeTime!</title>
+	<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
+	<style>
+		html, body {
+			width: 100%;
+			margin: 0 auto;
+			height: 100%;
+		}
+		canvas {
+			position: absolute;
+		}
+		input[type="text"]{
+			text-align: center;
+			width: 500px;
+			height: 50px;
+			font-size: 32px;
+			border-radius: 10px;
+			position: absolute;
+		}
+	</style>
+</head>
+<body onresize="canvasResize();" onload="init();">
+	<canvas id="canvas" width="1000" height="500"></canvas>
+	<canvas id="hud" width="1000" height="500"></canvas>
+	<input id="usernameInput" type="text">
+	<!-- Script stuff to draw on canvas -->
+	<script type="text/javascript">
 		var rows = 5;
 		var columns = 5;
-		var moveQueue = [];
-		$(document).ready(function(){
-			/*
-			$("#map table").css("top", "50% - " + $("#map table").outerHeight() + "px;");
-			*/
-
-			//Tried to do fancy animation shit but it didn't work ):
-			$("#page-cover").css("opacity", 0.7).fadeIn(1000, function(){
-	          $("#cover-message").css("display", "").slideDown("slow");
-	        });
-
-			//On clicking username button, 
-	        $("#submit_username").click(function(e){
-	        	username = document.getElementById("username_input").value;
-				console.log(username);
-				$("#username").text(username);
-				//ws.send(username);
-	        	//after username is sent, exit out of popup.
-	        	//should probably do stuff w/r/t validating username and whatnot too
-	        	$("#cover-message").css("display", "none");
-	        	$("#page-cover").css("display", "none");
-	        	e.preventDefault();
-	        });
-
-			for (var i = 0; i < rows; i++) { $("#map").append("<tr></tr>"); };
-			for (var j = 0; j < columns; j++) { $("#map > tbody > tr").append("<td></td>"); };
-
-			$("#player1").css("left", 0);
-			$("#player1").css("top", 0);
-		
-			$.get("init", function(data, status){
-	        	console.log("GET Data: " + data + "\nStatus: " + status);
-	    	});
-				
-
-			function MapRefresh(){
-				$.get("MapRule", function(data, status){
-	        		console.log("GET Data: " + data + "\nStatus: " + status);
-	        	});
+		var tilesize = 100;
+		var w, h, midXOffset, midYOffset;
+		var canvas, topc, botc;
+		var stage, top_stage, bot_stage;
+		var map;
+		var currentTile;
+		var player = {
+			"id": 0,
+			"username": "Bon",
+			"character": {
+				"name": "BIGBOY",
+				"stats": {
+					"health": 5,
+					"punch": 6,
+					"gun": 3,
+					"move": 3
+				},
 			}
-			var hostIP = window.location.host.split(":")[0];
-			console.log(hostIP);
-			var ws = new WebSocket("ws://"+hostIP+":8081/");
-			ws.onopen = function(){
-				console.log("Connection opened");
-				// ws.send(JSON.stringify({
-				// 	'command':'hello'
-				// }));
-				//ws.send("bye");
-				ws.send("HI");
-				ws.send("abcdefg");
+		}
+
+		Map.prototype = new createjs.Container();
+		Map.prototype.constructor = Map;
+		function Map(rows, columns){
+			var firstTime = true;
+			var pan = false;
+			this.x = (tilesize*columns)/2;
+			this.y = h/5;
+			for(var row = 0; row < rows; row++){
+				for(var col = 0; col < columns; col++){
+					var tile = new createjs.Shape();
+					if(row % 2 === 0 && col % 2 === 0) tile.graphics.beginFill("DeepSkyBlue");
+					else if(row % 2 !== 0 && col % 2 !== 0) tile.graphics.beginFill("DeepSkyBlue");
+					else tile.graphics.beginFill("AliceBlue");
+					tile.graphics.drawRect(0, 0, tilesize, tilesize);
+					tile.x = row*tilesize;
+					tile.y = col*tilesize;
+					this.addChild(tile);
+					//stage.update();
+				}	
 			}
-
-			ws.onmessage = function(msg){
-				var reader = new FileReader();
-			    reader.onload = function(){
-			      var arrayBuffer = reader.result;
-
-			      console.log(arrayBuffer);
-			      //console.log(arrayBuffer.);
-			    };
-			   
-			    reader.readAsBinaryString(msg.data);
-			    //reader.readAsDataURL(msg.data);
-				//console.log(JSON.stringify('{'+ msg.data));
-			}
-
-			ws.onclose = function(){
-				console.log("Connection closed");
-			}
-
-			ws.onerror = function(error){
-				console.log("Error: " + error);
-			}
-
-			$("td").click(function(e){
-				e.preventDefault();
-
-				$.post("MapRule", 
-					{x: $(this).index(), 
-					 z: ((rows-1) - $(this).closest('tr').index())
-					});
-				console.log("Tile position is: " 
-					+ $(this).index() 
-					+ ", " 
-					+ ((rows-1) - $(this).closest('tr').index()));
-				console.log("Tile pixel position is: " 
-					+ $(this).offset().left 
-					+ ", " 
-					+ $(this).offset().top);
-				moveQueue.push({x: $(this).offset().left + "px", y: $(this).offset().top + "px"});
-			});
-
-			$("#move").click(function(e){
-				//e.preventDefault();
-				for(var i = 0; i < moveQueue.length; i++){
-					$("#player1").velocity({
-						translateX: moveQueue[i].x,
-						translateY: moveQueue[i].y,
-					});
+			this.addEventListener("click", function(e){
+				console.log("clicky")
+				var selectedTile = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
+				if(firstTime) firstTime = false;
+				else if(selectedTile !== null && !pan) {
+					var circle = new createjs.Shape();
+					circle.graphics.beginFill("Crimson").drawCircle(0, 0, 10);
+					circle.x = e.stageX;
+					circle.y = e.stageY;
+					stage.addChild(circle);
+					createjs.Tween.get(circle, {loop: false})
+						.to({alpha: 0, x: e.stageX}, 500, createjs.Ease.getPowOut(2));
+					if(currentTile == undefined) {
+						var selectBox = new createjs.Shape();
+						selectBox.graphics.setStrokeStyle(3).beginStroke("Crimson").drawRect(0, 0, tilesize, tilesize);
+						currentTile = selectBox;
+						map.addChild(selectBox);
+					}
+					currentTile.x = selectedTile.x;
+					currentTile.y = selectedTile.y;
+					stage.update();
+					tileSelect(selectedTile.x, selectedTile.y);
 				}
-				moveQueue = [];
-				console.log("Command sent: Moving!");
-				$.post("init", "commitMove");
+			})
+			this.on("mousedown", function(e){
+				pan = false;
+				console.log("DOWN");
+				this.parent.addChild(this);
+				this.offset = {x: this.x - e.stageX, y: this.y - e.stageY};
+				this.addEventListener("")
 			});
-
-
-			$("#username_button").click(function(e){
-				//e.preventDefault();
-				username = document.getElementById("username_input").value;
-				console.log(username);
-				ws.send(username);
+			this.on("pressup", function(){
+				console.log("UP");
+				pan = false;
 			});
+			this.on("pressmove", panMap);
+		}
 
-		});
+		function panMap(e){
+			pan = true;
+			console.log("panpna");
+			if(this.offset.x == 0 && this.offset.y == 0) pan = false;
+			this.x = e.stageX + this.offset.x;
+			this.y = e.stageY + this.offset.y;
+			stage.update();
+		}
 
+		function showStartup(){
+			var usernameDOMField = document.getElementById("usernameInput");
+			var usernameField = new createjs.DOMElement(usernameDOMField);
+			usernameField.x = w/2 - 250;
+			usernameField.y = h/2;
+			var bg = new createjs.Shape();
+			var startPopup = new createjs.Shape();
+			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
+			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/16, h/16, w - w/8, h - h/8, 5);
+			var title = new createjs.Text("CrimeTime", "60px Impact", "white");
+			title.x = w/2 - w/16 - 60;
+			title.y = h/16 + 10;
+			var join_button = new createjs.Container();
+			var join_box = new createjs.Shape();
+			var join_button_text = new createjs.Text("Join the Heist!", "40px Impact", "white");
+			join_button_text.x = 300/8;
+			join_button_text.y = 75/4 - 75/16;
+			join_box.graphics.beginFill("Grey").drawRoundRect(0, 0, 300, 75, 5);
+			join_button.addChild(join_box, join_button_text);
+			join_button.x = w/2 - 150;
+			join_button.y = h/2 + h/8;
+			join_button.on("click", function(e){
+				player.username = usernameDOMField.value.trim();
+				//var encodedName = encodeURI(player.username);
+				$.post("PlayerRegister", player.username);
+				usernameDOMField.style.visibility = "hidden";
+				if(detectmob()){
+					if (hud.requestFullscreen) {
+						hud.requestFullscreen();
+					} else if (hud.webkitRequestFullscreen) {
+						hud.webkitRequestFullscreen();
+					} else if (hud.mozRequestFullScreen) {
+						hud.mozRequestFullScreen();
+					} else if (hud.msRequestFullscreen) {
+						hud.msRequestFullscreen();
+					}
+					setup();
+				} else{
+					setup();
+				}
+			});
+			hud_stage.addChild(bg, startPopup, title, join_button, usernameField);
+			hud_stage.update();
+		}
+		function loadPlayers(){
+			//get request data on all players
+			//if(id != this player) add to players array
+			//update player(s) data
+		}
+		
+		createjs.Ticker.addEventListener("tick", tick);
+		function tick(e){
+			//TODO: make this performance efficient for mobile devices
+			//hud should only need to update when an event triggers
+			stage.update();
+		}
+
+		function init(){
+			hud = document.getElementById("hud");
+			canvas = document.getElementById("canvas");
+			
+			stage = new createjs.Stage(canvas);
+			hud_stage = new createjs.Stage(hud);
+			createjs.Touch.enable(stage);
+			createjs.Touch.enable(hud_stage);
+			createjs.Ticker.setFPS(60);
+			createjs.Ticker.addEventListener("tick", stage);
+			canvas.width = hud.width = window.innerWidth;
+			canvas.height = hud.height = window.innerHeight;
+			w = canvas.width;
+			h = canvas.height;
+			showStartup();
+			//
+			//setup();
+		}
+		function setup(){
+			hud_stage.clear();
+			hud_stage.removeAllChildren();
+			hud_stage.removeAllEventListeners();
+			
+			hud_stage.update();
+			
+			
+			map = new Map(5, 5);
+			var top = new createjs.Shape();
+			var bot = new createjs.Shape();
+			var bg = new createjs.Shape();
+			bg.graphics.beginFill("#000").rect(0, 0, w, h);
+			bg.alpha = 0.01;
+			top.graphics.beginFill("Gray").drawRect(0, 0, w, h/5);
+			bot.graphics.beginFill("Gray").drawRect(0, h-(h/5), w, h/5);
+			stage.addChild(map);
+			hud_stage.addEventListener("click", function(e){
+				map.dispatchEvent(e);
+			})
+			hud_stage.addEventListener("pressup", function(e){
+				map.dispatchEvent(e);
+			})
+			hud_stage.addEventListener("mousedown", function(e){
+				map.dispatchEvent(e);
+			});
+			hud_stage.addEventListener("pressmove", function(e){
+				map.dispatchEvent(e);
+			});
+			hud_stage.addChild(bg);
+			hud_stage.addChild(top);
+			hud_stage.addChild(bot);
+			setupBotHud();
+			setupTopHud();
+		}
+		function canvasResize(){
+			//TODO: update w/h values and tell canvas to rerender.
+			//console.log("resized!");
+			//hud_stage.clear();
+			//stage.clear();
+			//init();
+		}
+		function setupTopHud(){
+			//loadPlayers();
+			var teamicons = [];
+			if(player.character.name == "Fisticop")
+				for(m = 0; m < 5; m++){
+					var member_display = new createjs.Container();
+					member_display.x = m*(w/5);
+					member_display.y = (h/5)/2 - 10;
+					var member_icon = new createjs.Shape();
+					member_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
+					member_icon.x = 50;
+					var member_stats = new createjs.Container();
+					var name = new createjs.Text("player " + (m+1), "18px Impact", "Black");
+					var health = new createjs.Container();
+					var range = new createjs.Container();
+					var melee = new createjs.Container();
+					var movespeed = new createjs.Container();
+					generatePips(health, 2, false);
+					generatePips(range, 2, false);
+					generatePips(melee, 2, false);
+					generatePips(movespeed, 2, false);
+					member_stats.x = 100;
+					member_stats.y = -40;
+					health.y = 25;
+					range.y = health.y + 15;
+					melee.y = range.y + 15;
+					movespeed.y = melee. y + 15;
+					member_stats.addChild(name, health, range, melee, movespeed);
+					member_display.addChild(member_icon, member_stats);
+					hud_stage.addChild(member_display);
+					hud_stage.update();
+				}
+			else
+				for(m = 0; m < 3; m++){
+					var member_display = new createjs.Container();
+					member_display.x = m*(w/5 - 20);
+					member_display.y = (h/5)/2 - 10;
+					var member_icon = new createjs.Shape();
+					member_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
+					member_icon.x = 50;
+					var member_stats = new createjs.Container();
+					var name = new createjs.Text("player " + (m+1), "18px Impact", "Black");
+					var health = new createjs.Container();
+					var range = new createjs.Container();
+					var melee = new createjs.Container();
+					var movespeed = new createjs.Container();
+					generatePips(health, 2, false);
+					generatePips(range, 2, false);
+					generatePips(melee, 2, false);
+					generatePips(movespeed, 2, false);
+					member_stats.x = 100;
+					member_stats.y = -40;
+					health.y = 25;
+					range.y = health.y + 15;
+					melee.y = range.y + 15;
+					movespeed.y = melee. y + 15;
+					member_stats.addChild(name, health, range, melee, movespeed);
+					member_display.addChild(member_icon, member_stats);
+					hud_stage.addChild(member_display);
+					hud_stage.update();
+				}
+				var seperator = new createjs.Shape();
+				seperator.graphics.beginFill("DimGray").drawRoundRect(0, 0, 4, (h/5) - 20, 2);
+				var seperator_settings = seperator.clone();
+				seperator.x = w - 2*(w/5) - 30;
+				seperator.y = 10;
+				seperator_settings.x = w - (w/5) + 100;
+				seperator_settings.y = 10;
+				var fisticop_display = new createjs.Container();
+				fisticop_display.x = 3*(w/5) + 30;
+				fisticop_display.y = (h/5)/2 - 10;
+				var fisticop_icon = new createjs.Shape();
+				fisticop_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
+				fisticop_icon.x = 0;
+				
+				var fisticop_stats = new createjs.Container();
+				var name = new createjs.Text("player " + 5, "18px Impact", "Black");
+				var health = new createjs.Container();
+				var range = new createjs.Container();
+				var melee = new createjs.Container();
+				var movespeed = new createjs.Container();
+				generatePips(health, 2, false);
+				generatePips(range, 2, false);
+				generatePips(melee, 2, false);
+				generatePips(movespeed, 2, false);
+				fisticop_stats.x = 50;
+				fisticop_stats.y = -40;
+				health.y = 25;
+				range.y = health.y + 15;
+				melee.y = range.y + 15;
+				movespeed.y = melee. y + 15;
+				fisticop_stats.addChild(name, health, range, melee, movespeed);
+				fisticop_display.addChild(fisticop_icon, fisticop_stats);
+				hud_stage.addChild(seperator, fisticop_display, seperator_settings);
+				hud_stage.update();
+		}
+
+
+
+		function setupBotHud(){
+			var player_icon = new createjs.Shape();
+			var player_icon_img = new Image();
+			player_icon_img.onload = function(){
+				
+			}
+
+			player_icon_img.src = "./sprites/josephine_player_icon.png";
+			player_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 100, 100);
+			player_icon.x = 120;
+			player_icon.y = h-(h/5) + 50;
+			//add mask for player sprite/portrait
+			// var player_icon_img_bitmap = new createjs.Bitmap(player_icon_img);
+			// player_icon_img_bitmap.x = 32;
+			// player_icon_img_bitmap.y = h-(h/5) - 35;
+			// player_icon_img_bitmap.scaleX = player_icon_img_bitmap.scaleY = 0.35;
+			var player_stats = new createjs.Container();
+			var name = new createjs.Text(player.username, "bold 30px Impact", "Black");
+			var health = new createjs.Container();
+			var range = new createjs.Container();
+			var melee = new createjs.Container();
+			var movespeed = new createjs.Container();
+			generatePips(health, player.character.stats.health, true);
+			generatePips(range, player.character.stats.gun, true);
+			generatePips(melee, player.character.stats.punch, true);
+			generatePips(movespeed, player.character.stats.move, true);
+			health.y = 40;
+			range.y = health.y + 25;
+			melee.y = range.y + 25;
+			movespeed.y = melee. y + 25;
+			player_stats.addChild(name, health, range, melee, movespeed);
+			player_stats.x = 230;
+			player_stats.y = h-(h/5) + 5;
+			//TODO: Should have bottom section of HUD be it's own container, then child
+			//everything that's setup here. Makes positioning items easiers
+			hud_stage.addChild(player_icon, player_stats);
+			hud_stage.update();
+		}
+
+		function generatePips(stat, pipAmt, isPlayer){
+			for(var i = 0; i < pipAmt; i++){
+				var pip = new createjs.Shape();
+				if(isPlayer) pip.graphics.beginFill("DimGray").drawRoundRect(11*i, 0, 9, 20, 5);
+				else pip.graphics.beginFill("DimGray").drawRoundRect(10*i, 0, 8, 13, 4);
+				stat.addChild(pip);
+			}
+		}
+
+		function tileSelect(x, y){
+			console.log("Selected : " + (x)/tilesize + ", " + (columns - (y)/tilesize - 1));
+			$.post("MapRule", 
+				{x: (x)/tilesize, 
+				 z: (columns - (y)/tilesize - 1)
+				});
+			
+		}
+		function detectmob() { 
+			 if( navigator.userAgent.match(/Android/i)
+			 || navigator.userAgent.match(/webOS/i)
+			 || navigator.userAgent.match(/iPhone/i)
+			 || navigator.userAgent.match(/iPad/i)
+			 || navigator.userAgent.match(/iPod/i)
+			 || navigator.userAgent.match(/BlackBerry/i)
+			 || navigator.userAgent.match(/Windows Phone/i)
+			 ){
+			    return true;
+			  }
+			 else {
+			    return false;
+			  }
+		}
 	</script>
-
-	</body>
+</body>
 </html>
