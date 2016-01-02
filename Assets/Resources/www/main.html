@@ -3,9 +3,9 @@
 <head>
 	<meta name="viewport" content="width=320" initial-scale="1.0" maximum-scale="1.0" user-scalable="0">
 	<title>CrimeTime!</title>
-	<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
-	<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
-	<!--script src="./Resources/www/js/easeljs.js"/-->
+	<!--script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script-->
+	<!--script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script-->
+	<script src="./js/easeljs.js"/>
 	<style>
 		html, body {
 			width: 100%;
@@ -74,12 +74,9 @@
 					stage.addChild(circle);
 					createjs.Tween.get(circle, {loop: false})
 						.to({alpha: 0, x: e.stageX}, 500, createjs.Ease.getPowOut(2));
-						//.to({alpha: 1, x: e.stageX}, 500, createjs.Ease.circIn(2));
-					//stage.removeChild(circle);
-					
 					if(currentTile == undefined) {
 						var selectBox = new createjs.Shape();
-						selectBox.graphics.setStrokeStyle(1).beginStroke("Crimson").drawRect(0, 0, tilesize, tilesize);
+						selectBox.graphics.setStrokeStyle(3).beginStroke("Crimson").drawRect(0, 0, tilesize, tilesize);
 						currentTile = selectBox;
 						map.addChild(selectBox);
 					}
@@ -102,7 +99,13 @@
 			});
 			
 		}
-
+		function showStartup(){
+			var bg = new createjs.Shape();
+			var startPopup = new createjs.Shape();
+			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/4, h/4, w - w/2, h - h/2);
+			stage.addChild(startPopup);
+			stage.update();
+		}
 		function loadPlayers(){
 			//get request data on all players
 			//if(id != this player) add to players array
@@ -117,7 +120,6 @@
 		}
 
 		function init(){
-
 			hud = document.getElementById("hud");
 			canvas = document.getElementById("canvas");
 			if (hud.requestFullscreen) {
@@ -147,8 +149,9 @@
 			canvas.height = hud.height = window.innerHeight;
 			w = canvas.width;
 			h = canvas.height;
-			map = new Map(5, 5);
-			setup();
+			showStartup();
+			//map = new Map(5, 5);
+			//setup();
 		}
 		function setup(){
 			var top = new createjs.Shape();
@@ -205,7 +208,7 @@
 					hud_stage.update();
 				}
 			else
-				for(m = 0; m < 4; m++){
+				for(m = 0; m < 3; m++){
 					var member_display = new createjs.Container();
 					member_display.x = m*(w/5 - 20);
 					member_display.y = (h/5)/2 - 10;
@@ -235,10 +238,13 @@
 				}
 				var seperator = new createjs.Shape();
 				seperator.graphics.beginFill("DimGray").drawRoundRect(0, 0, 4, (h/5) - 20, 2);
-				seperator.x = w - (w/5) - 60;
+				var seperator_settings = seperator.clone();
+				seperator.x = w - 2*(w/5) - 30;
 				seperator.y = 10;
+				seperator_settings.x = w - (w/5) + 100;
+				seperator_settings.y = 10;
 				var fisticop_display = new createjs.Container();
-				fisticop_display.x = 5*(w/5 - 38);
+				fisticop_display.x = 3*(w/5) + 30;
 				fisticop_display.y = (h/5)/2 - 10;
 				var fisticop_icon = new createjs.Shape();
 				fisticop_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
@@ -262,7 +268,7 @@
 				movespeed.y = melee. y + 15;
 				fisticop_stats.addChild(name, health, range, melee, movespeed);
 				fisticop_display.addChild(fisticop_icon, fisticop_stats);
-				hud_stage.addChild(seperator, fisticop_display);
+				hud_stage.addChild(seperator, fisticop_display, seperator_settings);
 				hud_stage.update();
 		}
 

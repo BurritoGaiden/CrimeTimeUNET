@@ -31,6 +31,7 @@
 	<input id="usernameInput" type="text">
 	<!-- Script stuff to draw on canvas -->
 	<script type="text/javascript">
+		var stage_state = "STARTUP";
 		var rows = 5;
 		var columns = 5;
 		var tilesize = 100;
@@ -146,8 +147,21 @@
 				//var encodedName = encodeURI(player.username);
 				$.post("PlayerRegister", player.username);
 				usernameDOMField.style.visibility = "hidden";
-				if(detectmob()){
-					if (hud.requestFullscreen) {
+				// if(detectmob()){
+				// 	if (hud.requestFullscreen) {
+				// 		hud.requestFullscreen();
+				// 	} else if (hud.webkitRequestFullscreen) {
+				// 		hud.webkitRequestFullscreen();
+				// 	} else if (hud.mozRequestFullScreen) {
+				// 		hud.mozRequestFullScreen();
+				// 	} else if (hud.msRequestFullscreen) {
+				// 		hud.msRequestFullscreen();
+				// 	}
+				// 	setup();
+				// } else{
+				// 	setup();
+				// }
+				if (hud.requestFullscreen) {
 						hud.requestFullscreen();
 					} else if (hud.webkitRequestFullscreen) {
 						hud.webkitRequestFullscreen();
@@ -157,9 +171,6 @@
 						hud.msRequestFullscreen();
 					}
 					setup();
-				} else{
-					setup();
-				}
 			});
 			hud_stage.addChild(bg, startPopup, title, join_button, usernameField);
 			hud_stage.update();
@@ -192,17 +203,13 @@
 			w = canvas.width;
 			h = canvas.height;
 			showStartup();
-			//
-			//setup();
 		}
 		function setup(){
+			var stage_state = "MAIN";
 			hud_stage.clear();
 			hud_stage.removeAllChildren();
 			hud_stage.removeAllEventListeners();
-			
 			hud_stage.update();
-			
-			
 			map = new Map(5, 5);
 			var top = new createjs.Shape();
 			var bot = new createjs.Shape();
@@ -230,12 +237,24 @@
 			setupBotHud();
 			setupTopHud();
 		}
+
 		function canvasResize(){
 			//TODO: update w/h values and tell canvas to rerender.
 			//console.log("resized!");
-			//hud_stage.clear();
-			//stage.clear();
-			//init();
+			
+			if(stage_state == "MAIN") {
+				hud_stage.clear();
+				hud_stage.removeAllEventListeners();
+				stage.removeAllEventListeners();
+				stage.clear();
+				createjs.Touch.enable(stage);
+				createjs.Touch.enable(hud_stage);
+				canvas.width = hud.width = window.innerWidth;
+				canvas.height = hud.height = window.innerHeight;
+				w = canvas.width;
+				h = canvas.height;
+				setup();
+			}
 		}
 		function setupTopHud(){
 			//loadPlayers();
