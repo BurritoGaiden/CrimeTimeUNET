@@ -146,23 +146,13 @@
 			join_button.on("click", function(e){
 				player.username = usernameDOMField.value.trim();
 				//var encodedName = encodeURI(player.username);
-				$.post("PlayerRegister", player.username);
+				$.post("PlayerRegister", player.username,
+					function(data, status){
+						console.log("Data: " + data + " Status: " + status);
+					});
 				usernameDOMField.style.visibility = "hidden";
-				// if(detectmob()){
-				// 	if (hud.requestFullscreen) {
-				// 		hud.requestFullscreen();
-				// 	} else if (hud.webkitRequestFullscreen) {
-				// 		hud.webkitRequestFullscreen();
-				// 	} else if (hud.mozRequestFullScreen) {
-				// 		hud.mozRequestFullScreen();
-				// 	} else if (hud.msRequestFullscreen) {
-				// 		hud.msRequestFullscreen();
-				// 	}
-				// 	setup();
-				// } else{
-				// 	setup();
-				// }
-				if (hud.requestFullscreen) {
+				if(detectmob()){
+					if (hud.requestFullscreen) {
 						hud.requestFullscreen();
 					} else if (hud.webkitRequestFullscreen) {
 						hud.webkitRequestFullscreen();
@@ -172,6 +162,9 @@
 						hud.msRequestFullscreen();
 					}
 					setup();
+				} else{
+					setup();
+				}
 			});
 			hud_stage.addChild(bg, startPopup, title, join_button, usernameField);
 			hud_stage.update();

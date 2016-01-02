@@ -51,7 +51,7 @@ public class PlayerRegisterRule : WebServerRule
         StreamReader reader = new StreamReader(request.InputStream);
         string username = reader.ReadToEnd();
         username = username.ToLower().Trim();
-        JSONWrapper j = new JSONWrapper(username);
+        //JSONWrapper j = new JSONWrapper(username);
 
         if (playerRegister.ContainsKey(username))
         {
