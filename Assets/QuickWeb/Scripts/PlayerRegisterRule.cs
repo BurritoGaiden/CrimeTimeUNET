@@ -59,10 +59,16 @@ public class PlayerRegisterRule : WebServerRule
         }
         else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5)
         {
-            playerRegister.Add(username, new GameObject());
-            dataString = "Player not found; space available, adding!";
+            GameObject newController = Instantiate<GameObject>(controllerPrefab);
+            playerRegister.Add(username, newController);
+            dataString = "Player not found; space available, adding " + username + " to the register!";
+        }
+        else
+        {
+            dataString = "Maximum player count reached, not accepting new players!";
         }
 
+        Debug.Log(dataString);
 
         byte[] data = Encoding.ASCII.GetBytes(dataString);
 
@@ -89,7 +95,14 @@ public class PlayerRegisterRule : WebServerRule
 
 #endif
 
-    private Dictionary<String, GameObject> playerRegister = new Dictionary<String, GameObject>();
+    private static Dictionary<String, GameObject> playerRegister = new Dictionary<String, GameObject>();
+    public static Dictionary<String, GameObject> getPlayerRegister
+    {
+        get { return playerRegister; }
+    }
+
+    [SerializeField]
+    private GameObject controllerPrefab;
 
     [SerializeField]
     private HtmlKeyValue[] substitutions;

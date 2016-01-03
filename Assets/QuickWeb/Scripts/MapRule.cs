@@ -53,13 +53,11 @@ public class MapRule : WebServerRule
 
 		JSONWrapper j = new JSONWrapper(s);
 
-		if (WebServer.controllerRoster.ContainsKey (ID)) {
-			CommandPanel cp = WebServer.controllerRoster [ID].GetComponent<CommandPanel> ();
+            CommandPanel cp = PlayerRegisterRule.getPlayerRegister[j["username"]].GetComponent<CommandPanel>();
 			Debug.Log("Processing tile data");
 			// TODO: rewrite this because holy shit it uses a public accessor
 			cp.pathSelection (FindObjectOfType<TileGen> ().tileArray [int.Parse (j ["x"]), int.Parse (j ["z"])]);
 			Debug.Log ("x:" + j ["x"] + "," + "z:" + j ["z"]);
-		}
 
 		byte[] data = Encoding.ASCII.GetBytes(dataString);
 		
