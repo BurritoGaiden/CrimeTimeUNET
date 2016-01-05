@@ -9,7 +9,7 @@ public class CommandPanel : MonoBehaviour {
     public string PlayerName
     {
         get { return playerName; }
-        set { playerName = value.Trim().ToLower(); }
+        set { playerName = value.Trim(); }
     }
 
     private bool connected = false;
@@ -73,11 +73,14 @@ public class CommandPanel : MonoBehaviour {
 
     void TickDown()
     {
-        timerCurrent -= Time.deltaTime;
-        if (timerCurrent < 0)
+        if (timerCurrent >= 0)
         {
-            connected = false;
-            Debug.Log(playerName + " has disconnected");
+            timerCurrent -= Time.deltaTime;
+            if (timerCurrent < 0)
+            {
+                connected = false;
+                Debug.Log(playerName + " has disconnected");
+            }
         }
     }
 

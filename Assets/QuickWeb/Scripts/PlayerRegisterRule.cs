@@ -53,12 +53,13 @@ public class PlayerRegisterRule : WebServerRule
         username = username.Trim();
         //JSONWrapper j = new JSONWrapper(username);
 
-        if (playerRegister.ContainsKey(username))
+        if (playerRegister.ContainsKey(username) && playerRegister[username].isConnected == false)
         {
             dataString = "Player found!";
         }
         else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5)
         {
+            //accept the request to join and create a controller instance 
             GameObject newController = Instantiate<GameObject>(controllerPrefab);
             CommandPanel newControllerCP = newController.GetComponent<CommandPanel>();
             newControllerCP.PlayerName = username;
@@ -68,7 +69,8 @@ public class PlayerRegisterRule : WebServerRule
         }
         else
         {
-            dataString = "Maximum player count reached, not accepting new players!";
+            //reject the request to join
+            dataString = "Maximum player count reached or player still connected!";
         }
 
         Debug.Log(dataString);
