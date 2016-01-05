@@ -16,7 +16,7 @@ public class JSONWrapper : Dictionary<string, string>{
 		}
 	}
 
-	public string findFromKey(string key){
+	public string FindFromKey(string key){
 		if (this.ContainsKey (key)) {
 			return this[key];
 		} else

@@ -12,8 +12,17 @@ public class CommandPanel : MonoBehaviour {
         set { playerName = value.Trim().ToLower(); }
     }
 
+    private bool connected = false;
+    public bool isConnected
+    {
+        get { return connected; }
+    }
 
-	private bool moveSelectEnabled;
+    [SerializeField]
+    private float timerMax = 10.0f;
+    private float timerCurrent = 0.0f;
+
+    private bool moveSelectEnabled;
 		public bool MoveSelectEnabled
 	{
 		get {return moveSelectEnabled; }
@@ -26,8 +35,11 @@ public class CommandPanel : MonoBehaviour {
 	public GameObject SelectedUnit
 	{
 		get {return unit; }
-		set {unit = value;
-			reset();}
+		set
+        {
+            unit = value;
+			Reset();
+        }
 	}
 
 	[SerializeField]
@@ -40,6 +52,7 @@ public class CommandPanel : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
 		//this.SelectedUnit = unit;
 		MoveSelectEnabled = true;
 		this.SelectedUnit = FindObjectOfType<CharacterBehavior> ().gameObject;
@@ -47,16 +60,33 @@ public class CommandPanel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+        TickDown();
 	}
 
-	void reset(){
+    // call this on the GET heartbeat rule
+    public void Pulse()
+    {
+        connected = true;
+        timerCurrent = timerMax;
+    }
+
+    void TickDown()
+    {
+        timerCurrent -= Time.deltaTime;
+        if (timerCurrent < 0)
+        {
+            connected = false;
+            Debug.Log(playerName + " has disconnected");
+        }
+    }
+
+	void Reset(){
 		unitBehavior = unit.GetComponent<CharacterBehavior>();
 //		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
 		queuedPath.Clear ();
 	}
 
-	public void pathSelection(GameObject tile){
+	public void PathSelection(GameObject tile){
 		Vector3 tilePos = tile.transform.position;
 		if (moveSelectEnabled) {
 			/*
@@ -113,15 +143,15 @@ public class CommandPanel : MonoBehaviour {
 			if(hit.collider.gameObject.Equals(target)){
 				Debug.DrawLine(unit.transform.position,target.transform.position,Color.red);
 				Debug.Log ("HIT!");
-				commitToAttack(target);
+				CommitToAttack(target);
 			}
 			else{
-				commitToAttack(hit.collider.gameObject);
+				CommitToAttack(hit.collider.gameObject);
 			}
 		}
 	}
 
-	public void commitToAttack(GameObject target){
+	public void CommitToAttack(GameObject target){
 		Attack attack = new Attack (unit, target, true);
 		StartCoroutine(Execute (attack));
 	}
@@ -130,7 +160,7 @@ public class CommandPanel : MonoBehaviour {
 		Debug.Log ("Executing...");
 		FindObjectOfType<FieldReporter> ().addActionToTurn(action);
 		yield return StartCoroutine(action.Execute());
-		reset ();
+		Reset ();
 		FindObjectOfType<FieldReporter> ().checkToIncrememt ();
 	}
 
