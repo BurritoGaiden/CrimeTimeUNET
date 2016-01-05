@@ -52,8 +52,7 @@ public class MapRule : WebServerRule
 		string ID = request.RemoteEndPoint.Address.ToString();
 
 		JSONWrapper j = new JSONWrapper(s);
-
-            CommandPanel cp = PlayerRegisterRule.getPlayerRegister[j["username"]].GetComponent<CommandPanel>();
+        CommandPanel cp = PlayerRegisterRule.getPlayerRegister[j["username"]].GetComponent<CommandPanel>();
 			Debug.Log("Processing tile data");
 			// TODO: rewrite this because holy shit it uses a public accessor
 			cp.pathSelection (FindObjectOfType<TileGen> ().tileArray [int.Parse (j ["x"]), int.Parse (j ["z"])]);

@@ -7,10 +7,31 @@
 	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
 	<style>
+		/*@font-face{
+			font-family: DAYPBL;
+			src: url(./Resources/www/fonts/DAYPBL.ttf);
+		}
+
+		@font-face{
+			font-family: cinzel;
+			src: url(./Resources/www/fonts/Cinzel-Regular.otf);
+		}*/
+		@font-face{
+			font-family: DAYPBL;
+			src: url(fonts/DAYPBL.ttf);
+		}
+
+		@font-face{
+			font-family: cinzel;
+			src: url(fonts/Cinzel-Regular.otf);
+		}
 		html, body {
+			font-family: DAYPBL;
 			width: 100%;
 			margin: 0 auto;
 			height: 100%;
+			padding: 0;
+			overflow: hidden;
 		}
 		canvas {
 			position: absolute;
@@ -25,7 +46,7 @@
 		}
 	</style>
 </head>
-<body onresize="canvasResize();" onload="init();">
+<body onload="init();">
 	<canvas id="canvas" width="1000" height="500"></canvas>
 	<canvas id="hud" width="1000" height="500"></canvas>
 	<input id="usernameInput" type="text">
@@ -53,7 +74,7 @@
 				},
 			}
 		}
-
+		window.addEventListener('resize', resize, false);
 		Map.prototype = new createjs.Container();
 		Map.prototype.constructor = Map;
 		function Map(rows, columns){
@@ -131,8 +152,8 @@
 			var startPopup = new createjs.Shape();
 			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
 			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/16, h/16, w - w/8, h - h/8, 5);
-			var title = new createjs.Text("CrimeTime", "60px Impact", "white");
-			title.x = w/2 - w/16 - 60;
+			var title = new createjs.Text("CrimeTime", '60px DAYPBL', "white");
+			title.x = w/2 - (title.getBounds().width/2);
 			title.y = h/16 + 10;
 			var join_button = new createjs.Container();
 			var join_box = new createjs.Shape();
@@ -196,15 +217,15 @@
 			canvas.height = hud.height = window.innerHeight;
 			w = canvas.width;
 			h = canvas.height;
+			map = new Map(5, 5);
 			showStartup();
 		}
 		function setup(){
-			var stage_state = "MAIN";
+			stage_state = "MAIN";
 			hud_stage.clear();
 			hud_stage.removeAllChildren();
 			hud_stage.removeAllEventListeners();
 			hud_stage.update();
-			map = new Map(5, 5);
 			var top = new createjs.Shape();
 			var bot = new createjs.Shape();
 			var bg = new createjs.Shape();
@@ -213,29 +234,40 @@
 			top.graphics.beginFill("Gray").drawRect(0, 0, w, h/5);
 			bot.graphics.beginFill("Gray").drawRect(0, h-(h/5), w, h/5);
 			stage.addChild(map);
-			hud_stage.addEventListener("click", function(e){
-				map.dispatchEvent(e);
+			hud_stage.addEventListener("mousedown", toMap);
+			hud_stage.addEventListener("pressmove", toMap);
+			var action_button = new createjs.Container();
+			var action_graphic = new createjs.Shape();
+			var txtSize = 32;
+			if(w < 500) txtSize = 28;
+			var action_text = new createjs.Text("Move", txtSize + "px cinzel", 'white');
+			action_text.x -= action_text.getBounds().width/2;
+			action_text.y -= action_text.getBounds().height/2;
+			action_graphic.graphics.beginFill("DimGray").drawCircle(0, 0, 50);
+			action_button.addChild(action_graphic, action_text);
+			action_button.x = w - action_button.getBounds().width;
+			action_button.y = h - (h/5) - action_button.getBounds().width;
+			action_button.on("click", function(){
+				//send post
+				console.log("Committing movements");
 			})
-			hud_stage.addEventListener("pressup", function(e){
-				map.dispatchEvent(e);
-			})
-			hud_stage.addEventListener("mousedown", function(e){
-				map.dispatchEvent(e);
-			});
-			hud_stage.addEventListener("pressmove", function(e){
-				map.dispatchEvent(e);
-			});
 			hud_stage.addChild(bg);
 			hud_stage.addChild(top);
 			hud_stage.addChild(bot);
+			hud_stage.addChild(action_button);
 			setupBotHud();
 			setupTopHud();
 		}
 
-		function canvasResize(){
+		function toMap(e){
+			map.dispatchEvent(e);
+		}
+
+		function resize(){
 			//TODO: update w/h values and tell canvas to rerender.
 			//console.log("resized!");
-			
+			console.log("resize!");
+			console.log(stage_state);
 			if(stage_state == "MAIN") {
 				hud_stage.clear();
 				hud_stage.removeAllEventListeners();
@@ -243,10 +275,10 @@
 				stage.clear();
 				createjs.Touch.enable(stage);
 				createjs.Touch.enable(hud_stage);
-				canvas.width = hud.width = window.innerWidth;
-				canvas.height = hud.height = window.innerHeight;
-				w = canvas.width;
-				h = canvas.height;
+				stage.canvas.width = hud_stage.canvas.width = window.innerWidth;
+				stage.canvas.height = hud_stage.canvas.height = window.innerHeight;
+				w = window.innerWidth;
+				h = window.innerHeight;
 				setup();
 			}
 		}
@@ -262,7 +294,7 @@
 					member_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
 					member_icon.x = 50;
 					var member_stats = new createjs.Container();
-					var name = new createjs.Text("player " + (m+1), "18px Impact", "Black");
+					var name = new createjs.Text("player " + (m+1), "18px cinzel", "Black");
 					var health = new createjs.Container();
 					var range = new createjs.Container();
 					var melee = new createjs.Container();
@@ -400,8 +432,10 @@
 		function tileSelect(x, y){
 			console.log("Selected : " + (x)/tilesize + ", " + (columns - (y)/tilesize - 1));
 			$.post("MapRule", 
-				{x: (x)/tilesize, 
-				 z: (columns - (y)/tilesize - 1)
+				{
+					username: player.username,
+					x: (x)/tilesize, 
+				 	z: (columns - (y)/tilesize - 1)
 				});
 			
 		}
