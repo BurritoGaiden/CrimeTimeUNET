@@ -173,21 +173,11 @@
 				$.post("PlayerRegister", player.username,
 					function(data, status){
 						console.log("Data: " + data + " Status: " + status);
-					})
-					.done(function(){
-						//Calls heartbeat every 2 seconds
-						//TODO: More stuff w/r/t GUI notifications
-						setInterval($.get("Heartbeat")
-							.done(function(data){
+						setInterval(function(){
+							$.get("Heartbeat", function(){
 								console.log("Success! Data: " + data);
 							})
-							.fail(function(){
-								console.log("Connection to server failed.");
-							})
-						, 2000);
-					})
-					.fail(function(){
-						console.log("Unable to send message to server.");
+						}, 2000);
 					});
 				usernameDOMField.style.visibility = "hidden";
 				if(detectmob()){
@@ -213,8 +203,7 @@
 			//if(id != this player) add to players array
 			//update player(s) data
 		}
-		
-		createjs.Ticker.addEventListener("tick", tick);
+	
 		function tick(e){
 			//TODO: make this performance efficient for mobile devices
 			//hud should only need to update when an event triggers
@@ -230,6 +219,7 @@
 			createjs.Touch.enable(stage);
 			createjs.Touch.enable(hud_stage);
 			createjs.Ticker.setFPS(60);
+			createjs.Ticker.addEventListener("tick", tick);
 			createjs.Ticker.addEventListener("tick", stage);
 			canvas.width = hud.width = window.innerWidth;
 			canvas.height = hud.height = window.innerHeight;
@@ -252,6 +242,7 @@
 			top.graphics.beginFill("Gray").drawRect(0, 0, w, h/5);
 			bot.graphics.beginFill("Gray").drawRect(0, h-(h/5), w, h/5);
 			stage.addChild(map);
+			hud_stage.addEventListener("click", toMap);
 			hud_stage.addEventListener("mousedown", toMap);
 			hud_stage.addEventListener("pressmove", toMap);
 			var action_button = new createjs.Container();
@@ -268,6 +259,7 @@
 			action_button.on("click", function(){
 				//send post
 				console.log("Committing movements");
+				$.post("init", "commitMove");
 			})
 			hud_stage.addChild(bg);
 			hud_stage.addChild(top);
