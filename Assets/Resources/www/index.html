@@ -74,6 +74,9 @@
 				},
 			}
 		}
+
+		//Function to call heartbeat
+
 		window.addEventListener('resize', resize, false);
 		Map.prototype = new createjs.Container();
 		Map.prototype.constructor = Map;
@@ -170,6 +173,21 @@
 				$.post("PlayerRegister", player.username,
 					function(data, status){
 						console.log("Data: " + data + " Status: " + status);
+					})
+					.done(function(){
+						//Calls heartbeat every 2 seconds
+						//TODO: More stuff w/r/t GUI notifications
+						setInterval($.get("Heartbeat")
+							.done(function(data){
+								console.log("Success! Data: " + data);
+							})
+							.fail(function(){
+								console.log("Connection to server failed.")
+							});
+						, 2000);
+					})
+					.fail(function(){
+						console.log("Unable to send message to server.");
 					});
 				usernameDOMField.style.visibility = "hidden";
 				if(detectmob()){
