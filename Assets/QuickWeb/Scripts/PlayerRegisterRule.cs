@@ -60,7 +60,9 @@ public class PlayerRegisterRule : WebServerRule
         else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5)
         {
             GameObject newController = Instantiate<GameObject>(controllerPrefab);
-            playerRegister.Add(username, newController);
+            CommandPanel newControllerCP = newController.GetComponent<CommandPanel>();
+            newControllerCP.PlayerName = username;
+            playerRegister.Add(username, newControllerCP);
             dataString = "Player not found; space available, adding " + username + " to the register!";
         }
         else
@@ -95,8 +97,8 @@ public class PlayerRegisterRule : WebServerRule
 
 #endif
 
-    private static Dictionary<String, GameObject> playerRegister = new Dictionary<String, GameObject>();
-    public static Dictionary<String, GameObject> getPlayerRegister
+    private static Dictionary<String, CommandPanel> playerRegister = new Dictionary<String, CommandPanel>();
+    public static Dictionary<String, CommandPanel> PlayerRegister
     {
         get { return playerRegister; }
     }
