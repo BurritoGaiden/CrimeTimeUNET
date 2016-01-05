@@ -50,7 +50,7 @@ public class PlayerRegisterRule : WebServerRule
         HttpListenerRequest request = context.Request;
         StreamReader reader = new StreamReader(request.InputStream);
         string username = reader.ReadToEnd();
-        username = username.ToLower().Trim();
+        username = username.Trim();
         //JSONWrapper j = new JSONWrapper(username);
 
         if (playerRegister.ContainsKey(username))
@@ -62,6 +62,7 @@ public class PlayerRegisterRule : WebServerRule
             GameObject newController = Instantiate<GameObject>(controllerPrefab);
             CommandPanel newControllerCP = newController.GetComponent<CommandPanel>();
             newControllerCP.PlayerName = username;
+            newControllerCP.Pulse();
             playerRegister.Add(username, newControllerCP);
             dataString = "Player not found; space available, adding " + username + " to the register!";
         }

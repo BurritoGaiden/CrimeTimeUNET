@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;   
+using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Net;
 using System.IO;
 
-public class MapStateRule : WebServerRule
+public class ControllerInputRule : WebServerRule
 {
 
     [Serializable]
@@ -32,8 +32,6 @@ public class MapStateRule : WebServerRule
             this.key = key;
             this.value = value;
         }
-
-
     }
 
 #if UNITY_STANDALONE || UNITY_EDITOR
@@ -45,56 +43,32 @@ public class MapStateRule : WebServerRule
 
     protected override IEnumerator OnRequest(HttpListenerContext context)
     {
-        string dataString = "Ping";
 
         HttpListenerRequest request = context.Request;
         StreamReader reader = new StreamReader(request.InputStream);
-        string s = reader.ReadToEnd();
+        string command = reader.ReadToEnd();
 
-        JSONWrapper j = new JSONWrapper(s);
-        CommandPanel cp;
-        try {
-            cp = PlayerRegisterRule.PlayerRegister[j["username"]];
-            cp.Pulse();
-            dataString = cp.PlayerName + " has a pulse!";
+        JSONWrapper j = new JSONWrapper(command);
 
-        }
-        catch (Exception e)
+        if (PlayerRegisterRule.PlayerRegister.ContainsKey(j["username"]))
         {
-            Debug.Log(e.Message);
+            CommandPanel cp = PlayerRegisterRule.PlayerRegister[j["username"]];
+            Debug.Log(j["command"]);
+            if (j["command"].Equals("commitMove"))
+            {
+                cp.CommitToMove();
+            }
         }
-
-        byte[] data = Encoding.ASCII.GetBytes(dataString);
 
         yield return null;
-
-        HttpListenerResponse response = context.Response;
-
-        response.ContentType = "text/plain";
-
-        Stream responseStream = response.OutputStream;
-
-        int count = data.Length;
-        int i = 0;
-        while (i < count)
-        {
-            if (i != 0)
-                yield return null;
-
-            int writeLength = Math.Min((int)writeStaggerCount, count - i);
-            responseStream.Write(data, i, writeLength);
-            i += writeLength;
-        }
     }
 
 #endif
-
-    private List<String> queuedPosts = new List<String>();
 
     [SerializeField]
     private HtmlKeyValue[] substitutions;
 
     [SerializeField]
     [Tooltip("How many bytes to write before waiting a frame to continue.")]
-    private uint writeStaggerCount = 4096;
+    private int writeStaggerCount = 4096;
 }

@@ -68,6 +68,7 @@ public class CommandPanel : MonoBehaviour {
     {
         connected = true;
         timerCurrent = timerMax;
+        Debug.Log(PlayerName + " has a pulse!");
     }
 
     void TickDown()
@@ -118,21 +119,21 @@ public class CommandPanel : MonoBehaviour {
 				Debug.Log ("Next Step: " + v.x + "," + v.z);
 			}
 
-			updateMovesLeft();
+			UpdateMovesLeft();
 		}
 	}
 
-	public void commitToMove(){
+	public void CommitToMove(){
 
 		Movement move = new Movement (unit, queuedPath, true);
 		StartCoroutine(Execute (move));
 	}
 
-	void updateMovesLeft(){
+	void UpdateMovesLeft(){
 //		movesLeft.text = (unitBehavior.getMoveStat() - (queuedPath.Count-1)).ToString();
 	}
 
-	public void targetAttack(GameObject target){
+	public void TargetAttack(GameObject target){
 		float dx = Mathf.Abs(unit.transform.position.x - target.transform.position.x);
 		float dz = Mathf.Abs(unit.transform.position.z - target.transform.position.z);
 		Debug.Log ("Targeting: " + dx + " + " + dz);

@@ -174,7 +174,12 @@
 					function(data, status){
 						console.log("Data: " + data + " Status: " + status);
 						setInterval(function(){
-							$.get("Heartbeat", function(){
+							$.post("MapState", 
+							{
+								username: player.username,
+					
+							},
+								function(data, status){
 								console.log("Success! Data: " + data);
 							})
 						}, 2000);
@@ -259,7 +264,11 @@
 			action_button.on("click", function(){
 				//send post
 				console.log("Committing movements");
-				$.post("init", "commitMove");
+				$.post("ControlInput", 
+					{
+					username: player.username,
+					command: "commitMove", 
+				});
 			})
 			hud_stage.addChild(bg);
 			hud_stage.addChild(top);

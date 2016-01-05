@@ -14,6 +14,6 @@ public class DummyCharacter : MonoBehaviour {
 	}
 
 	void OnMouseDown(){
-		FindObjectOfType<CommandPanel> ().targetAttack (this.gameObject);
+		FindObjectOfType<CommandPanel> ().TargetAttack (this.gameObject);
 	}
 }

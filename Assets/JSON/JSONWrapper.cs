@@ -10,10 +10,19 @@ public class JSONWrapper : Dictionary<string, string>{
 	//converts a JSON string into a usable datatable
 	public JSONWrapper(string encoded){
 		string[] andSplit = encoded.Split ('&');
-		for (int i = 0; i < andSplit.Length; i++) {
-			string[] temp = andSplit[i].Split('=');
-			this.Add(temp[0], temp[1]);
-		}
+        if (andSplit.Length > 1)
+        {
+            for (int i = 0; i < andSplit.Length; i++)
+            {
+                string[] temp = andSplit[i].Split('=');
+                this.Add(temp[0], temp[1]);
+            }
+        }
+        else
+        {
+            string[] temp = encoded.Split('=');
+            this.Add(temp[0], temp[1]);
+        }
 	}
 
 	public string FindFromKey(string key){
