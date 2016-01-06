@@ -3,20 +3,22 @@
 <head>
 	<meta name="viewport" content="width=320" initial-scale="1.0" maximum-scale="1.0" user-scalable="0">
 	<title>CrimeTime!</title>
-	<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+	<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
 	<style>
-		/*@font-face{
+		@font-face{
 			font-family: DAYPBL;
-			src: url(./Resources/www/fonts/DAYPBL.ttf);
+			src: url(./Resources/www/fonts/DAYPBL.ttf) format("truetype");
 		}
-
 		@font-face{
 			font-family: cinzel;
-			src: url(./Resources/www/fonts/Cinzel-Regular.otf);
-		}*/
+			src: url(./Resources/www/fonts/Cinzel-Regular.otf) format("opentype");
+		}
 		@font-face{
+			font-family: great-vibes;
+			src: url(./Resources/www/fonts/GreatVibes-Regular.otf) format("opentype");
+		}
+		/*@font-face{
 			font-family: DAYPBL;
 			src: url(fonts/DAYPBL.ttf);
 		}
@@ -24,9 +26,9 @@
 		@font-face{
 			font-family: cinzel;
 			src: url(fonts/Cinzel-Regular.otf);
-		}
+		}*/
 		html, body {
-			font-family: DAYPBL;
+			font-family: DAYPBL, great-vibes, cinzel;
 			width: 100%;
 			margin: 0 auto;
 			height: 100%;
@@ -47,6 +49,10 @@
 	</style>
 </head>
 <body onload="init();">
+	<div class="font_preload" style="opacity: 0">
+	    <span style="font-family: cinzel"></span>
+	    <span style="font-family: great-vibes"></span>
+	</div>
 	<canvas id="canvas" width="1000" height="500"></canvas>
 	<canvas id="hud" width="1000" height="500"></canvas>
 	<input id="usernameInput" type="text">
@@ -74,6 +80,11 @@
 				},
 			}
 		}
+		var preload = new createjs.LoadQueue(true, "./Resources/www/");
+		var startup_manifest = [
+			{src: "sprites/titleborder.png", id: "startupBorderImg", type: "image"},
+			{src: "sprites/titlebracket.png", id: "startupBracketImg", type: "image"}
+		];
 
 		//Function to call heartbeat
 
@@ -146,6 +157,7 @@
 			stage.update();
 		}
 
+
 		function showStartup(){
 			var usernameDOMField = document.getElementById("usernameInput");
 			var usernameField = new createjs.DOMElement(usernameDOMField);
@@ -155,15 +167,22 @@
 			var startPopup = new createjs.Shape();
 			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
 			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/16, h/16, w - w/8, h - h/8, 5);
-			var title = new createjs.Text("CrimeTime", '60px DAYPBL', "white");
+			var title = new createjs.Text("HeistNight");
+			title.font = '60px DAYPBL'
+			title.color = "white";
 			title.x = w/2 - (title.getBounds().width/2);
 			title.y = h/16 + 10;
+			var prompt = new createjs.Text("Your name, please:");
+			prompt.font = "60px great-vibes";
+			prompt.color = "white";
+			prompt.x = w/2 - (prompt.getBounds().width/2);
+			prompt.y = usernameField.y - 100;
 			var join_button = new createjs.Container();
 			var join_box = new createjs.Shape();
-			var join_button_text = new createjs.Text("Join the Heist!", "40px Impact", "white");
-			join_button_text.x = 300/8;
-			join_button_text.y = 75/4 - 75/16;
+			var join_button_text = new createjs.Text("Join the Heist!", "30px DAYPBL", "white");
 			join_box.graphics.beginFill("Grey").drawRoundRect(0, 0, 300, 75, 5);
+			join_button_text.x = 150 - join_button_text.getBounds().width/2;
+			join_button_text.y = 75/2 - join_button_text.getBounds().height/2;
 			join_button.addChild(join_box, join_button_text);
 			join_button.x = w/2 - 150;
 			join_button.y = h/2 + h/8;
@@ -200,7 +219,51 @@
 					setup();
 				}
 			});
-			hud_stage.addChild(bg, startPopup, title, join_button, usernameField);
+			var borderimg = preload.getResult("startupBorderImg");
+			var borders = new createjs.Container();
+			var borderBitmap = new createjs.Bitmap(borderimg);
+			var border_offset = 20;
+			for(i = 1; i <= 4; i++){
+				var border = borderBitmap.clone();
+				border.rotation = (90*i)%360;
+				var popupwidth = w - w/8;
+				var popupheight = h - h/8;
+				var bounds = border.getBounds();
+				switch(i){
+					//top-left (0,0)
+					case 1: //top-right
+						border.x = popupwidth - border_offset;
+						break;
+					case 3: //bottom-left
+						border.y = popupheight - border_offset;
+						break;
+					case 2: //bottom-right
+						border.x = popupwidth - border_offset;
+						border.y = popupheight - border_offset;
+						break;
+				}
+				borders.addChild(border);
+			}
+			borders.x = w/16 + border_offset/2;
+			borders.y = h/16 + border_offset/2;	
+			var bracketimg = preload.getResult("startupBracketImg");
+			var brackets = new createjs.Container();
+			var bracketBitmap = new createjs.Bitmap(bracketimg);
+			for(i = 0; i < 2; i++){
+				var bracket = bracketBitmap.clone();
+				bracket.rotation = i*180;
+				switch(i){
+					case 1:
+						bracket.x = 600 + 100; //600 is length of usernameField
+						bracket.y = bracket.image.height;
+						break;
+				}
+				bracket.y -= bracket.image.height/4;
+				brackets.addChild(bracket);
+			}
+			brackets.x = usernameField.x - 100;
+			brackets.y = (h - h/8)/2;
+			hud_stage.addChild(bg, startPopup, borders, brackets, title, prompt, join_button, usernameField);
 			hud_stage.update();
 		}
 		function loadPlayers(){
@@ -231,8 +294,10 @@
 			w = canvas.width;
 			h = canvas.height;
 			map = new Map(5, 5);
-			showStartup();
+			preload.on("complete", showStartup);
+			preload.loadManifest(startup_manifest);
 		}
+
 		function setup(){
 			stage_state = "MAIN";
 			hud_stage.clear();
