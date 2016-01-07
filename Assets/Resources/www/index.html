@@ -348,7 +348,7 @@
 				$.post("ControlInput", 
 					{
 					username: player.username,
-					command: "commitMove", 
+					command: "CommitMove", 
 				});
 			})
 			hud_stage.addChild(bg);
@@ -533,9 +533,10 @@
 
 		function tileSelect(x, y){
 			console.log("Selected : " + (x)/tilesize + ", " + (columns - (y)/tilesize - 1));
-			$.post("MapRule", 
+			$.post("ControlInput", 
 				{
 					username: player.username,
+					command: "SelectTile", 
 					x: (x)/tilesize, 
 				 	z: (columns - (y)/tilesize - 1)
 				});

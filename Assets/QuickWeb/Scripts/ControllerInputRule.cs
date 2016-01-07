@@ -49,14 +49,37 @@ public class ControllerInputRule : WebServerRule
         string command = reader.ReadToEnd();
 
         JSONWrapper j = new JSONWrapper(command);
-
+        string givenCommand = "";
+            try
+            {
+                givenCommand = j["command"];
+            }catch(Exception e)
+            {
+                Debug.Log(e.Message);
+            }   
         if (PlayerRegisterRule.PlayerRegister.ContainsKey(j["username"]))
         {
             CommandPanel cp = PlayerRegisterRule.PlayerRegister[j["username"]];
             Debug.Log(j["command"]);
-            if (j["command"].Equals("commitMove"))
+            switch (givenCommand)
             {
-                cp.CommitToMove();
+                // commit their movement path and execute a move
+                case "CommitMove":
+                    cp.CommitToMove();
+                    break;
+
+                // select a tile to add to the movement path
+                case "SelectTile":
+                    Debug.Log("Processing tile data");
+                    // TODO: rewrite this because holy shit it uses a public accessor
+                    cp.PathSelection(FindObjectOfType<TileGen>().tileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
+                    Debug.Log("x:" + j["x"] + "," + "z:" + j["z"]);
+                    break;
+                
+                // none of the above
+                default:
+                    Debug.Log("Command either not parsed or not valid. Given command was: " + givenCommand);
+                    break;
             }
         }
 
