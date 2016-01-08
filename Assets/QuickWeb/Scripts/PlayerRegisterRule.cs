@@ -100,19 +100,21 @@ public class PlayerRegisterRule : WebServerRule
 
 #endif
 
+    [SerializeField]
+    private HtmlKeyValue[] substitutions;
+
+    [SerializeField]
+    [Tooltip("How many bytes to write before waiting a frame to continue.")]
+    private int writeStaggerCount = 4096;
+
+    [Header("Player Prefabs")]
+    [SerializeField]
+    private GameObject controllerPrefab;
+
     private static Dictionary<String, CommandPanel> playerRegister = new Dictionary<String, CommandPanel>();
     public static Dictionary<String, CommandPanel> PlayerRegister
     {
         get { return playerRegister; }
     }
 
-    [SerializeField]
-    private GameObject controllerPrefab;
-
-    [SerializeField]
-    private HtmlKeyValue[] substitutions;
-
-    [SerializeField]
-    [Tooltip("How many bytes to write before waiting a frame to continue.")]
-    private uint writeStaggerCount = 4096;
 }

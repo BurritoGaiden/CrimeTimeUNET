@@ -7,9 +7,13 @@ public class TileGen : MonoBehaviour {
 	[SerializeField]
 	private GameObject tilePrefab;
 
-	public GameObject[,] tileArray;
+	private GameObject[,] tileArray;
+    public GameObject[,] TileArray
+    {
+        get { return tileArray; }
+    }
 
-	[SerializeField]
+    [SerializeField]
 	private int fieldSize;
 
 	// Use this for initialization
@@ -33,9 +37,6 @@ public class TileGen : MonoBehaviour {
 			tileArray[i,j].GetComponent<TileBehavior>().X = i;
 			tileArray[i,j].GetComponent<TileBehavior>().Z = j;
 		}
-	}
-	void spawnPlayer(){
-
 	}
 
 }
