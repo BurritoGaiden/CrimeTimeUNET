@@ -177,7 +177,7 @@
 			var usernameDOMField = document.getElementById("usernameInput");
 			var usernameField = new createjs.DOMElement(usernameDOMField);
 			usernameField.x = w/2 - 250;
-			usernameField.y = h/2;
+			usernameField.y = (h - h/8 + h/16)/2;
 			
 			var title = new createjs.Text("HeistNight");
 			title.font = '60px DAYPBL'
@@ -247,12 +247,12 @@
 						bracket.y = bracket.image.height;
 						break;
 				}
-				bracket.y -= bracket.image.height/4;
+				bracket.y -= bracket.image.height/2;
 				brackets.addChild(bracket);
 				if(mobile_offset == 0.5) bracket.scaleY = bracket.scaleX = 0.75;
 			}
 			brackets.x = usernameField.x - 100*mobile_offset;
-			brackets.y = (h - h/8)/2;
+			brackets.y = (h - h/8)/2 + h/16;
 			startupScreen.addChild(borders, brackets, title, prompt, join_button, usernameField);
 			hud_stage.addChild(startupScreen);
 			hud_stage.update();
