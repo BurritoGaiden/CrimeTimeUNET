@@ -86,6 +86,15 @@
 			{src: "sprites/titleborder.png", id: "startupBorderImg", type: "image"},
 			{src: "sprites/titlebracket.png", id: "startupBracketImg", type: "image"}
 		];
+		var preload_icon = new createjs.LoadQueue(true, "./Resources/www/sprites/icons_placeholder/")
+		var charSelect_manifest = [
+			{src: "characterSelectIcon0.png", id: "characterSelectIcon0", type: "image"},
+			{src: "characterSelectIcon1.png", id: "characterSelectIcon1", type: "image"},
+			{src: "characterSelectIcon2.png", id: "characterSelectIcon2", type: "image"},
+			{src: "characterSelectIcon3.png", id: "characterSelectIcon3", type: "image"},
+			{src: "characterSelectIcon4.png", id: "characterSelectIcon4", type: "image"},
+		]
+
 
 		//Function to call heartbeat
 
@@ -253,8 +262,8 @@
 			}
 			brackets.x = usernameField.x - 100*mobile_offset;
 			brackets.y = (h - h/8)/2 + h/16;
-			startupScreen.addChild(borders, brackets, title, prompt, join_button, usernameField);
-			hud_stage.addChild(startupScreen);
+			startupScreen.addChild(brackets, title, prompt, join_button, usernameField);
+			hud_stage.addChild(borders, startupScreen);
 			hud_stage.update();
 		}
 		function loadPlayers(){
@@ -264,36 +273,56 @@
 		}
 
 		function showCharacterSelect(){
-			hud_stage.remove(hud_stage.getChildByName("startupScreen"));
+			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
 			charSelectScreen.name = "charSelectScreen";
-			var promptText = new createjs.Text("Please select your character:", "60px cinzel", "white");
+			var promptText = new createjs.Text("Please select your character:", "42px cinzel", "white");
 			promptText.x = w/2 - promptText.getBounds().width/2;
-			promptText.y = h/4;
-			for(i = 0; i < 5; i++){
+			promptText.y = h/5;
+			var characters = new createjs.Container();
+			for(i = 4; i >= 0; i--){
 				var character_icon = new createjs.Container();
 				var character_icon_bg = new createjs.Shape();
-				character_icon_bg.graphics.beginFill("Gray").drawCircle(0, 0, 100);
-				//TODO: NEED ICONS FIRST! hahahaahahahaha
-				//var character_icon_img = preload.getResult("characterSelectIcon" + i);
-				//var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
-				//character_icon_bitmap.x = (100 - character_icon_bitmap.image.width)/2;
-				//character_icon_bitmap.y = (100 - character_icon_bitmap.image.height)/2;
-				//var character_details_img = preload.getResult("detailsIcon");
-				//var character_details_bitmap = new createjs.Bitmap(character_details_img);
-				//character_details_bitmap.on("click", displayCharacterDetail, i);
-				//character_details_bitmap.x = character_icon_bitmap.x;
-				//character_details_bitmap.y = ??????? Not sure if put on icon corner, or below it, or on top, etcetc...
-				//character_icon.addChild(character_icon_bg, character_icon_bitmap, character_details_bitmap);
+				character_icon_bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
+				var character_icon_img = preload_icon.getResult("characterSelectIcon" + i);
+				var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
+				character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
+				character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
+				// var character_details_img = preload.getResult("detailsIcon");
+				// var character_details_bitmap = new createjs.Bitmap(character_details_img);
+				// character_details_bitmap.on("click", displayCharacterDetail, i);
+				// character_details_bitmap.x = character_icon_bitmap.x;
+				// character_details_bitmap.y = ??????? Not sure if put on icon corner, or below it, or on top, etcetc...
+				character_icon.addChild(character_icon_bg, character_icon_bitmap); //REMEMBER TO PUT BACK IN CHARACTER DETAILS
 				//add event listener here that if someone has already selected this character, disable it/grey it out
-				character_icon.x = w/4 + 150*i;
-				character_icon.y = promptText.y + 100;
+				character_icon.scaleX = character_icon.scaleY = mobile_offset - 0.15;
+				var fisticop_icon;
+				if(i == 4) {
+					fisticop_icon = character_icon;
+					var bounds = character_icon.getBounds();
+					console.log(character_icon.getBounds());
+					character_icon.x = w/2 + bounds.width/2;
+					character_icon.y = h/2;
+					character_icon.scaleX = character_icon.scaleY = mobile_offset;
+				}
+				else if(i % 2 == 0){
+					character_icon.x = fisticop_icon.x - 150;
+					if(i/2 == 0) character_icon.y = promptText.y + 150;
+					else if (i/2 == 1) character_icon.y = promptText.y + 150*2.1;
+				} else {
+					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width + 150;
+					if(i == 1) character_icon.y = promptText.y + 150;
+					else if (i == 3) character_icon.y = promptText.y + 150*2.1;
+				} 
+				character_icon.x -= character_icon.getBounds().width/2;
 				character_icon.on("click", function(){
 					//sent POST request to select
+					console.log("SELECTED CHARACTER");
 				})
-				charSelectScreen.addChild(character_icon);
+				characters.addChild(character_icon);
 			}
-			hud_stage.add(charSelectScreen);
+			charSelectScreen.addChild(promptText, characters);
+			hud_stage.addChild(charSelectScreen);
 			hud_stage.update();
 		}
 
@@ -327,7 +356,9 @@
 				}
 			} 
 
-			setup();
+			//setup();
+			preload_icon.on("complete", showCharacterSelect);
+			preload_icon.loadManifest(charSelect_manifest);
 			//should be showCharacterSelect();
 		}
 	
