@@ -53,9 +53,9 @@ public class CommandPanel : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		//this.SelectedUnit = unit;
-		MoveSelectEnabled = true;
-		this.SelectedUnit = FindObjectOfType<CharacterBehavior> ().gameObject;
+        //this.SelectedUnit = FindObjectOfType<CharacterBehavior> ().gameObject;
+        //this.SelectedUnit = unit;
+        MoveSelectEnabled = true;
 	}
 	
 	// Update is called once per frame
@@ -79,19 +79,37 @@ public class CommandPanel : MonoBehaviour {
             if (timerCurrent < 0)
             {
                 connected = false;
+                try
+                {
+                    SendMessageUpwards("OnPlayerHasDisconnected", playerName, SendMessageOptions.RequireReceiver);
+                }
+                catch
+                {
+                    Debug.Log("CATASTROPHIC ERROR: Server missing???");
+                }
                 Debug.Log(playerName + " has disconnected");
             }
         }
     }
 
 	void Reset(){
-		unitBehavior = unit.GetComponent<CharacterBehavior>();
-//		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
-		queuedPath.Clear ();
+        if (unit != null)
+        {
+            unitBehavior = unit.GetComponent<CharacterBehavior>();
+            //		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
+            queuedPath.Clear();
+        }
 	}
+
+    // TODO: Add functionality!
+    public void SpawnPlayerCharacter()
+    {
+
+    }
 
 	public void PathSelection(GameObject tile){
 		Vector3 tilePos = tile.transform.position;
+        if(unit != null)
 		if (moveSelectEnabled) {
 			/*
 		if (currentPos > unit.GetComponent<CharacterBehavior> ().getMoveStat ()) {

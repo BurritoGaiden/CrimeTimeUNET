@@ -71,8 +71,11 @@ public class ControllerInputRule : WebServerRule
                 // select a tile to add to the movement path
                 case "SelectTile":
                     Debug.Log("Processing tile data");
-                    cp.PathSelection(Map.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
-                    Debug.Log("x:" + j["x"] + "," + "z:" + j["z"]);
+                    if (Map != null)
+                    {
+                        cp.PathSelection(Map.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
+                        Debug.Log("x:" + j["x"] + "," + "z:" + j["z"]);
+                    }
                     break;
                 
                 // none of the above
@@ -83,6 +86,11 @@ public class ControllerInputRule : WebServerRule
         }
 
         yield return null;
+    }
+
+    void OnLevelWasLoaded(int level)
+    {
+        Map = FindObjectOfType<TileGen>();
     }
 
 #endif

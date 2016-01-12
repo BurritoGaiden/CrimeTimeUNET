@@ -31,6 +31,7 @@ public class TileGen : MonoBehaviour {
 		for(int j = 0; j< fieldSize; j++){
 			position = (i*fieldSize + j);
 			tileArray[i,j] = (GameObject)Instantiate(tilePrefab, new Vector3(i, 0, j), Quaternion.identity);
+                tileArray[i, j].transform.parent = this.transform;
 			tileArray[i,j].transform.Rotate(new Vector3(90,0,0));
 			if (position%2 == 0)
 				tileArray[i,j].GetComponent<MeshRenderer>().material.color = Color.grey;

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;   
 using System;
@@ -59,13 +60,24 @@ public class PlayerRegisterRule : WebServerRule
         }
         else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5)
         {
+
+            if (!firstPlayerJoined)
+            {
+                GetComponentInParent<GameStateManager>().GameState = GameState.CharacterSelect;
+            }
             //accept the request to join and create a controller instance 
             GameObject newController = Instantiate<GameObject>(controllerPrefab);
+            newController.transform.parent = this.gameObject.transform;
+            newController.name = username + "'s Controller";
+
             CommandPanel newControllerCP = newController.GetComponent<CommandPanel>();
             newControllerCP.PlayerName = username;
             newControllerCP.Pulse();
+
             playerRegister.Add(username, newControllerCP);
             dataString = "Player not found; space available, adding " + username + " to the register!";
+
+            firstPlayerJoined = true;
         }
         else
         {
@@ -98,6 +110,48 @@ public class PlayerRegisterRule : WebServerRule
         }
     }
 
+    // TODO: Fill with the good stuff
+    void OnPlayerHasDisconnected(string dcName)
+    {
+       
+    }
+
+    void OnGameStateHasChanged(GameState newState)
+    {
+        Debug.Log("Game State has changed!");
+        switch (newState) {
+            case GameState.CharacterSelect:
+                deleteOnDisconnect = true;
+                SceneManager.LoadScene(1);
+                break;
+
+            case GameState.Heist:
+                deleteOnDisconnect = false;
+                foreach (CommandPanel cp in PlayerRegister.Values)
+                {
+                    cp.SpawnPlayerCharacter();
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    /*
+    private void SwitchOutOfMenu()
+    {
+        switch (PlayerRegister.Count)
+        {
+            case 0:
+                break;
+
+            default:
+                SceneManager.LoadScene(1);
+                break;
+        }
+    }
+    */
 #endif
 
     [SerializeField]
@@ -116,5 +170,9 @@ public class PlayerRegisterRule : WebServerRule
     {
         get { return playerRegister; }
     }
+    // if true, delete entries from the player registry when they disconnect (for example, during pre-game)
+    private bool deleteOnDisconnect = true;
 
+    // if true, a player has joined at some point during this application's launch session
+    private bool firstPlayerJoined = false;
 }
