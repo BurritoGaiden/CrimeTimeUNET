@@ -5,8 +5,12 @@ public class CharacterBehavior : MonoBehaviour {
 	
 	[SerializeField]
 	private string label;
+    public string Label
+    {
+        get { return label; }
+    }
 
-	private string firstName, lastName;
+        private string firstName, lastName;
 	private string helpTextLookup;
 
 	[SerializeField]

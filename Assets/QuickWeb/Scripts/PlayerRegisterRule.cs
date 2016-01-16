@@ -54,7 +54,7 @@ public class PlayerRegisterRule : WebServerRule
         username = username.Trim();
         //JSONWrapper j = new JSONWrapper(username);
 
-        if (playerRegister.ContainsKey(username) && playerRegister[username].isConnected == false)
+        if (playerRegister.ContainsKey(username) && playerRegister[username].IsConnected == false)
         {
             dataString = "Player found!";
         }

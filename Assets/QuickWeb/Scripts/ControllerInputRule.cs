@@ -50,19 +50,50 @@ public class ControllerInputRule : WebServerRule
 
         JSONWrapper j = new JSONWrapper(command);
         string givenCommand = "";
+        string user = "";
             try
             {
                 givenCommand = j["command"];
-            }catch(Exception e)
+                user = j["username"]; 
+                Debug.Log("Receiving command " + givenCommand + " from " + user);
+        }
+        catch(Exception e)
             {
                 Debug.Log(e.Message);
             }   
-        if (PlayerRegisterRule.PlayerRegister.ContainsKey(j["username"]))
+        if (PlayerRegisterRule.PlayerRegister.ContainsKey(user))
         {
-            CommandPanel cp = PlayerRegisterRule.PlayerRegister[j["username"]];
-            Debug.Log(j["command"]);
+            CommandPanel cp = PlayerRegisterRule.PlayerRegister[user];
             switch (givenCommand)
             {
+                // for use during charcter select
+                case "ChooseCharacter":
+                    if(GetComponentInParent<GameStateManager>().GameState == GameState.CharacterSelect)
+                    {
+                        string charSelected = "";
+                        try
+                        {
+                            charSelected = j["character"];
+                        } catch(Exception e)
+                        {
+                            Debug.Log(e.Message);
+                        }
+
+                        // if the character was able to be assigned
+                        if(charSelected != "")
+                        {
+                            try
+                            {
+                                //TODO: Make and implement the character selector
+                                FindObjectOfType<CharacterSelect>().SelectCharForPlayer(charSelected, user);
+                            } catch(Exception e)
+                            {
+                                Debug.Log(e.Message);
+                            }
+                        }
+                    }
+                    break;
+
                 // commit their movement path and execute a move
                 case "CommitMove":
                     cp.CommitToMove();
@@ -70,11 +101,17 @@ public class ControllerInputRule : WebServerRule
 
                 // select a tile to add to the movement path
                 case "SelectTile":
-                    Debug.Log("Processing tile data");
                     if (Map != null)
                     {
-                        cp.PathSelection(Map.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
-                        Debug.Log("x:" + j["x"] + "," + "z:" + j["z"]);
+                        try
+                        {
+                            cp.PathSelection(Map.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
+                            Debug.Log("Processing tile data: {x:" + j["x"] + "," + "z:" + j["z"]+"}");
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.Log(e.Message);
+                        }
                     }
                     break;
                 

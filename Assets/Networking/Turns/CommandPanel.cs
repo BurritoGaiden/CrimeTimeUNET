@@ -13,7 +13,7 @@ public class CommandPanel : MonoBehaviour {
     }
 
     private bool connected = false;
-    public bool isConnected
+    public bool IsConnected
     {
         get { return connected; }
     }
@@ -21,6 +21,14 @@ public class CommandPanel : MonoBehaviour {
     [SerializeField]
     private float timerMax = 10.0f;
     private float timerCurrent = 0.0f;
+
+
+    private GameObject character;
+    public GameObject Character
+    {
+        get { return character; }
+        set { character = value; }
+    }
 
     private bool moveSelectEnabled;
 		public bool MoveSelectEnabled
