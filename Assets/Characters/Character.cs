@@ -11,14 +11,6 @@ public class Character : MonoBehaviour {
         get { return associatedCharacter; }
     }
 
-    // the name of the associated character, pulled from the CharacterBehavior of the AssociatedCharacter
-    [SerializeField]
-    private string characterName = "";
-    public string CharacterName
-    {
-        get { return characterName; }
-    }
-
     // the boolean determining if this character has been selected by a player
     private bool isChosen = false;
     public bool IsChosen
@@ -37,7 +29,6 @@ public class Character : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        characterName = associatedCharacter.GetComponent<CharacterBehavior>().Label;
 	}
 	
 	// Update is called once per frame

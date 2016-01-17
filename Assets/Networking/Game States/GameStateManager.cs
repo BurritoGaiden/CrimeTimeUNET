@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class GameStateManager : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class GameStateManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
+        SceneManager.LoadScene(1);
     }
 
     // Update is called once per frame

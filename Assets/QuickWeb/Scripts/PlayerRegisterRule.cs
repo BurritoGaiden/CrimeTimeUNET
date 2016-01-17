@@ -128,7 +128,7 @@ public class PlayerRegisterRule : WebServerRule
         switch (newState) {
             case GameState.CharacterSelect:
                 deleteOnDisconnect = true;
-                SceneManager.LoadScene(1);
+                SceneManager.LoadScene(2);
                 break;
 
             case GameState.Heist:
