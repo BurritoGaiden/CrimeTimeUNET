@@ -22,9 +22,9 @@ public class CommandPanel : MonoBehaviour {
     private float timerMax = 10.0f;
     private float timerCurrent = 0.0f;
 
-
-    private GameObject character;
-    public GameObject Character
+    // the chosen character for this controller. null indicates no character selected yet
+    private Character character = null;
+    public Character Character
     {
         get { return character; }
         set { character = value; }
@@ -100,7 +100,8 @@ public class CommandPanel : MonoBehaviour {
         }
     }
 
-	void Reset(){
+	void Reset()
+    {
         if (unit != null)
         {
             unitBehavior = unit.GetComponent<CharacterBehavior>();

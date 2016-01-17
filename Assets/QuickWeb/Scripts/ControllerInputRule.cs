@@ -80,12 +80,12 @@ public class ControllerInputRule : WebServerRule
                         }
 
                         // if the character was able to be assigned
-                        if(charSelected != "")
+                        if(charSelected != "" && charSelectManager != null)
                         {
                             try
                             {
                                 //TODO: Make and implement the character selector
-                                FindObjectOfType<CharacterSelect>().SelectCharForPlayer(charSelected, user);
+                               charSelectManager.SelectCharForPlayer(charSelected, cp);
                             } catch(Exception e)
                             {
                                 Debug.Log(e.Message);
@@ -128,6 +128,7 @@ public class ControllerInputRule : WebServerRule
     void OnLevelWasLoaded(int level)
     {
         Map = FindObjectOfType<TileGen>();
+        charSelectManager = FindObjectOfType<CharacterSelectManager>();
     }
 
 #endif
@@ -142,4 +143,6 @@ public class ControllerInputRule : WebServerRule
     [Header("Gameplay Objects to Interface")]
     [SerializeField]
     private TileGen Map;
+    [SerializeField]
+    private CharacterSelectManager charSelectManager;
 }

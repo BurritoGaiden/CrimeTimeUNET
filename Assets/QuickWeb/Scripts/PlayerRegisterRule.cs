@@ -58,7 +58,7 @@ public class PlayerRegisterRule : WebServerRule
         {
             dataString = "Player found!";
         }
-        else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5)
+        else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5 && allowNewJoins)
         {
 
             if (!firstPlayerJoined)
@@ -110,10 +110,16 @@ public class PlayerRegisterRule : WebServerRule
         }
     }
 
-    // TODO: Fill with the good stuff
     void OnPlayerHasDisconnected(string dcName)
     {
-       
+       if(deleteOnDisconnect)
+        {
+            if (PlayerRegister[dcName].Character != null)
+                PlayerRegister[dcName].Character.IsChosen = false;
+
+            Destroy(PlayerRegister[dcName].gameObject);
+            PlayerRegister.Remove(dcName);
+        }
     }
 
     void OnGameStateHasChanged(GameState newState)
@@ -172,6 +178,9 @@ public class PlayerRegisterRule : WebServerRule
     }
     // if true, delete entries from the player registry when they disconnect (for example, during pre-game)
     private bool deleteOnDisconnect = true;
+
+    // if true, allow new players to join. otherwise, only allow re-connects
+    private bool allowNewJoins = true;
 
     // if true, a player has joined at some point during this application's launch session
     private bool firstPlayerJoined = false;
