@@ -115,10 +115,10 @@ public class CommandPanel : MonoBehaviour {
     {
 
     }
-
-	public void PathSelection(GameObject tile){
+    // This will need to be reworked to accomodate for non 1x1 tiles (we're using 6x6 now but I'd be a fool to hardcode it again)
+	public void PathSelection(TileBehavior tile){
 		Vector3 tilePos = tile.transform.position;
-        if(unit != null)
+        if(unit != null && tile.IsPathable)
 		if (moveSelectEnabled) {
 			/*
 		if (currentPos > unit.GetComponent<CharacterBehavior> ().getMoveStat ()) {

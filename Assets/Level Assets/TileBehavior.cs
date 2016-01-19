@@ -15,14 +15,45 @@ public class TileBehavior : MonoBehaviour {
 		set {z  = value;}
 	}
 
+    private TileType tt;
+    public TileType TileType
+    {
+        get { return tt; }
+        set
+        {
+            tt = value;
+            DeterminePathing(tt);
+        }
+    }
+
+    private bool isPathable = true;
+    public bool IsPathable
+    {
+        get { return isPathable; }
+    }
+
 	// Use this for initialization
 	void Start () {
 	
 	}
 	
+    void DeterminePathing(TileType incomingType)
+    {
+        switch (incomingType)
+        {
+            case TileType.Wall:
+                isPathable = false;
+                break;
+
+            default:
+                isPathable = true;
+                break;
+        }
+    }
+
 
 	void OnMouseDown(){
 		Debug.Log ("This tile is: " + x + "," + z);
-		FindObjectOfType<CommandPanel> ().PathSelection (this.gameObject);
+		FindObjectOfType<CommandPanel> ().PathSelection (this);
 	}
 }
