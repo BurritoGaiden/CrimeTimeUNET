@@ -101,11 +101,11 @@ public class ControllerInputRule : WebServerRule
 
                 // select a tile to add to the movement path
                 case "SelectTile":
-                    if (Map != null)
+                    if (mapGenerator != null)
                     {
                         try
                         {
-                            cp.PathSelection(Map.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
+                            cp.PathSelection(mapGenerator.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
                             Debug.Log("Processing tile data: {x:" + j["x"] + "," + "z:" + j["z"]+"}");
                         }
                         catch (Exception e)
@@ -127,7 +127,10 @@ public class ControllerInputRule : WebServerRule
 
     void OnLevelWasLoaded(int level)
     {
-        Map = FindObjectOfType<TileGen>();
+        mapGenerator = FindObjectOfType<TileGen>();
+        if (mapGenerator != null)
+            mapGenerator.generateFromMap(selectedMap);
+
         charSelectManager = FindObjectOfType<CharacterSelectManager>();
     }
 
@@ -142,7 +145,9 @@ public class ControllerInputRule : WebServerRule
 
     [Header("Gameplay Objects to Interface")]
     [SerializeField]
-    private TileGen Map;
+    private TileGen mapGenerator;
+    [SerializeField]
+    private Map selectedMap;
     [SerializeField]
     private CharacterSelectManager charSelectManager;
 }

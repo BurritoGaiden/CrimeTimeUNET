@@ -144,20 +144,6 @@ public class PlayerRegisterRule : WebServerRule
         }
     }
 
-    /*
-    private void SwitchOutOfMenu()
-    {
-        switch (PlayerRegister.Count)
-        {
-            case 0:
-                break;
-
-            default:
-                SceneManager.LoadScene(1);
-                break;
-        }
-    }
-    */
 #endif
 
     [SerializeField]
