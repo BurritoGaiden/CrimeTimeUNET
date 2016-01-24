@@ -23,8 +23,9 @@ public class CommandPanel : MonoBehaviour {
     private float timerCurrent = 0.0f;
 
     // the chosen character for this controller. null indicates no character selected yet
-    private Character character = null;
-    public Character Character
+    [SerializeField]
+    private GameObject character = null;
+    public GameObject Character
     {
         get { return character; }
         set { character = value; }
@@ -54,9 +55,6 @@ public class CommandPanel : MonoBehaviour {
 	private float distanceBetweenTiles = 1f;
 	
 	private List<Vector3> queuedPath = new List<Vector3>();
-
-	[SerializeField]
-	private Text movesLeft;
 
 	// Use this for initialization
 	void Start () {
@@ -141,7 +139,7 @@ public class CommandPanel : MonoBehaviour {
 				}
 			} else if ((((dx == distanceBetweenTiles && dz == 0f) || (dx == 0f && dz == distanceBetweenTiles)) 
 			            && (dx + dz <= distanceBetweenTiles))
-			            && queuedPath.Count-1 < unitBehavior.getMoveStat()){
+			            && queuedPath.Count-1 < unitBehavior.MoveStat){
 				queuedPath.Add (tilePos); 
 			}
 

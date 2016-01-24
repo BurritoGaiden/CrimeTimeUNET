@@ -115,7 +115,7 @@ public class PlayerRegisterRule : WebServerRule
        if(deleteOnDisconnect)
         {
             if (PlayerRegister[dcName].Character != null)
-                PlayerRegister[dcName].Character.IsChosen = false;
+                //PlayerRegister[dcName].Character.IsChosen = false;
 
             Destroy(PlayerRegister[dcName].gameObject);
             PlayerRegister.Remove(dcName);

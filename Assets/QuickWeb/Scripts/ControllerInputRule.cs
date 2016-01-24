@@ -129,7 +129,7 @@ public class ControllerInputRule : WebServerRule
     {
         mapGenerator = FindObjectOfType<TileGen>();
         if (mapGenerator != null)
-            mapGenerator.generateFromMap(selectedMap);
+            //mapGenerator.generateFromMap(selectedMap);
 
         charSelectManager = FindObjectOfType<CharacterSelectManager>();
     }

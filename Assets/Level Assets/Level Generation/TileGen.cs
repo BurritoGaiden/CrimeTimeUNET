@@ -74,9 +74,8 @@ public class TileGen : MonoBehaviour {
         for (int i = 0; i < fieldSizeX; i++)
             for (int j = 0; j < fieldSizeZ; j++)
             {
-                Debug.Log((map.Layout.GetPixel(i, j)).ToString());
                 TileType t = colorToTile[map.Layout.GetPixel(i, j)];
-                Debug.Log(t.ToString());
+
                 tilePrefab = map.Tileset.TypeToTile[t];
 
                 tileArray[i, j] = ((GameObject)Instantiate(tilePrefab, new Vector3(i * tileSpacing, 0, j * tileSpacing), Quaternion.identity)).GetComponent<TileBehavior>();

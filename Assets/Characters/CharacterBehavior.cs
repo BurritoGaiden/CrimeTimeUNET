@@ -10,11 +10,35 @@ public class CharacterBehavior : MonoBehaviour {
         get { return label; }
     }
 
-        private string firstName, lastName;
-	private string helpTextLookup;
+    private string firstName, lastName;
+
+    [SerializeField]
+    private Alliance team;
+    public Alliance Team
+    {
+        get { return team; }
+    }
 
 	[SerializeField]
-	private int HP, MoveStat, GunStat, CQCStat;
+	private int hp, moveStat, gunStat, cqcStat;
+
+    public int HP
+    {
+        get { return hp; }
+    }
+    public int MoveStat
+    {
+        get { return moveStat; }
+    }
+    public int GunStat
+    {
+        get { return gunStat; }
+    }
+    public int CQCStat
+    {
+        get { return cqcStat; }
+    }
+
 
 	private bool finishedMoving = false;
 	public bool FinishedMoving
@@ -33,20 +57,12 @@ public class CharacterBehavior : MonoBehaviour {
 	
 	}
 
+    /*
 	public void initCharacter(){
 		firstName = txtLookup.updateString (label+"_firstname");
 		lastName = txtLookup.updateString (label+"_lastname");
 		helpTextLookup = txtLookup.updateString (label+"_helptext");
 	}
-
-
-	public string getFirstName(){return firstName;}
-	public string getLastName(){return lastName;}
-	public string getHelpText(){return helpTextLookup;}
-
-	public int getHP(){return HP;}
-	public int getMoveStat(){return MoveStat;}
-	public int getGunStat(){return GunStat;}
-	public int getCQCStat(){return CQCStat;}
+    */
 
 }
