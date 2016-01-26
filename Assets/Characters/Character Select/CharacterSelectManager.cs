@@ -68,29 +68,33 @@ public class CharacterSelectManager : MonoBehaviour {
             CharacterSelectEntry desiredCharacter = roster[characterName];
             if (desiredCharacter.Owner.Equals(playerCP))                            // If player selects the character they already had again, deselect it instead
             {
-                playerCP.Character = null;
-                desiredCharacter.Owner = null;
+                DeselectPlayerCharacter(playerCP);
             }
             else if (desiredCharacter.Owner == null && playerCP.Character == null)  // If player has no character and selected character has no owner, 
             {
                 desiredCharacter.Owner = playerCP;
                 playerCP.Character = desiredCharacter.CharacterPrefab;
             }
-            else if (desiredCharacter.Owner == null && playerCP.Character != null)  // If the player selects a character with no owner and already has 
+            else if (desiredCharacter.Owner == null && playerCP.Character != null)  // If the player selects a character with no owner and already has a character, deselect the old character
             {
-                foreach (CharacterSelectEntry entry in roster.Values)
-                {
-                    if (entry.Owner.Equals(playerCP))
-                    {
-                        entry.Owner = null;
-                        playerCP.Character = null;
-                        break;
-                    }
-                }
+                DeselectPlayerCharacter(playerCP);
+
                 desiredCharacter.Owner = playerCP;
                 playerCP.Character = desiredCharacter.CharacterPrefab;
             }
         }
     }
 
+    public void DeselectPlayerCharacter(CommandPanel playerCP)
+    {
+        foreach (CharacterSelectEntry entry in roster.Values)
+        {
+            if (entry.Owner.Equals(playerCP))
+            {
+                entry.Owner = null;
+                playerCP.Character = null;
+                break;
+            }
+        }
+    }
 }

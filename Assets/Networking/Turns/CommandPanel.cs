@@ -50,14 +50,12 @@ public class CommandPanel : MonoBehaviour {
 			Reset();
         }
 	}
-
-	[SerializeField]
-	private float distanceBetweenTiles = 1f;
 	
-	private List<Vector3> queuedPath = new List<Vector3>();
 
-	// Use this for initialization
-	void Start () {
+    private List<TileBehavior> queuedPath = new List<TileBehavior>();
+
+    // Use this for initialization
+    void Start () {
 
         //this.SelectedUnit = FindObjectOfType<CharacterBehavior> ().gameObject;
         //this.SelectedUnit = unit;
@@ -113,45 +111,58 @@ public class CommandPanel : MonoBehaviour {
     {
 
     }
-    // This will need to be reworked to accomodate for non 1x1 tiles (we're using 6x6 now but I'd be a fool to hardcode it again)
-	public void PathSelection(TileBehavior tile){
-		Vector3 tilePos = tile.transform.position;
-        if(unit != null && tile.IsPathable)
-		if (moveSelectEnabled) {
-			/*
-		if (currentPos > unit.GetComponent<CharacterBehavior> ().getMoveStat ()) {
-			return;
-		}
-		*/
-			// if the list is empty, set the start at where you're at, idiot
-			if(queuedPath.Count == 0)
-				queuedPath.Add(new Vector3(unit.transform.position.x, 0f, unit.transform.position.z));
-			int currentPos = queuedPath.Count;
-			// checks the distance between the selected tiles 
-			float dx = Mathf.Abs(queuedPath [currentPos - 1].x - tilePos.x);
-			float dz = Mathf.Abs(queuedPath [currentPos - 1].z - tilePos.z);
-			//if you click on an already-existant tile, remove everything past there
-			if (queuedPath.Contains (tilePos)) {
-				int index = queuedPath.IndexOf (tilePos);
-				for (int i = queuedPath.Count-1; i > index; i--) {
-					Debug.Log ("Removing: " + queuedPath[i].x + "," + queuedPath[i].z);
-					queuedPath.RemoveAt (i);
-				}
-			} else if ((((dx == distanceBetweenTiles && dz == 0f) || (dx == 0f && dz == distanceBetweenTiles)) 
-			            && (dx + dz <= distanceBetweenTiles))
-			            && queuedPath.Count-1 < unitBehavior.MoveStat){
-				queuedPath.Add (tilePos); 
-			}
 
-			foreach (Vector3 v in queuedPath) {
-				Debug.Log ("Next Step: " + v.x + "," + v.z);
-			}
+    public void PathSelection(TileBehavior tile)
+    {
+        if (unit != null && tile.IsPathable)
+            if (moveSelectEnabled)
+            {
+                // if the list is empty, set the start at where you're at, idiot
+                if (queuedPath.Count == 0)
+                {
+                    RaycastHit hit = new RaycastHit();
+                    Physics.Raycast(unit.transform.position, Vector3.down, out hit, 10f);
+                    GameObject tileBelow = hit.collider.gameObject;
+                    if (tileBelow.GetComponent<TileBehavior>() != null)
+                    {
+                        //Debug.Log("Below you is " + tileBelow.GetComponent<TileBehavior>().X + "," + tileBelow.GetComponent<TileBehavior>().Z);
+                        TileBehavior tb = tileBelow.GetComponent<TileBehavior>();
+                        queuedPath.Add(tb);
+                    }
+                }
+                int currentPos = queuedPath.Count;
+                // checks the distance between the selected tile indexes (moves are only valid if this number is one)
+                Coordinate distance = queuedPath[currentPos - 1].Coord - tile.Coord;
+                int dx = Mathf.Abs(distance.X);
+                int dz = Mathf.Abs(distance.Z);
+                //if you click on an already-existant tile, remove everything past there
+                if (queuedPath.Contains(tile))
+                {
+                    int index = queuedPath.IndexOf(tile);
+                    Debug.Log("Duplicate tile found at " + index + "/" + currentPos);
+                    for (int i = queuedPath.Count - 1; i > index; i--)
+                    {
+                        Debug.Log("Removing index " + i + ":" + queuedPath[i].Coord.ToString());
+                        queuedPath.RemoveAt(i);
+                    }
+                }
+                else if ((((dx == 1 && dz == 0) || (dx == 0 && dz == 1))
+                          && (dx + dz <= 1))
+                          && queuedPath.Count - 1 < 4)
+                {
+                    queuedPath.Add(tile);
+                }
 
-			UpdateMovesLeft();
-		}
-	}
+                foreach (TileBehavior tb in queuedPath)
+                {
+                    Debug.Log("Next Step: " + tb.Coord.ToString());
+                }
 
-	public void CommitToMove(){
+                UpdateMovesLeft();
+            }
+    }
+
+    public void CommitToMove(){
 
 		Movement move = new Movement (unit, queuedPath, true);
 		StartCoroutine(Execute (move));
@@ -161,6 +172,8 @@ public class CommandPanel : MonoBehaviour {
 //		movesLeft.text = (unitBehavior.getMoveStat() - (queuedPath.Count-1)).ToString();
 	}
 
+
+    // will need to rewrite soon
 	public void TargetAttack(GameObject target){
 		float dx = Mathf.Abs(unit.transform.position.x - target.transform.position.x);
 		float dz = Mathf.Abs(unit.transform.position.z - target.transform.position.z);

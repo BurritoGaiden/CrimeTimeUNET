@@ -39,16 +39,22 @@ public class CharacterBehavior : MonoBehaviour {
         get { return cqcStat; }
     }
 
+    private Coordinate coord;
+    public Coordinate Coord
+    {
+        get { return coord; }
+        set { coord = value; }
+    }
 
-	private bool finishedMoving = false;
+    private bool finishedMoving = false;
 	public bool FinishedMoving
 	{
 		get {return finishedMoving; }
 		set {finishedMoving = value;}
 	}
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
 
 	}
 	
