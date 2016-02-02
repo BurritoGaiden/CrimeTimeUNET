@@ -33,7 +33,6 @@
 			margin: 0 auto;
 			height: 100%;
 			padding: 0;
-			overflow: hidden;
 		}
 		canvas {
 			position: absolute;
@@ -64,7 +63,7 @@
 		var columns = 5;
 		var tilesize = 100;
 		var w, h, midXOffset, midYOffset;
-		var canvas, topc, botc;
+		var canvas, topc, botc; 	
 		var stage, top_stage, bot_stage;
 		var map;
 		var currentTile;
@@ -174,6 +173,34 @@
 			var startPopup = new createjs.Shape();
 			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
 			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/16, h/16, w - w/8, h - h/8, 5);
+			var borderimg = preload.getResult("startupBorderImg");
+			var borders = new createjs.Container();
+			var borderBitmap = new createjs.Bitmap(borderimg);
+			var border_offset = 20;
+			for(i = 1; i <= 4; i++){
+				var border = borderBitmap.clone();
+				border.rotation = (90*i)%360;
+				var popupwidth = w - w/8;
+				var popupheight = h - h/8;
+				var bounds = border.getBounds();
+				switch(i){
+					//top-left (0,0)
+					case 1: //top-right
+						border.x = popupwidth - border_offset;
+						break;
+					case 3: //bottom-left
+						border.y = popupheight - border_offset;
+						break;
+					case 2: //bottom-right
+						border.x = popupwidth - border_offset;
+						border.y = popupheight - border_offset;
+						break;
+				}
+				border.scaleX = border.scaleY = mobile_offset;
+				borders.addChild(border);
+			}
+			borders.x = w/16 + border_offset/2;
+			borders.y = h/16 + border_offset/2;
 			hud_stage.addChild(bg, startPopup);
 		}
 
@@ -216,34 +243,7 @@
 				}
 			}
 			join_button.on("click", registerPlayer);
-			var borderimg = preload.getResult("startupBorderImg");
-			var borders = new createjs.Container();
-			var borderBitmap = new createjs.Bitmap(borderimg);
-			var border_offset = 20;
-			for(i = 1; i <= 4; i++){
-				var border = borderBitmap.clone();
-				border.rotation = (90*i)%360;
-				var popupwidth = w - w/8;
-				var popupheight = h - h/8;
-				var bounds = border.getBounds();
-				switch(i){
-					//top-left (0,0)
-					case 1: //top-right
-						border.x = popupwidth - border_offset;
-						break;
-					case 3: //bottom-left
-						border.y = popupheight - border_offset;
-						break;
-					case 2: //bottom-right
-						border.x = popupwidth - border_offset;
-						border.y = popupheight - border_offset;
-						break;
-				}
-				border.scaleX = border.scaleY = mobile_offset;
-				borders.addChild(border);
-			}
-			borders.x = w/16 + border_offset/2;
-			borders.y = h/16 + border_offset/2;	
+				
 			var bracketimg = preload.getResult("startupBracketImg");
 			var brackets = new createjs.Container();
 			var bracketBitmap = new createjs.Bitmap(bracketimg);
@@ -273,6 +273,7 @@
 		}
 
 		function showCharacterSelect(){
+
 			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
 			charSelectScreen.name = "charSelectScreen";
@@ -306,13 +307,13 @@
 					character_icon.scaleX = character_icon.scaleY = mobile_offset;
 				}
 				else if(i % 2 == 0){
-					character_icon.x = fisticop_icon.x - 150;
-					if(i/2 == 0) character_icon.y = promptText.y + 150;
-					else if (i/2 == 1) character_icon.y = promptText.y + 150*2.1;
+					character_icon.x = fisticop_icon.x - 150*mobile_offset;
+					if(i/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
+					else if (i/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
 				} else {
-					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width + 150;
-					if(i == 1) character_icon.y = promptText.y + 150;
-					else if (i == 3) character_icon.y = promptText.y + 150*2.1;
+					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width + 150*mobile_offset;
+					if(i == 1) character_icon.y = promptText.y + 150*mobile_offset;
+					else if (i == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
 				} 
 				character_icon.x -= character_icon.getBounds().width/2;
 				character_icon.on("click", function(){
@@ -345,18 +346,21 @@
 				});
 			usernameDOMField.style.visibility = "hidden";
 			if(detectmob()){
-				if (hud.requestFullscreen) {
-					hud.requestFullscreen();
-				} else if (hud.webkitRequestFullscreen) {
-					hud.webkitRequestFullscreen();
-				} else if (hud.mozRequestFullScreen) {
-					hud.mozRequestFullScreen();
-				} else if (hud.msRequestFullscreen) {
-					hud.msRequestFullscreen();
+				var doc = window.document;
+  				var docEl = doc.documentElement;
+				var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+				var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+				if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+				  requestFullScreen.call(docEl);
+				}
+				else {
+				  cancelFullScreen.call(doc);
 				}
 			} 
 
 			//setup();
+			stage_state = "CHARSELECT";
 			preload_icon.on("complete", showCharacterSelect);
 			preload_icon.loadManifest(charSelect_manifest);
 			//should be showCharacterSelect();
@@ -379,7 +383,7 @@
 			createjs.Ticker.setFPS(60);
 			createjs.Ticker.addEventListener("tick", tick);
 			createjs.Ticker.addEventListener("tick", stage);
-			canvas.width = hud.width = window.innerWidth;
+			canvas.width = hud.width = window.innerWidth
 			canvas.height = hud.height = window.innerHeight;
 			w = canvas.width;
 			h = canvas.height;
@@ -444,7 +448,7 @@
 			//console.log("resized!");
 			console.log("resize!");
 			console.log(stage_state);
-			if(stage_state == "MAIN") {
+			if(stage_state != "STARTUP") {
 				hud_stage.clear();
 				hud_stage.removeAllEventListeners();
 				stage.removeAllEventListeners();
@@ -457,7 +461,8 @@
 				h = window.innerHeight;
 				if(h <= 500) mobile_offset = 0.5;
 				else mobile_offset = 1;
-				setup();
+				setupStartupBg();
+				//setup();
 			}
 		}
 		function setupTopHud(){
