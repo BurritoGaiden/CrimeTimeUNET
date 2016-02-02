@@ -28,10 +28,11 @@ public class Tileset : MonoBehaviour
         get { return size; }
     }
 
-    void Start()
+    public void InitializeDictionary()
     {
         size = typeToTileMap[0].tile.GetComponent<MeshRenderer>().bounds.size.x;
         foreach (TypeToTileEntry t in typeToTileMap)
-           typeToTile.Add(t.type, t.tile);
+            typeToTile.Add(t.type, t.tile);
     }
+
 }

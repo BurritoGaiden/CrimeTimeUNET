@@ -129,7 +129,7 @@ public class ControllerInputRule : WebServerRule
     {
         mapGenerator = FindObjectOfType<TileGen>();
         if (mapGenerator != null)
-            mapGenerator.generateFromMap(selectedMap);
+            //mapGenerator.generateFromMap(selectedMap);
 
         charSelectManager = FindObjectOfType<CharacterSelectManager>();
     }
@@ -146,8 +146,22 @@ public class ControllerInputRule : WebServerRule
     [Header("Gameplay Objects to Interface")]
     [SerializeField]
     private TileGen mapGenerator;
+    public TileGen MapGenerator
+    {
+        get { return mapGenerator; }
+    }
+
     [SerializeField]
     private Map selectedMap;
+    public Map SelectedMap
+    {
+        get { return selectedMap; }
+    }
+
     [SerializeField]
     private CharacterSelectManager charSelectManager;
+    public CharacterSelectManager CharSelectManager
+    {
+        get { return CharSelectManager; }
+    }
 }

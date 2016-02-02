@@ -110,21 +110,24 @@ public class PlayerRegisterRule : WebServerRule
         }
     }
 
+    // called when a player controller sends the message upward that it has disconnected
     void OnPlayerHasDisconnected(string dcName)
     {
        if(deleteOnDisconnect)
         {
-            if (PlayerRegister[dcName].Character != null)
-                PlayerRegister[dcName].Character.IsChosen = false;
-
+            if(GetComponent<ControllerInputRule>().CharSelectManager != null)
+            {
+                GetComponent<ControllerInputRule>().CharSelectManager.DeselectPlayerCharacter(PlayerRegister[dcName]);
+            }
             Destroy(PlayerRegister[dcName].gameObject);
             PlayerRegister.Remove(dcName);
+            Debug.Log(dcName + " has disconnected during a non-gameplay game state, and was therefore removed from the registry");
         }
     }
 
+    // changes parameter of how this rule functions depending on the game state
     void OnGameStateHasChanged(GameState newState)
     {
-        Debug.Log("Game State has changed!");
         switch (newState) {
             case GameState.CharacterSelect:
                 deleteOnDisconnect = true;
@@ -153,7 +156,7 @@ public class PlayerRegisterRule : WebServerRule
     [Tooltip("How many bytes to write before waiting a frame to continue.")]
     private int writeStaggerCount = 4096;
 
-    [Header("Player Prefabs")]
+    [Header("Player Controller Prefabs")]
     [SerializeField]
     private GameObject controllerPrefab;
 

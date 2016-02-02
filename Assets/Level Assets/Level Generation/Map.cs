@@ -25,4 +25,9 @@ public class Map : MonoBehaviour{
         get { return tileset; }
     }
 
+    public void InitializeMap()
+    {
+        tileset.InitializeDictionary();
+    }
+
 }

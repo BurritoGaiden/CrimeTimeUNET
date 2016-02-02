@@ -61,6 +61,7 @@ public class MapStateRule : WebServerRule
         }
         catch (Exception e)
         {
+            // Put code here to refresh the web page
             Debug.Log(e.Message);
         }
 
