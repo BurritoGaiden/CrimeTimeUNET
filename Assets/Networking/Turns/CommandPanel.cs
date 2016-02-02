@@ -24,12 +24,35 @@ public class CommandPanel : MonoBehaviour {
 
     // the chosen character for this controller. null indicates no character selected yet
     [SerializeField]
-    private GameObject character = null;
-    public GameObject Character
+    private CharacterBehavior character = null;
+    public CharacterBehavior Character
     {
         get { return character; }
-        set { character = value; }
+        set
+        {
+            character = value;
+            team = character.Team;
+        }
     }
+
+    [SerializeField]
+    private CharacterBehavior unit;
+    public CharacterBehavior CurrentUnit
+    {
+        get { return unit; }
+        set
+        {
+            unit = value;
+            Reset();
+        }
+    }
+
+    private Alliance team;
+    public Alliance Team
+    {
+        get { return team; }
+    }
+
 
     private bool moveSelectEnabled;
 		public bool MoveSelectEnabled
@@ -37,20 +60,6 @@ public class CommandPanel : MonoBehaviour {
 		get {return moveSelectEnabled; }
 		set {moveSelectEnabled = value;}
 	}
-
-	[SerializeField]
-	private GameObject unit;
-	private CharacterBehavior unitBehavior;
-	public GameObject SelectedUnit
-	{
-		get {return unit; }
-		set
-        {
-            unit = value;
-			Reset();
-        }
-	}
-	
 
     private List<TileBehavior> queuedPath = new List<TileBehavior>();
 
@@ -98,12 +107,7 @@ public class CommandPanel : MonoBehaviour {
 
 	void Reset()
     {
-        if (unit != null)
-        {
-            unitBehavior = unit.GetComponent<CharacterBehavior>();
-            //		movesLeft.text = (unitBehavior.getMoveStat ()).ToString();
-            queuedPath.Clear();
-        }
+        queuedPath.Clear();
 	}
 
     // TODO: Add functionality!
@@ -174,7 +178,7 @@ public class CommandPanel : MonoBehaviour {
 
 
     // will need to rewrite soon
-	public void TargetAttack(GameObject target){
+	public void TargetAttack(MapActor target){
 		float dx = Mathf.Abs(unit.transform.position.x - target.transform.position.x);
 		float dz = Mathf.Abs(unit.transform.position.z - target.transform.position.z);
 		Debug.Log ("Targeting: " + dx + " + " + dz);
@@ -183,17 +187,17 @@ public class CommandPanel : MonoBehaviour {
 		if ((dx + dz) <= 7.0f && 
 		    Physics.Raycast(unit.transform.position, (distanceBetween).normalized, out hit, distanceBetween.magnitude)) {
 			if(hit.collider.gameObject.Equals(target)){
-				Debug.DrawLine(unit.transform.position,target.transform.position,Color.red);
+				Debug.DrawLine(unit.transform.position, target.transform.position,Color.red);
 				Debug.Log ("HIT!");
 				CommitToAttack(target);
 			}
 			else{
-				CommitToAttack(hit.collider.gameObject);
+				CommitToAttack(hit.collider.gameObject.GetComponent<CharacterBehavior>());
 			}
 		}
 	}
 
-	public void CommitToAttack(GameObject target){
+	public void CommitToAttack(MapActor target){
 		Attack attack = new Attack (unit, target, true);
 		StartCoroutine(Execute (attack));
 	}

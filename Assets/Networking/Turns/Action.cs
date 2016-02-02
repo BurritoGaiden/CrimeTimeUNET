@@ -13,13 +13,13 @@ public class Movement : Action{
 
 	private List<TileBehavior> path;
 	// what object is doing the action
-	private GameObject actor;
+	private MapActor actor;
 	// what object is targeted by the action
 	private GameObject target;
 	// did the action work, or did it fail? 
 	private bool success;
 
-	public Movement(GameObject a, List<TileBehavior> p, bool s){
+	public Movement(MapActor a, List<TileBehavior> p, bool s){
 		actor = a;
 		path = new List<TileBehavior>(p);
 		success = s;
@@ -36,11 +36,8 @@ public class Movement : Action{
 				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (xPos, 0.125f, zPos), t);
 				yield return 0;
 			}
-            // If the moving actor is a character, set its current coordinates to the index of the tile it ends on
-            if (actor.GetComponent<CharacterBehavior>() != null)
-            {
-                actor.GetComponent<CharacterBehavior>().Coord = tb.Coord;
-            }
+                actor.Coord = tb.Coord;
+
             yield return null;
 		}
 	}
@@ -49,13 +46,13 @@ public class Movement : Action{
 public class Attack : Action{
 	
 
-	private GameObject actor;
+	private MapActor actor;
 	// what object is targeted by the action
-	private GameObject target;
+	private MapActor target;
 	// did the action work, or did it fail? 
 	private bool success;
 	
-	public Attack(GameObject a, GameObject t, bool s){
+	public Attack(MapActor a, MapActor t, bool s){
 		actor = a;
 		target = t;
 		success = s;

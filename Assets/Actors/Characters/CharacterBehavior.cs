@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CharacterBehavior : MonoBehaviour {
+public class CharacterBehavior : MapActor {
 	
 	[SerializeField]
 	private string label;
@@ -20,7 +20,7 @@ public class CharacterBehavior : MonoBehaviour {
     }
 
 	[SerializeField]
-	private int hp, moveStat, gunStat, cqcStat;
+	private int hp, moveStat, gunStat, cqcStat = 0;
 
     public int HP
     {
@@ -37,13 +37,6 @@ public class CharacterBehavior : MonoBehaviour {
     public int CQCStat
     {
         get { return cqcStat; }
-    }
-
-    private Coordinate coord;
-    public Coordinate Coord
-    {
-        get { return coord; }
-        set { coord = value; }
     }
 
     private bool finishedMoving = false;

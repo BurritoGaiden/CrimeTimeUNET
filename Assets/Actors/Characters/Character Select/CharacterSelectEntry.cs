@@ -5,10 +5,8 @@ using System.Collections;
 public class CharacterSelectEntry {
 
     // used as the identifier that the web client sends 
-    public string selectionLabel;
-    [SerializeField]
-    private GameObject characterPrefab;
-    public GameObject CharacterPrefab
+    private CharacterBehavior characterPrefab;
+    public CharacterBehavior CharacterPrefab
     {
         get { return characterPrefab; }
     }

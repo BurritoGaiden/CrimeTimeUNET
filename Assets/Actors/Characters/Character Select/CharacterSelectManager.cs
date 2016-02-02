@@ -15,7 +15,7 @@ public class CharacterSelectManager : MonoBehaviour {
         {
             try
             {
-                roster.Add(c.selectionLabel, c);
+                roster.Add(c.CharacterPrefab.Label, c);
             }
             catch (Exception e)
             {

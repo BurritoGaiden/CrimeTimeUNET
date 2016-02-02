@@ -56,7 +56,16 @@ public class MapStateRule : WebServerRule
         try {
             cp = PlayerRegisterRule.PlayerRegister[j["username"]];
             cp.Pulse();
-            dataString = cp.PlayerName + " has a pulse!";
+            Alliance playerTeam = cp.Team;
+            Debug.Log(cp.PlayerName + " has a pulse!");
+
+            MapActor[] actorList = FindObjectsOfType<MapActor>();
+            foreach (MapActor actor in actorList)
+            {
+                Type actorType = actor.GetType();
+                Debug.Log(actorType);
+            }
+
 
         }
         catch (Exception e)
