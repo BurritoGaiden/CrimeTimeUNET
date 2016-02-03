@@ -1,0 +1,86 @@
+{
+	"state": "",
+	"user": {
+		"username": "Bon",
+		"character": {
+			"name": "Sniper",
+			"stats": {
+				"health": 5,
+				"range": 8,
+				"melee": 2,
+				"movespeed": 3
+			},
+			"position": {"x": 0, "y": 0},
+			"items": [],
+		},
+		"connected": true},
+	"players": [
+		{
+			"username": "P2",
+			"character": {
+				"name": "Sniper",
+				"stats": {
+					"health": 5,
+					"range": 8,
+					"melee": 2,
+					"movespeed": 3
+				},
+				"position": {"x": 0, "y": 0},
+				"items": [],
+			},
+			"connected": true
+		},
+		{
+			"username": "Bon",
+			"character": {
+				"name": "Sniper",
+				"stats": {
+					"health": 5,
+					"range": 8,
+					"melee": 2,
+					"movespeed": 3
+				},
+				"position": {"x": 0, "y": 0},
+				"items": [],
+			},
+			"connected": true
+		},
+		{
+			"username": "Bon",
+			"character": {
+				"name": "Sniper",
+				"stats": {
+					"health": 5,
+					"range": 8,
+					"melee": 2,
+					"movespeed": 3
+				},
+				"position": {"x": 0, "y": 0},
+				"items": [],
+			},
+			"connected": true
+		},
+		{
+			"username": "Bon",
+			"character": {
+				"name": "Fisticop",
+				"stats": {
+					"health": 5,
+					"range": 8,
+					"melee": 2,
+					"movespeed": 3
+				},
+				"position": {"x": 0, "y": 0},
+				"items": [],
+				"robots": [
+					{},
+					{},
+				]
+			},
+			"connected": true
+		},],
+	"map": {
+		"items": [],
+		"obstructed_locations": []
+	}
+}

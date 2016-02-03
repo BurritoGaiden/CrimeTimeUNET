@@ -11,45 +11,48 @@ public interface Action {
 
 public class Movement : Action{
 
-	private List<Vector3> path;
+	private List<TileBehavior> path;
 	// what object is doing the action
-	private GameObject actor;
+	private MapActor actor;
 	// what object is targeted by the action
 	private GameObject target;
 	// did the action work, or did it fail? 
 	private bool success;
 
-	public Movement(GameObject a, List<Vector3> p, bool s){
+	public Movement(MapActor a, List<TileBehavior> p, bool s){
 		actor = a;
-		path = new List<Vector3>(p);
+		path = new List<TileBehavior>(p);
 		success = s;
 	}
 	
 	public IEnumerator Execute(){
-		foreach (Vector3 v in path) {
+		foreach (TileBehavior tb in path) {
 			float t = 0.0f;
-			while (t < 1.0f) {
+            float xPos = tb.transform.position.x;
+            float zPos = tb.transform.position.z;
+            actor.transform.LookAt(Vector3.Lerp(actor.transform.position, new Vector3(xPos, 0.125f, zPos), t));
+            while (t < 1.0f) {
 				t += Time.deltaTime / 0.25f; // Sweeps from 0 to 1 in time seconds
-				actor.transform.LookAt(Vector3.Lerp(actor.transform.position, new Vector3 (v.x, 0.125f, v.z), t));
-				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (v.x, 0.125f, v.z), t);
+				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (xPos, 0.125f, zPos), t);
 				yield return 0;
-			} 
-			yield return null;
+			}
+                actor.Coord = tb.Coord;
+
+            yield return null;
 		}
 	}
-
 }
 
 public class Attack : Action{
 	
 
-	private GameObject actor;
+	private MapActor actor;
 	// what object is targeted by the action
-	private GameObject target;
+	private MapActor target;
 	// did the action work, or did it fail? 
 	private bool success;
 	
-	public Attack(GameObject a, GameObject t, bool s){
+	public Attack(MapActor a, MapActor t, bool s){
 		actor = a;
 		target = t;
 		success = s;

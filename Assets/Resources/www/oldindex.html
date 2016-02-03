@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="./Resources/www/css/skeleton.css"/>
+		<link rel="stylesheet" type="text/css" href="./Resources/www/css/normalize.css"/>
+		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+		<style>
+
+			 #page-cover {
+		        opacity: 0;
+		        position: fixed;
+		        width: 100%;
+		        height: 100%;
+		        background-color: black;
+		        top: 0;
+		        left: 0;
+		        z-index: 500;
+		      }
+
+		      #cover-message {
+		        text-align: center;
+		        width: 500px;
+		        z-index: 600;
+		        position: fixed;
+		        border-radius: 5px;
+		        padding: 50px;
+		        margin:-100px 0 0 -150px;
+		        background-color: white;
+		        top: 50%;
+		        left: 43%;
+		      }
+
+			body {
+				height: 100vh;
+				width: 100%;
+				margin: 0px;
+			}
+			table {
+				border: 1px black solid;
+			}
+
+			@font-face{
+				font-family: daypbl;
+				src: url(./Resources/www/fonts/DAYPBL.ttf);
+			}
+
+			@font-face{
+				font-family: cinzel-r;
+				src: url(./Resources/www/fonts/Cinzel-Regular.otf);
+			}
+
+			.hud {
+				width: 100%;
+				position: fixed;
+				height: 100px;
+				margin: 0px;
+				border: 1px white solid;
+				background-color: gray;
+			}
+
+			#mid{
+				width: 100%;
+				height: 100%;
+				/*z-index: -5;*/
+				border: 1px black solid;
+				background-color: black;
+			}
+
+			#mid table {
+				border-collapse: collapse;
+				position: relative;
+				top: 50%;
+				margin-top: -125px;
+			}
+
+			tr {
+				padding: 0;
+				margin: 0;
+			}
+
+			tr:nth-child(odd) > td:nth-child(even){
+				background-color: white;
+			}
+
+			tr:nth-child(odd) > td:nth-child(odd){
+				background-color: gray;
+			}
+
+			tr:nth-child(even) > td:nth-child(even){
+				background-color: gray;
+			}
+
+			tr:nth-child(even) > td:nth-child(odd){
+				background-color: white;
+			}
+			#mid td {
+				height: 50px;
+				width: 50px;
+				border: 1px white solid;
+				padding: 0;
+			}
+
+			#mid td:hover{
+				background-color: green;
+			}
+
+			#bottom {
+				bottom: 0;
+			}
+
+			#move {
+ 				width: 10%;
+     			height: 75%;
+				margin-left: 5%;
+				margin-top: 15px;
+				font-family: "cinzel-r";
+				font-size: 24pt;
+			}
+			#username_button {
+ 				width: 10%;
+     			height: 75%;
+				margin-left: 5%;
+				margin-top: 15px;
+				font-family: "cinzel-r";
+				font-size: 24p	
+			}
+
+		</style>
+	</head>
+	<body>
+		<!-- page-cover dims the background -->
+		<div id="page-cover"></div>
+		<!-- pop-up msg -->
+		<div id="cover-message">
+	      	<h2>Enter a name:</h2>
+	      	<input id="username_input" type="text" name="input"/>
+	      	<button id="submit_username">Enter</button>
+	    </div>
+
+		<div id="top" class="hud">
+			<h1>Player <span id="username"></span></h1>
+		</div>	
+
+		<div id="mid" align="center">
+			<table id="map"></table>
+		</div>
+
+		<div id="bottom" class="hud">
+			<button id="move" type="button">MOVE</button>
+			<!-- <img id="player1" src="./sprites/324.png"/> -->
+			<img id="player1" src="./Resources/www/sprites/158.png"/>
+
+			<!-- Nickname Field -->
+  			<input id="username_input" type="text" name="input">
+  			<button id="username_button" type="button">ENTER</button>
+
+		</div>
+
+	<script src="./Resources/www/js/velocity.js"></script>
+	<script>
+
+		var username = "";
+
+		var rows = 5;
+		var columns = 5;
+		var moveQueue = [];
+		$(document).ready(function(){
+			/*
+			$("#map table").css("top", "50% - " + $("#map table").outerHeight() + "px;");
+			*/
+
+			//Tried to do fancy animation shit but it didn't work ):
+			$("#page-cover").css("opacity", 0.7).fadeIn(1000, function(){
+	          $("#cover-message").css("display", "").slideDown("slow");
+	        });
+
+			//On clicking username button, 
+	        $("#submit_username").click(function(e){
+	        	username = document.getElementById("username_input").value;
+				console.log(username);
+				$("#username").text(username);
+				ws.send(username);
+	        	//after username is sent, exit out of popup.
+	        	//should probably do stuff w/r/t validating username and whatnot too
+	        	$("#cover-message").css("display", "none");
+	        	$("#page-cover").css("display", "none");
+	        	e.preventDefault();
+	        });
+
+			for (var i = 0; i < rows; i++) { $("#map").append("<tr></tr>"); };
+			for (var j = 0; j < columns; j++) { $("#map > tbody > tr").append("<td></td>"); };
+
+			$("#player1").css("left", 0);
+			$("#player1").css("top", 0);
+		
+			$.get("init", function(data, status){
+	        	console.log("GET Data: " + data + "\nStatus: " + status);
+	    	});
+				
+
+			function MapRefresh(){
+				$.get("MapRule", function(data, status){
+	        		console.log("GET Data: " + data + "\nStatus: " + status);
+	        	});
+			}
+
+			var hostIP = window.location.host.split(":")[0];
+			console.log(hostIP);
+			var ws = new WebSocket("ws://"+hostIP+":8081/");
+			ws.onopen = function(){
+				console.log("Connection opened");
+				// ws.send(JSON.stringify({
+				// 	'command':'hello'
+				// }));
+				//ws.send("bye");
+				console.log(ws.bufferedAmount);
+				if(ws.readyState === 1) ws.send("HI");
+				
+				//ws.send("abcdefg");
+			}
+
+			ws.onmessage = function(msg){
+				var reader = new FileReader();
+			    reader.onload = function(){
+			      var arrayBuffer = reader.result;
+
+			      console.log(arrayBuffer);
+			      //console.log(arrayBuffer.);
+			    };
+			    console.log(msg);
+			    reader.readAsText(msg.data);
+			 	//console.log(ab2str(msg.data));
+			    //reader.readAsDataURL(msg.data);
+				//console.log(JSON.stringify('{'+ msg.data));
+			}
+
+			ws.onclose = function(){
+				console.log("Connection closed");
+			}
+
+			ws.onerror = function(error){
+				console.log("Error: " + error);
+			}
+
+			$("td").click(function(e){
+				e.preventDefault();
+
+				$.post("MapRule", 
+					{x: $(this).index(), 
+					 z: ((rows-1) - $(this).closest('tr').index())
+					});
+				console.log("Tile position is: " 
+					+ $(this).index() 
+					+ ", " 
+					+ ((rows-1) - $(this).closest('tr').index()));
+				console.log("Tile pixel position is: " 
+					+ $(this).offset().left 
+					+ ", " 
+					+ $(this).offset().top);
+				moveQueue.push({x: $(this).offset().left + "px", y: $(this).offset().top + "px"});
+			});
+
+			$("#move").click(function(e){
+				//e.preventDefault();
+				for(var i = 0; i < moveQueue.length; i++){
+					$("#player1").velocity({
+						translateX: moveQueue[i].x,
+						translateY: moveQueue[i].y,
+					});
+				}
+				moveQueue = [];
+				console.log("Command sent: Moving!");
+				$.post("init", "commitMove");
+			});
+
+
+			$("#username_button").click(function(e){
+				//e.preventDefault();
+				username = document.getElementById("username_input").value;
+				console.log(username);
+				ws.send(username);
+			});
+
+		});
+	</script>
+
+	</body>
+</html>

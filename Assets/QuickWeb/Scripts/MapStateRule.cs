@@ -52,6 +52,27 @@ public class MapStateRule : WebServerRule
         string s = reader.ReadToEnd();
 
         JSONWrapper j = new JSONWrapper(s);
+        CommandPanel cp;
+        try {
+            cp = PlayerRegisterRule.PlayerRegister[j["username"]];
+            cp.Pulse();
+            Alliance playerTeam = cp.Team;
+            Debug.Log(cp.PlayerName + " has a pulse!");
+
+            MapActor[] actorList = FindObjectsOfType<MapActor>();
+            foreach (MapActor actor in actorList)
+            {
+                Type actorType = actor.GetType();
+                Debug.Log(actorType);
+            }
+
+
+        }
+        catch (Exception e)
+        {
+            // Put code here to refresh the web page
+            Debug.Log(e.Message);
+        }
 
         byte[] data = Encoding.ASCII.GetBytes(dataString);
 

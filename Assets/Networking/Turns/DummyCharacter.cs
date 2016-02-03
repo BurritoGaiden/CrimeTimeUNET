@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DummyCharacter : MonoBehaviour {
+public class DummyCharacter : MapActor {
 
 	// Use this for initialization
 	void Start () {
@@ -14,6 +14,6 @@ public class DummyCharacter : MonoBehaviour {
 	}
 
 	void OnMouseDown(){
-		FindObjectOfType<CommandPanel> ().targetAttack (this.gameObject);
+		FindObjectOfType<CommandPanel> ().TargetAttack (this);
 	}
 }

@@ -79,12 +79,13 @@ public class HtmlRule : WebServerRule
 #endif
 
     [SerializeField]
-    private TextAsset htmlPage;
-
-    [SerializeField]
     private HtmlKeyValue[] substitutions;
 
     [SerializeField]
     [Tooltip("How many bytes to write before waiting a frame to continue.")]
     private uint writeStaggerCount = 4096;
+
+    [Header("HTML Pages")]
+    [SerializeField]
+    private TextAsset htmlPage;
 }
