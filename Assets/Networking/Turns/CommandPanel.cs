@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class CommandPanel : MonoBehaviour {
+public class CommandPanel : MonoBehaviour, IJSONable {
 
     private string playerName;
     public string PlayerName
@@ -84,6 +84,15 @@ public class CommandPanel : MonoBehaviour {
         Debug.Log(PlayerName + " has a pulse!");
     }
 
+    public IJSON ToJSON()
+    {
+        PlayerJSON json = new PlayerJSON();
+        json.username = playerName;
+        json.connected = IsConnected;
+
+        return json;
+    }
+
     void TickDown()
     {
         if (timerCurrent >= 0)
@@ -136,7 +145,7 @@ public class CommandPanel : MonoBehaviour {
                 }
                 int currentPos = queuedPath.Count;
                 // checks the distance between the selected tile indexes (moves are only valid if this number is one)
-                Coordinate distance = queuedPath[currentPos - 1].Coord - tile.Coord;
+                Coordinate distance = queuedPath[currentPos - 1].Coords - tile.Coords;
                 int dx = Mathf.Abs(distance.X);
                 int dz = Mathf.Abs(distance.Z);
                 //if you click on an already-existant tile, remove everything past there
@@ -146,7 +155,7 @@ public class CommandPanel : MonoBehaviour {
                     Debug.Log("Duplicate tile found at " + index + "/" + currentPos);
                     for (int i = queuedPath.Count - 1; i > index; i--)
                     {
-                        Debug.Log("Removing index " + i + ":" + queuedPath[i].Coord.ToString());
+                        Debug.Log("Removing index " + i + ":" + queuedPath[i].Coords.ToString());
                         queuedPath.RemoveAt(i);
                     }
                 }
@@ -159,7 +168,7 @@ public class CommandPanel : MonoBehaviour {
 
                 foreach (TileBehavior tb in queuedPath)
                 {
-                    Debug.Log("Next Step: " + tb.Coord.ToString());
+                    Debug.Log("Next Step: " + tb.Coords.ToString());
                 }
 
                 UpdateMovesLeft();

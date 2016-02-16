@@ -134,7 +134,7 @@ public class PlayerRegisterRule : WebServerRule
                 SceneManager.LoadScene(2);
                 break;
 
-            case GameState.Heist:
+            case GameState.GameBegin:
                 deleteOnDisconnect = false;
                 foreach (CommandPanel cp in PlayerRegister.Values)
                 {

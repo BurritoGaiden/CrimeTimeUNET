@@ -16,4 +16,11 @@ public class DummyCharacter : MapActor {
 	void OnMouseDown(){
 		FindObjectOfType<CommandPanel> ().TargetAttack (this);
 	}
+
+    public override IJSON ToJSON()
+    {
+        ActorJSON json = new ActorJSON();
+        json.coords = Coords;
+        return json;
+    }
 }

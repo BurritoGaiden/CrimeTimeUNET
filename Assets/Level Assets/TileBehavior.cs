@@ -4,25 +4,12 @@ using System.Collections;
 public class TileBehavior : MonoBehaviour {
 
     private Coordinate coord;
-    public Coordinate Coord
+    public Coordinate Coords
     {
         get { return coord; }
         set { coord = value; }
     }
 
-    /*
-	private int x, z;
-	public int X
-	{
-		get {return x; }
-		set {x  = value;}
-	}
-	public int Z
-	{
-		get {return z; }
-		set {z  = value;}
-	}
-    */
     private TileType tt;
     public TileType TileType
     {
@@ -61,7 +48,6 @@ public class TileBehavior : MonoBehaviour {
 
 
 	void OnMouseDown(){
-		//Debug.Log ("This tile is: " + x + "," + z);
-		FindObjectOfType<CommandPanel> ().PathSelection (this);
+		//Debug.Log ("This tile is: " + x + "," + z)
 	}
 }

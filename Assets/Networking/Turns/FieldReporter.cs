@@ -13,7 +13,7 @@ public class FieldReporter : MonoBehaviour {
 	private int turnNumber = 0;
 	private int turnMax;
 	[SerializeField]
-	private Text turnDisplay; 
+	private Text[] turnDisplay; 
 	[SerializeField]
 	private Text scaleDisplay; 
 	[SerializeField]
@@ -21,8 +21,15 @@ public class FieldReporter : MonoBehaviour {
 	[SerializeField]
 	private Button pauseButton;  
 	private bool pauseToggle = true;
-	// Use this for initialization
-	void Start () {
+    [SerializeField]
+    private RectTransform intertitle;
+
+    private bool thievesTurn = true;
+    [SerializeField]
+    private Text teamDisplay;
+
+    // Use this for initialization
+    void Start () {
 		incrementTurn ();
 		pauseButton.interactable = false;
 		scaleDisplay.text = Time.timeScale.ToString("0.00") + "x";
@@ -35,13 +42,13 @@ public class FieldReporter : MonoBehaviour {
 
 	public void incrementTurn(){
 		Record.Add (new List<Action> ());
-		turnNumber = Record.Count;
+        turnNumber = Record.Count;
 		updateTurnDisplay(turnNumber);
 	}
 
 	void updateTurnDisplay(int turn){
-		turnDisplay.text = "Turn:" + turn;
-	}
+        StartCoroutine(Transition(turn, 1f));
+    }
 
 	public void addActionToTurn(Action a){
 		Record [turnNumber-1].Add (a);
@@ -90,4 +97,57 @@ public class FieldReporter : MonoBehaviour {
 		incrementTurn ();
 	}
 
+    // Tear out the lerp subroutine and make that a single external thing instead of repeating code
+    public IEnumerator Transition(int turn, float seconds)
+    {
+        if (thievesTurn)
+            teamDisplay.text = "The Gang's\nTurn";
+        else
+            teamDisplay.text = "The Cop's\nTurn";
+
+        intertitle.gameObject.SetActive(false);
+        CanvasGroup cr = intertitle.GetComponentInParent<CanvasGroup>();
+
+        yield return StartCoroutine(AlphaLerp(cr, 0.0f, 1.0f, 0.75f * seconds));
+
+        foreach (Text t in turnDisplay)
+            t.text = "Turn: " + turn;
+
+        intertitle.position = new Vector3(-Screen.width, Screen.height / 2.0f, 0);
+        intertitle.gameObject.SetActive(true);
+
+        yield return StartCoroutine(EaseLerp(intertitle, new Vector3(Screen.width / 2.0f, -Screen.height, 0), new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), seconds));
+        yield return new WaitForSeconds(1.25f*seconds);
+        yield return StartCoroutine(EaseLerp(intertitle, new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), new Vector3(Screen.width / 2.0f, 2* Screen.height, 0), seconds));
+
+        intertitle.gameObject.SetActive(false);
+
+        yield return StartCoroutine(AlphaLerp(cr, 1.0f, 0.0f, 0.75f * seconds));
+
+        thievesTurn = !thievesTurn;
+    }
+
+    // Helper Coroutines
+
+    IEnumerator EaseLerp(RectTransform rect, Vector3 startpos, Vector3 endpos, float seconds)
+    {
+        float t = 0.0f;
+        while (t <= 1.0)
+        {
+            t += Time.deltaTime / seconds;
+            rect.position = Vector3.Lerp(startpos, endpos, Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, t)))));
+            yield return null;
+        }
+    }
+
+    IEnumerator AlphaLerp(CanvasGroup cr, float from, float to, float seconds)
+    {
+        float t = 0.0f;
+        while (t <= 1.0)
+        {
+            t += Time.deltaTime / seconds;
+            cr.alpha = Mathf.Lerp(from, to, Mathf.SmoothStep(0.0f, 1.0f, t));
+            yield return null;
+        }
+    }
 }

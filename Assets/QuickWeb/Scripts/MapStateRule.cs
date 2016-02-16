@@ -97,7 +97,22 @@ public class MapStateRule : WebServerRule
         }
     }
 
+    void OnGameStateHasChanged(GameState newState)
+    {
+        currentState = newState;
+    }
+
+    private string ConstructHeartbeat(string username)
+    {
+        string heartbeatJSON = "";
+
+        return heartbeatJSON;
+    }
+
+
 #endif
+
+    private GameState currentState;
 
     private List<String> queuedPosts = new List<String>();
 

@@ -6,6 +6,8 @@ public enum GameState
     MainMenu,
     CharacterSelect,
     Planning,
-    Heist,
+    GameBegin,
+    CopsTurn,
+    GangTurn,
     PostGame,
 }
