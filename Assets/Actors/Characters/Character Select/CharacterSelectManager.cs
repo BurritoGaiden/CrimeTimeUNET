@@ -11,6 +11,10 @@ public class CharacterSelectManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        Intertitle.Instance.QRMode();
+        Intertitle.Instance.Title.text = "HeistNight!";
+        StartCoroutine(StartMenu(1.25f));
+
         foreach (CharacterSelectEntry c in characterList)
         {
             try
@@ -24,6 +28,7 @@ public class CharacterSelectManager : MonoBehaviour {
         }
     }
 	
+
 	// Update is called once per frame
 	void Update () {
 	
@@ -97,4 +102,17 @@ public class CharacterSelectManager : MonoBehaviour {
             }
         }
     }
+
+    public IEnumerator StartMenu(float seconds)
+    {
+        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.AlphaLerp(0.0f, 1.0f, 0.75f * seconds));
+        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(seconds));
+    }
+
+    public IEnumerator ClearMenu(float seconds)
+    {
+        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(seconds));
+        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.AlphaLerp(1.0f, 0.0f, 0.75f * seconds));
+    }
+
 }

@@ -16,6 +16,8 @@ public abstract class WebServerRule : MonoBehaviour
 
     void Start()
     {
+
+
         foreach(string pattern in urlRegexList)
         {
             regexList.Add(new Regex(pattern));
@@ -53,8 +55,6 @@ public abstract class WebServerRule : MonoBehaviour
 
         isMatch(true);
     }
-
-
 
     protected abstract IEnumerator OnRequest(HttpListenerContext context);
 #endif

@@ -10,6 +10,8 @@ public class JSONTester : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+        /*
+
         List<PlayerJSON> pj = new List<PlayerJSON>();
         foreach (CommandPanel cp in PlayerRegisterRule.PlayerRegister.Values)
         {
@@ -27,5 +29,7 @@ public class JSONTester : MonoBehaviour {
         h.characters = cj.ToArray();
 
         Debug.Log(JsonUtility.ToJson(h));
+
+        */
     }
 }

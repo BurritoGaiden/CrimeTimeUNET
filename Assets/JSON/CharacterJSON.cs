@@ -31,7 +31,7 @@ public class ActorJSON : IJSON
 public class CharacterJSON : ActorJSON
 {
     public string name;
-    public string owner;
+    public string username;
     public Alliance team;
     public Stats stats;
 

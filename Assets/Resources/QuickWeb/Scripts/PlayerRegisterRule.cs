@@ -63,7 +63,7 @@ public class PlayerRegisterRule : WebServerRule
 
             if (!firstPlayerJoined)
             {
-                GetComponentInParent<GameStateManager>().GameState = GameState.CharacterSelect;
+               GameStateManager.Instance.GameState = GameState.GameBegin;
             }
             //accept the request to join and create a controller instance 
             GameObject newController = Instantiate<GameObject>(controllerPrefab);
@@ -136,6 +136,8 @@ public class PlayerRegisterRule : WebServerRule
 
             case GameState.GameBegin:
                 deleteOnDisconnect = false;
+                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(1.25f));
+                SceneManager.LoadScene(2);
                 foreach (CommandPanel cp in PlayerRegister.Values)
                 {
                     cp.SpawnPlayerCharacter();

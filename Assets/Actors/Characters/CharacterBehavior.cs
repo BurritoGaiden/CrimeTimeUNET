@@ -54,7 +54,7 @@ public class CharacterBehavior : MapActor {
     {
         CharacterJSON json = new CharacterJSON();
         json.coords = Coords;
-        json.owner = owner;
+        json.username = owner;
         json.team = team;
         json.name = label;
         json.stats = stats;

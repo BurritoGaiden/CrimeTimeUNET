@@ -45,7 +45,7 @@ public class MapStateRule : WebServerRule
 
     protected override IEnumerator OnRequest(HttpListenerContext context)
     {
-        string dataString = "Ping";
+        string dataString = "";
 
         HttpListenerRequest request = context.Request;
         StreamReader reader = new StreamReader(request.InputStream);
@@ -54,18 +54,32 @@ public class MapStateRule : WebServerRule
         JSONWrapper j = new JSONWrapper(s);
         CommandPanel cp;
         try {
+
             cp = PlayerRegisterRule.PlayerRegister[j["username"]];
             cp.Pulse();
             Alliance playerTeam = cp.Team;
             Debug.Log(cp.PlayerName + " has a pulse!");
 
-            MapActor[] actorList = FindObjectsOfType<MapActor>();
-            foreach (MapActor actor in actorList)
+            // List of other players
+            List<PlayerJSON> pj = new List<PlayerJSON>();
+            foreach (CommandPanel c in PlayerRegisterRule.PlayerRegister.Values)
             {
-                Type actorType = actor.GetType();
-                Debug.Log(actorType);
+                pj.Add((PlayerJSON)c.ToJSON());
             }
 
+            // List of characters
+            List<CharacterJSON> cj = new List<CharacterJSON>();
+            foreach (CharacterBehavior c in FindObjectsOfType<CharacterBehavior>())
+            {
+                // add conditional "if same team || isVisible"
+                cj.Add((CharacterJSON)c.ToJSON());
+            }
+            Heartbeat h = new Heartbeat();
+            h.state = GameStateManager.Instance.GameState;
+            h.players = pj.ToArray();
+            h.characters = cj.ToArray();
+
+            dataString = JsonUtility.ToJson(h);
 
         }
         catch (Exception e)
@@ -74,6 +88,7 @@ public class MapStateRule : WebServerRule
             Debug.Log(e.Message);
         }
 
+        Debug.Log(dataString);
         byte[] data = Encoding.ASCII.GetBytes(dataString);
 
         yield return null;
@@ -97,24 +112,7 @@ public class MapStateRule : WebServerRule
         }
     }
 
-    void OnGameStateHasChanged(GameState newState)
-    {
-        currentState = newState;
-    }
-
-    private string ConstructHeartbeat(string username)
-    {
-        string heartbeatJSON = "";
-
-        return heartbeatJSON;
-    }
-
-
 #endif
-
-    private GameState currentState;
-
-    private List<String> queuedPosts = new List<String>();
 
     [SerializeField]
     private HtmlKeyValue[] substitutions;

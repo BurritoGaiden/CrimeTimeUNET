@@ -68,7 +68,7 @@ public class ControllerInputRule : WebServerRule
             {
                 // for use during charcter select
                 case "ChooseCharacter":
-                    if(GetComponentInParent<GameStateManager>().GameState == GameState.CharacterSelect)
+                    if(GameStateManager.Instance.GameState == GameState.CharacterSelect)
                     {
                         string charSelected = "";
                         try
@@ -125,6 +125,7 @@ public class ControllerInputRule : WebServerRule
         yield return null;
     }
 
+    // auto-hook to gameplay managers when they show up
     void OnLevelWasLoaded(int level)
     {
         mapGenerator = FindObjectOfType<TileGen>();
@@ -132,6 +133,7 @@ public class ControllerInputRule : WebServerRule
             //mapGenerator.generateFromMap(selectedMap);
 
         charSelectManager = FindObjectOfType<CharacterSelectManager>();
+        reporter = FindObjectOfType<FieldReporter>();
     }
 
 #endif
@@ -162,6 +164,13 @@ public class ControllerInputRule : WebServerRule
     private CharacterSelectManager charSelectManager;
     public CharacterSelectManager CharSelectManager
     {
-        get { return CharSelectManager; }
+        get { return charSelectManager; }
+    }
+
+    [SerializeField]
+    private FieldReporter reporter;
+    public FieldReporter Reporter
+    {
+        get { return reporter; }
     }
 }
