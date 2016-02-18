@@ -27,11 +27,13 @@ public class GameStateManager : Singleton<GameStateManager>
         }
     }
     // Use this for initialization
-    void Start()
+    void Awake()
     {
+        /*
         webServer = (GameObject)Resources.Load("QuickWeb/WebPlayerServer");
         GameObject ws = GameObject.Instantiate(webServer);
         ws.transform.parent = this.gameObject.transform;
+        */
     }
 
     // Update is called once per frame

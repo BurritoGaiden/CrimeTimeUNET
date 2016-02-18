@@ -71,7 +71,7 @@ public class CharacterSelectManager : MonoBehaviour {
         if (roster.ContainsKey(characterName))
         {
             CharacterSelectEntry desiredCharacter = roster[characterName];
-            if (desiredCharacter.Owner.Equals(playerCP))                            // If player selects the character they already had again, deselect it instead
+            if (desiredCharacter.Owner != null && desiredCharacter.Owner.Equals(playerCP))                            // If player selects the character they already had again, deselect it instead
             {
                 DeselectPlayerCharacter(playerCP);
             }

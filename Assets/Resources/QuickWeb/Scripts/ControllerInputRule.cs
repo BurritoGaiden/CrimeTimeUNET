@@ -63,6 +63,7 @@ public class ControllerInputRule : WebServerRule
             }   
         if (PlayerRegisterRule.PlayerRegister.ContainsKey(user))
         {
+            Debug.Log(user + " found, entering command switch");
             CommandPanel cp = PlayerRegisterRule.PlayerRegister[user];
             switch (givenCommand)
             {
@@ -74,6 +75,7 @@ public class ControllerInputRule : WebServerRule
                         try
                         {
                             charSelected = j["character"];
+                            Debug.Log(charSelected);
                         } catch(Exception e)
                         {
                             Debug.Log(e.Message);
@@ -82,14 +84,9 @@ public class ControllerInputRule : WebServerRule
                         // if the character was able to be assigned
                         if(charSelected != "" && charSelectManager != null)
                         {
-                            try
-                            {
-                                //TODO: Make and implement the character selector
+                           
                                charSelectManager.SelectCharForPlayer(charSelected, cp);
-                            } catch(Exception e)
-                            {
-                                Debug.Log(e.Message);
-                            }
+                            
                         }
                     }
                     break;
@@ -130,7 +127,9 @@ public class ControllerInputRule : WebServerRule
     {
         mapGenerator = FindObjectOfType<TileGen>();
         if (mapGenerator != null)
+        {
             //mapGenerator.generateFromMap(selectedMap);
+        }
 
         charSelectManager = FindObjectOfType<CharacterSelectManager>();
         reporter = FindObjectOfType<FieldReporter>();

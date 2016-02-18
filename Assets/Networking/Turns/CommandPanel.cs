@@ -31,7 +31,8 @@ public class CommandPanel : MonoBehaviour, IJSONable {
         set
         {
             character = value;
-            team = character.Team;
+            if(character!= null)
+                team = character.Team;
         }
     }
 
