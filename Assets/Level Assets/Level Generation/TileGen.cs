@@ -91,7 +91,10 @@ public class TileGen : MonoBehaviour {
                 if (position % 2 == 0 && t == TileType.FloorIndoor)
                     tileArray[i, j].GetComponent<MeshRenderer>().material.color = Color.grey;
             }
-
+        foreach(CommandPanel cp in PlayerRegisterRule.PlayerRegister.Values)
+        {
+            cp.SpawnPlayerCharacter();
+        }
     }
 
 }
