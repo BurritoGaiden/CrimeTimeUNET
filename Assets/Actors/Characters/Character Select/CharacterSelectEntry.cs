@@ -5,6 +5,7 @@ using System.Collections;
 public class CharacterSelectEntry {
 
     // used as the identifier that the web client sends 
+    [SerializeField]
     private CharacterBehavior characterPrefab;
     public CharacterBehavior CharacterPrefab
     {
