@@ -80,6 +80,9 @@
 				},
 			}
 		}
+		//Referenced strings
+		var character_conversion = ["BigBoy", "Graves", "Lulu", "Regards", "Fisticop"];
+		//
 		var preload = new createjs.LoadQueue(true, "./Resources/www/");
 		var startup_manifest = [
 			{src: "sprites/titleborder.png", id: "startupBorderImg", type: "image"},
@@ -94,7 +97,7 @@
 			{src: "characterSelectIcon4.png", id: "characterSelectIcon4", type: "image"},
 		]
 
-
+		var borders;
 		//Function to call heartbeat
 
 		window.addEventListener('resize', resize, false);
@@ -174,7 +177,7 @@
 			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
 			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/16, h/16, w - w/8, h - h/8, 5);
 			var borderimg = preload.getResult("startupBorderImg");
-			var borders = new createjs.Container();
+			borders = new createjs.Container();
 			var borderBitmap = new createjs.Bitmap(borderimg);
 			var border_offset = 20;
 			for(i = 1; i <= 4; i++){
@@ -273,7 +276,6 @@
 		}
 
 		function showCharacterSelect(){
-
 			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
 			charSelectScreen.name = "charSelectScreen";
@@ -281,11 +283,11 @@
 			promptText.x = w/2 - promptText.getBounds().width/2;
 			promptText.y = h/5;
 			var characters = new createjs.Container();
-			for(i = 4; i >= 0; i--){
+			for(character = 4; character >= 0; character--){
 				var character_icon = new createjs.Container();
 				var character_icon_bg = new createjs.Shape();
 				character_icon_bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
-				var character_icon_img = preload_icon.getResult("characterSelectIcon" + i);
+				var character_icon_img = preload_icon.getResult("characterSelectIcon" + character);
 				var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
 				character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
 				character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
@@ -298,7 +300,7 @@
 				//add event listener here that if someone has already selected this character, disable it/grey it out
 				character_icon.scaleX = character_icon.scaleY = mobile_offset - 0.15;
 				var fisticop_icon;
-				if(i == 4) {
+				if(character == 4) {
 					fisticop_icon = character_icon;
 					var bounds = character_icon.getBounds();
 					console.log(character_icon.getBounds());
@@ -306,19 +308,29 @@
 					character_icon.y = h/2;
 					character_icon.scaleX = character_icon.scaleY = mobile_offset;
 				}
-				else if(i % 2 == 0){
+				else if(character % 2 == 0){
 					character_icon.x = fisticop_icon.x - 150*mobile_offset;
-					if(i/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (i/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+					if(character/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
+					else if (character/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
 				} else {
 					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width + 150*mobile_offset;
-					if(i == 1) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (i == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+					if(character == 1) character_icon.y = promptText.y + 150*mobile_offset;
+					else if (character == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
 				} 
 				character_icon.x -= character_icon.getBounds().width/2;
+				character_icon.name = character;
 				character_icon.on("click", function(){
 					//sent POST request to select
-					console.log("SELECTED CHARACTER");
+					console.log("SELECTED CHARACTER " + this.name);
+					$.post("ControlInput", 
+					{
+						username: player.username,
+						command: "ChooseCharacter",
+						character: character_conversion[this.name],
+					},
+						function(data, status){
+							console.log("Success! Data: " + data);
+					})
 				})
 				characters.addChild(character_icon);
 			}
