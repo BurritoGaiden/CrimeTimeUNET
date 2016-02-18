@@ -63,7 +63,7 @@ public class PlayerRegisterRule : WebServerRule
 
             if (!firstPlayerJoined)
             {
-               GameStateManager.Instance.GameState = GameState.GameBegin;
+               GameStateManager.Instance.GameState = GameState.CharacterSelect;
             }
             //accept the request to join and create a controller instance 
             GameObject newController = Instantiate<GameObject>(controllerPrefab);
@@ -131,7 +131,7 @@ public class PlayerRegisterRule : WebServerRule
         switch (newState) {
             case GameState.CharacterSelect:
                 deleteOnDisconnect = true;
-                SceneManager.LoadScene(2);
+                SceneManager.LoadScene(1);
                 break;
 
             case GameState.GameBegin:
