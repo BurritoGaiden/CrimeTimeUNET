@@ -12,11 +12,18 @@ public class CharacterSelectEntry {
         get { return characterPrefab; }
     }
     [SerializeField]
+    private Light spotlight;
+    [SerializeField]
     private CommandPanel owner;
     public CommandPanel Owner
     {
         get { return owner; }
-        set { owner = value; }
+        set
+        {
+            owner = value;
+            spotlight.enabled = (owner != null);
+
+        }
     }
     //public bool isPicked = false;
   

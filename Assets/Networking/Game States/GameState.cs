@@ -3,6 +3,7 @@ using System.Collections;
 
 public enum GameState
 {
+    Launcher,
     MainMenu,
     CharacterSelect,
     Planning,

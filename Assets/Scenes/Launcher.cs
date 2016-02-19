@@ -7,6 +7,5 @@ public class Launcher : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         GameStateManager.Instance.GameState = GameState.MainMenu;
-        SceneManager.LoadScene(1);
     }
 }

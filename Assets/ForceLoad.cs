@@ -16,6 +16,6 @@ public class ForceLoad : MonoBehaviour {
 
     public void ForceReady()
     {
-        SceneManager.LoadScene(2);
+        GameStateManager.Instance.GameState = GameState.GameBegin;
     }
 }

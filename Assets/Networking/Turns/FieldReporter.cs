@@ -14,7 +14,7 @@ public class FieldReporter : MonoBehaviour
     private int turnNumber = 0;
     private int turnMax;
     [SerializeField]
-    private Text[] turnDisplay;
+    private Text turnDisplay;
     [SerializeField]
     private Text scaleDisplay;
     [SerializeField]
@@ -31,6 +31,11 @@ public class FieldReporter : MonoBehaviour
         incrementTurn();
         pauseButton.interactable = false;
         scaleDisplay.text = Time.timeScale.ToString("0.00") + "x";
+
+        foreach (CommandPanel cp in PlayerRegisterRule.PlayerRegister.Values)
+        {
+            cp.SpawnPlayerCharacter();
+        }
     }
 
     // Update is called once per frame
@@ -125,8 +130,7 @@ public class FieldReporter : MonoBehaviour
             Intertitle.Instance.Subtitle.text = "The Cop's\nTurn";
         }
 
-        foreach (Text t in turnDisplay)
-            t.text = "Turn: " + turn;
+            turnDisplay.text = "Turn: " + turn;
 
         yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(seconds));
         yield return new WaitForSeconds(1.25f * seconds);

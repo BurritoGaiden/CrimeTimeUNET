@@ -131,17 +131,10 @@ public class PlayerRegisterRule : WebServerRule
         switch (newState) {
             case GameState.CharacterSelect:
                 deleteOnDisconnect = true;
-                SceneManager.LoadScene(1);
                 break;
 
             case GameState.GameBegin:
                 deleteOnDisconnect = false;
-                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(1.25f));
-                SceneManager.LoadScene(2);
-                foreach (CommandPanel cp in PlayerRegister.Values)
-                {
-                    cp.SpawnPlayerCharacter();
-                }
                 break;
 
             default:

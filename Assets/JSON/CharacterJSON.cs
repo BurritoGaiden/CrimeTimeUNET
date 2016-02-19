@@ -13,6 +13,15 @@ public interface IJSON
 }
 
 [Serializable]
+public class MapJSON : IJSON
+{
+
+    public int width;
+    public int height;
+
+}
+
+[Serializable]
 public class PlayerJSON: IJSON
 {
     public string username;

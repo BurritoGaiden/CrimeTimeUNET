@@ -47,6 +47,7 @@ public class ControllerInputRule : WebServerRule
         HttpListenerRequest request = context.Request;
         StreamReader reader = new StreamReader(request.InputStream);
         string command = reader.ReadToEnd();
+        string dataString = "";
 
         JSONWrapper j = new JSONWrapper(command);
         string givenCommand = "";
@@ -67,6 +68,14 @@ public class ControllerInputRule : WebServerRule
             CommandPanel cp = PlayerRegisterRule.PlayerRegister[user];
             switch (givenCommand)
             {
+                // for getting the size (and more if needed) of the map, to generate a grid at runtime
+                case "GetMapData":
+                    if (selectedMap != null)
+                    {
+                        dataString = JsonUtility.ToJson(selectedMap.ToJSON());
+                    }
+                    break;
+
                 // for use during charcter select
                 case "ChooseCharacter":
                     if(GameStateManager.Instance.GameState == GameState.CharacterSelect)
@@ -119,7 +128,27 @@ public class ControllerInputRule : WebServerRule
             }
         }
 
+        byte[] data = Encoding.ASCII.GetBytes(dataString);
+
         yield return null;
+
+        HttpListenerResponse response = context.Response;
+
+        response.ContentType = "text/plain";
+
+        Stream responseStream = response.OutputStream;
+
+        int count = data.Length;
+        int i = 0;
+        while (i < count)
+        {
+            if (i != 0)
+                yield return null;
+
+            int writeLength = Math.Min((int)writeStaggerCount, count - i);
+            responseStream.Write(data, i, writeLength);
+            i += writeLength;
+        }
     }
 
     // auto-hook to gameplay managers when they show up

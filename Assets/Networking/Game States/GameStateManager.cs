@@ -10,7 +10,7 @@ public class GameStateManager : Singleton<GameStateManager>
     private GameObject webServer;
 
     [SerializeField]
-    private GameState state = GameState.MainMenu;
+    private GameState state = GameState.Launcher;
     public GameState GameState
     {
         get { return state; }
@@ -44,7 +44,21 @@ public class GameStateManager : Singleton<GameStateManager>
 
     public void OnGameStateHasChanged(GameState newState)
     {
-        
+        switch (newState)
+        {
+            case GameState.MainMenu:
+                Intertitle.Instance.QRMode();
+                Intertitle.Instance.Title.text = "HeistNight!";
+                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(1.25f));
+                break;
+            case GameState.CharacterSelect:
+                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(1.25f));
+                SceneManager.LoadScene(1);
+                break;
+            case GameState.GameBegin:
+                SceneManager.LoadScene(2);
+                break;
+        }
     }
 }
 

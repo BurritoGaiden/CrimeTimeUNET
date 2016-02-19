@@ -54,9 +54,6 @@ public class Intertitle : Singleton<Intertitle> {
 
     public IEnumerator EaseLerp(Vector3 startpos, Vector3 endpos, float seconds)
     {
-        while (inUse)
-            yield return new WaitForEndOfFrame();
-        inUse = true;
         card.position = startpos;
         card.gameObject.SetActive(true);
         float t = 0.0f;
@@ -67,26 +64,37 @@ public class Intertitle : Singleton<Intertitle> {
             yield return null;
         }
         card.position = endpos;
-        inUse = false;
     }
 
     public IEnumerator FromBottomToCenter(float seconds)
     {
-        yield return StartCoroutine(AlphaLerp(0.0f, 1.0f, 0.75f * seconds));
-        yield return StartCoroutine(EaseLerp(new Vector3(Screen.width / 2.0f, -Screen.height, 0), new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), seconds));
+        if(inUse == false)
+        {
+            inUse = true;
+            yield return StartCoroutine(AlphaLerp(0.0f, 1.0f, 0.75f * seconds));
+            yield return StartCoroutine(EaseLerp(new Vector3(Screen.width / 2.0f, -Screen.height, 0), new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), seconds));
+            inUse = false;
+        }
+        yield return null;
+       
     }
     public IEnumerator FromCenterToTop(float seconds)
     {
-        yield return StartCoroutine(EaseLerp(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), new Vector3(Screen.width / 2.0f, 2 * Screen.height, 0), seconds));
-        yield return StartCoroutine(AlphaLerp(1.0f, 0.0f, 0.75f * seconds));
+
+        if (inUse == false)
+        {
+            inUse = true;
+            yield return StartCoroutine(EaseLerp(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), new Vector3(Screen.width / 2.0f, 2 * Screen.height, 0), seconds));
+            yield return StartCoroutine(AlphaLerp(1.0f, 0.0f, 0.75f * seconds));
+            inUse = false;
+        }
+        yield return null;
+
 
     }
 
     public IEnumerator AlphaLerp(float from, float to, float seconds)
     {
-        while (inUse)
-            yield return new WaitForEndOfFrame();
-        inUse = true;
         cr.alpha = from;
         float t = 0.0f;
         while (t <= 1.0)
@@ -96,6 +104,5 @@ public class Intertitle : Singleton<Intertitle> {
             yield return null;
         }
         cr.alpha = to;
-        inUse = false;
     }
 }

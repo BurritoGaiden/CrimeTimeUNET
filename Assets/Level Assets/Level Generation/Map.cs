@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 [System.Serializable]
-public class Map : MonoBehaviour{
+public class Map : MonoBehaviour, IJSONable{
 
     [SerializeField]
     private string mapName;
@@ -30,4 +31,12 @@ public class Map : MonoBehaviour{
         tileset.InitializeDictionary();
     }
 
+    public IJSON ToJSON()
+    {
+        MapJSON json = new MapJSON();
+        json.width = layout.width;
+        json.height = layout.height;
+
+        return json;
+    }
 }

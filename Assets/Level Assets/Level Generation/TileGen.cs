@@ -66,7 +66,11 @@ public class TileGen : MonoBehaviour {
     */
     public void generateFromMap(Map map)
     {
+
         map.InitializeMap();
+
+        Debug.Log(JsonUtility.ToJson(map.ToJSON()));
+
         fieldSizeX = map.Layout.width;
         fieldSizeZ = map.Layout.height;
         tileArray = new TileBehavior[fieldSizeX, fieldSizeZ];
