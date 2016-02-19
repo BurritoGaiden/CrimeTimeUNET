@@ -70,6 +70,7 @@
 		var player = {
 			"id": 0,
 			"username": "Bon",
+			"ready": false,
 			"character": {
 				"name": "BIGBOY",
 				"stats": {
@@ -99,6 +100,22 @@
 
 		var borders;
 		//Function to call heartbeat
+
+		var _extends = function(ChildClass, ParentClass)
+		{
+		    var f = function() { };
+		    f.prototype = ParentClass.prototype;
+
+		    // copy child prototype methods in case there are some defined already
+		    for(var m in ChildClass.prototype)
+		    {
+		        f.prototype[m] = ChildClass.prototype[m];
+		    }
+
+		    ChildClass.prototype = new f();
+		    ChildClass.prototype.constructor = ChildClass;
+		    ChildClass.prototype._super = ParentClass.prototype;        
+		};
 
 		window.addEventListener('resize', resize, false);
 		Map.prototype = new createjs.Container();
@@ -275,6 +292,29 @@
 			//update player(s) data
 		}
 
+		var CharacterSelectIcon = function() {
+			this._super.constructor.call(this);
+			this.bg = new createjs.Shape();
+		}
+		CharacterSelectIcon.prototype.generateIcon = function(character) {
+			this.bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
+			var character_icon_img = preload_icon.getResult("characterSelectIcon" + character);
+			var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
+			character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
+			character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
+			// var character_details_img = preload.getResult("detailsIcon");
+			// var character_details_bitmap = new createjs.Bitmap(character_details_img);
+			// character_details_bitmap.on("click", displayCharacterDetail, i);
+			// character_details_bitmap.x = character_icon_bitmap.x;
+			// character_details_bitmap.y = ??????? Not sure if put on icon corner, or below it, or on top, etcetc...
+			this.addChild(this.bg, character_icon_bitmap); //REMEMBER TO PUT BACK IN CHARACTER DETAILS
+			//add event listener here that if someone has already selected this character, disable it/grey it out
+			this.scaleX = this.scaleY = mobile_offset - 0.15;
+			this.x -= this.getBounds().width/2;
+			this.name = character;
+		}
+		_extends(CharacterSelectIcon, createjs.Container);
+
 		function showCharacterSelect(){
 			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
@@ -282,46 +322,15 @@
 			var promptText = new createjs.Text("Please select your character:", "42px cinzel", "white");
 			promptText.x = w/2 - promptText.getBounds().width/2;
 			promptText.y = h/5;
+
 			var characters = new createjs.Container();
 			for(character = 4; character >= 0; character--){
-				var character_icon = new createjs.Container();
-				var character_icon_bg = new createjs.Shape();
-				character_icon_bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
-				var character_icon_img = preload_icon.getResult("characterSelectIcon" + character);
-				var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
-				character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
-				character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
-				// var character_details_img = preload.getResult("detailsIcon");
-				// var character_details_bitmap = new createjs.Bitmap(character_details_img);
-				// character_details_bitmap.on("click", displayCharacterDetail, i);
-				// character_details_bitmap.x = character_icon_bitmap.x;
-				// character_details_bitmap.y = ??????? Not sure if put on icon corner, or below it, or on top, etcetc...
-				character_icon.addChild(character_icon_bg, character_icon_bitmap); //REMEMBER TO PUT BACK IN CHARACTER DETAILS
-				//add event listener here that if someone has already selected this character, disable it/grey it out
-				character_icon.scaleX = character_icon.scaleY = mobile_offset - 0.15;
-				var fisticop_icon;
-				if(character == 4) {
-					fisticop_icon = character_icon;
-					var bounds = character_icon.getBounds();
-					console.log(character_icon.getBounds());
-					character_icon.x = w/2 + bounds.width/2;
-					character_icon.y = h/2;
-					character_icon.scaleX = character_icon.scaleY = mobile_offset;
-				}
-				else if(character % 2 == 0){
-					character_icon.x = fisticop_icon.x - 150*mobile_offset;
-					if(character/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (character/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
-				} else {
-					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width + 150*mobile_offset;
-					if(character == 1) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (character == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
-				} 
-				character_icon.x -= character_icon.getBounds().width/2;
-				character_icon.name = character;
+				var character_icon = new CharacterSelectIcon();
+				character_icon.generateIcon(character);
+				
 				character_icon.on("click", function(){
+					var icon = this;
 					//sent POST request to select
-					console.log("SELECTED CHARACTER " + this.name);
 					$.post("ControlInput", 
 					{
 						username: player.username,
@@ -329,12 +338,70 @@
 						character: character_conversion[this.name],
 					},
 						function(data, status){
-							console.log("Success! Data: " + data);
+							console.log("SELECTED CHARACTER " + character_conversion[icon.name]);
+							for(var i=0; i<characters.children.length;i++){
+								if(i!=character){
+									var other = characters.children[i];
+									other.bg.graphics.clear().beginFill("Gray").drawCircle(0, 0, 90);
+								}
+							}
+							icon.bg.graphics.clear().beginFill("White").drawCircle(0, 0, 90);
+							hud_stage.update();
 					})
 				})
+				var fisticop_icon;
+				if(character == 4) {
+					fisticop_icon = character_icon;
+					var bounds = character_icon.getBounds();
+					console.log(character_icon.getBounds());
+					character_icon.x = w/2;
+					character_icon.y = h/2;
+					character_icon.scaleX = character_icon.scaleY = mobile_offset;
+				}
+				else if(character % 2 == 0){ //left side icons
+					character_icon.x = fisticop_icon.x - fisticop_icon.getBounds().width/2 - 150*mobile_offset;
+					if(character/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
+					else if (character/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+				} else { //right side icons
+					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width/2 + 150*mobile_offset;
+					if(character == 1) character_icon.y = promptText.y + 150*mobile_offset;
+					else if (character == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+				} 
 				characters.addChild(character_icon);
 			}
-			charSelectScreen.addChild(promptText, characters);
+
+			var ready_button = new createjs.Container();
+			var ready_box = new createjs.Shape();
+			var ready_button_text = new createjs.Text("Ready", "30px DAYPBL", "white");
+			ready_box.graphics.beginFill("DarkGray").drawRoundRect(0, 0, 200, 75, 5);
+			ready_button_text.x = 100 - ready_button_text.getBounds().width/2;
+			ready_button_text.y = 75/2 - ready_button_text.getBounds().height/2;
+			ready_button.addChild(ready_box, ready_button_text);
+			ready_button.x = w/2 - 100;
+			ready_button.y = characters.getBounds().height + 150*mobile_offset;
+
+			ready_button.on("click", function(){
+				$.post("ControlInput", 
+				{
+					username: player.username,
+					command: "ToggleReady",
+				},
+					function(data, status){
+						console.log("Success! Data: " + data);
+						var color = "DarkGray";
+						var txt_color = "White";
+						player.ready = !player.ready;
+						if(player.ready) {
+							color = "Gray";
+							txt_color = "DarkGray";
+						}
+						ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
+						ready_button_text.color = txt_color;
+						hud_stage.update();
+				})
+			})
+
+			charSelectScreen.addChild(promptText, characters, ready_button);
 			hud_stage.addChild(charSelectScreen);
 			hud_stage.update();
 		}
