@@ -21,6 +21,8 @@ public class Intertitle : Singleton<Intertitle> {
     }
     [SerializeField]
     private Image QR;
+    [SerializeField]
+    private GameObject[] QRObjects;
 
     private RectTransform content;
 
@@ -42,12 +44,20 @@ public class Intertitle : Singleton<Intertitle> {
     {
         QR.enabled = true;
         subtitle.enabled = false;
+        foreach(GameObject go in QRObjects)
+        {
+            go.SetActive(true);
+        }
     }
 
     public void TextMode()
     {
         QR.enabled = false;
         subtitle.enabled = true;
+        foreach (GameObject go in QRObjects)
+        {
+            go.SetActive(false);
+        }
     }
 
     // Helper Coroutines
@@ -66,26 +76,28 @@ public class Intertitle : Singleton<Intertitle> {
         card.position = endpos;
     }
 
-    public IEnumerator FromBottomToCenter(float seconds)
+    public IEnumerator FromBottomToCenter(float seconds, bool fadein)
     {
         if(inUse == false)
         {
             inUse = true;
-            yield return StartCoroutine(AlphaLerp(0.0f, 1.0f, 0.75f * seconds));
+            if(fadein && cr.alpha != 1.0f)
+                yield return StartCoroutine(AlphaLerp(0.0f, 1.0f, 0.75f * seconds));
             yield return StartCoroutine(EaseLerp(new Vector3(Screen.width / 2.0f, -Screen.height, 0), new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), seconds));
             inUse = false;
         }
         yield return null;
        
     }
-    public IEnumerator FromCenterToTop(float seconds)
+    public IEnumerator FromCenterToTop(float seconds, bool fadeout)
     {
 
         if (inUse == false)
         {
             inUse = true;
             yield return StartCoroutine(EaseLerp(new Vector3(Screen.width / 2.0f, Screen.height / 2.0f, 0), new Vector3(Screen.width / 2.0f, 2 * Screen.height, 0), seconds));
-            yield return StartCoroutine(AlphaLerp(1.0f, 0.0f, 0.75f * seconds));
+            if (fadeout && cr.alpha != 0.0f)
+                yield return StartCoroutine(AlphaLerp(1.0f, 0.0f, 0.75f * seconds));
             inUse = false;
         }
         yield return null;

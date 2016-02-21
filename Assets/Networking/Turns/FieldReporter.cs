@@ -132,9 +132,9 @@ public class FieldReporter : MonoBehaviour
 
             turnDisplay.text = "Turn: " + turn;
 
-        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(seconds));
+        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(seconds, true));
         yield return new WaitForSeconds(1.25f * seconds);
-        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(seconds));
+        yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(seconds, true));
 
         thievesTurn = !thievesTurn;
     }

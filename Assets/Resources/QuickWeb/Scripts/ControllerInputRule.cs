@@ -99,6 +99,22 @@ public class ControllerInputRule : WebServerRule
                         }
                     }
                     break;
+                case "ToggleReady":
+                    cp.IsReady = !cp.IsReady;
+                        List<bool> readies = new List<bool>();
+                        foreach (CommandPanel r in PlayerRegisterRule.PlayerRegister.Values)
+                        {
+                            readies.Add(r.IsReady);
+                        }
+                        if (!readies.Contains(false))
+                        {
+                            charSelectManager.StartCoroutine("Countdown");
+                        }
+                        else
+                        {
+                            charSelectManager.StartCoroutine(charSelectManager.StopCountdown());
+                        }
+                    break;
 
                 // commit their movement path and execute a move
                 case "CommitMove":

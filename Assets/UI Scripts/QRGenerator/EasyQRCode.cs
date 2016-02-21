@@ -8,7 +8,7 @@ public class EasyQRCode : MonoBehaviour {
 	public string textToEncode;
     public Color darkColor = Color.black;
     public Color lightColor = Color.white;
-	
+    public Text textOutput;
 
     void Start()
     {
@@ -19,9 +19,14 @@ public class EasyQRCode : MonoBehaviour {
 		textToEncode = "http://"+(Network.player.ipAddress)+":8080/HeistNight/index";
         Texture2D qrTexture = QRGenerator.EncodeString(textToEncode, darkColor, lightColor);
 
-
         // Set the generated texture as a new sqrite to use on a UI Image element 
 		GetComponent<Image> ().sprite = Sprite.Create(qrTexture,  new Rect(0, 0, qrTexture.width, qrTexture.height), new Vector2(0.5f, 0.5f));
-		#endif
+
+        if (textOutput != null)
+        {
+            textOutput.text = textToEncode;
+        }
+
+    #endif
     }
 }

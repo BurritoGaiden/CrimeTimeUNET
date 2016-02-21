@@ -18,6 +18,13 @@ public class CommandPanel : MonoBehaviour, IJSONable {
         get { return connected; }
     }
 
+    private bool ready = false;
+    public bool IsReady
+    {
+        get { return ready; }
+        set { ready = value; }
+    }
+
     [SerializeField]
     private float timerMax = 10.0f;
     private float timerCurrent = 0.0f;
@@ -123,8 +130,13 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     // TODO: Add functionality!
     public void SpawnPlayerCharacter()
     {
-        GameObject pc = GameObject.Instantiate(character.gameObject);
-        pc.transform.position = new Vector3(0, .5f, 0);
+        GameObject pc;
+        if (character != null)
+        {
+            pc = GameObject.Instantiate(character.gameObject);
+            pc.transform.position = new Vector3(0, .5f, 0);
+        }
+          
     }
 
     public void PathSelection(TileBehavior tile)

@@ -49,10 +49,10 @@ public class GameStateManager : Singleton<GameStateManager>
             case GameState.MainMenu:
                 Intertitle.Instance.QRMode();
                 Intertitle.Instance.Title.text = "HeistNight!";
-                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(1.25f));
+                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(1.25f, true));
                 break;
             case GameState.CharacterSelect:
-                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(1.25f));
+                Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(1.25f, true));
                 SceneManager.LoadScene(1);
                 break;
             case GameState.GameBegin:
