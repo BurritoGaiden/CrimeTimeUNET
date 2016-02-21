@@ -117,7 +117,7 @@
 		    ChildClass.prototype._super = ParentClass.prototype;        
 		};
 
-		window.addEventListener('resize', resize, false);
+		//window.addEventListener('resize', resize, false);
 		Map.prototype = new createjs.Container();
 		Map.prototype.constructor = Map;
 		function Map(rows, columns){
@@ -295,6 +295,7 @@
 		var CharacterSelectIcon = function() {
 			this._super.constructor.call(this);
 			this.bg = new createjs.Shape();
+			this.selected = false;
 		}
 		CharacterSelectIcon.prototype.generateIcon = function(character) {
 			this.bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
@@ -316,12 +317,20 @@
 		_extends(CharacterSelectIcon, createjs.Container);
 
 		function showCharacterSelect(){
+			var ready_button = new createjs.Container();
+			var ready_box = new createjs.Shape();
+			var ready_button_text = new createjs.Text("Ready", "30px DAYPBL", "white");
+			
+
 			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
 			charSelectScreen.name = "charSelectScreen";
-			var promptText = new createjs.Text("Please select your character:", "42px cinzel", "white");
-			promptText.x = w/2 - promptText.getBounds().width/2;
-			promptText.y = h/5;
+			var promptText1 = new createjs.Text("Choose your", "50px DAYPBL", "white");
+			var promptText2 = new createjs.Text("character", "50px DAYPBL", "white");
+			promptText1.x = w/2 - promptText1.getBounds().width/2;
+			promptText1.y = h/16;
+			promptText2.x = w/2 - promptText2.getBounds().width/2;
+			promptText2.y = promptText1.y + promptText1.getBounds().height/2 + 10;
 
 			var characters = new createjs.Container();
 			for(character = 4; character >= 0; character--){
@@ -340,12 +349,44 @@
 						function(data, status){
 							console.log("SELECTED CHARACTER " + character_conversion[icon.name]);
 							for(var i=0; i<characters.children.length;i++){
-								if(i!=character){
-									var other = characters.children[i];
+								var other = characters.children[i];
+								if(other!=icon){
+									other.selected = false;
 									other.bg.graphics.clear().beginFill("Gray").drawCircle(0, 0, 90);
 								}
 							}
-							icon.bg.graphics.clear().beginFill("White").drawCircle(0, 0, 90);
+							console.log(icon.selected);
+							if(icon.selected) {
+								icon.selected = false;
+								icon.bg.graphics.clear().beginFill("Gray").drawCircle(0, 0, 90);
+							}
+							else {
+								icon.selected = true;
+								icon.bg.graphics.clear().beginFill("White").drawCircle(0, 0, 90);
+							}
+							if(player.ready){
+								$.post("ControlInput", 
+								{
+									username: player.username,
+									command: "ToggleReady",
+								},
+									function(data, status){
+										console.log("Success! Data: " + data);
+										var color = "DarkGray";
+										var txt_color = "White";
+										player.ready = !player.ready;
+										if(player.ready) {
+											color = "Gray";
+											txt_color = "DarkGray";
+										} else {
+											color = "DarkGray";
+											txt_color = "White";
+										}
+										ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
+										ready_button_text.color = txt_color;
+										hud_stage.update();
+								})
+							}
 							hud_stage.update();
 					})
 				})
@@ -360,25 +401,22 @@
 				}
 				else if(character % 2 == 0){ //left side icons
 					character_icon.x = fisticop_icon.x - fisticop_icon.getBounds().width/2 - 150*mobile_offset;
-					if(character/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (character/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+					if(character/2 == 0) character_icon.y = promptText2.y + 125*mobile_offset;
+					else if (character/2 == 1) character_icon.y = promptText2.y + 145*2.1*mobile_offset;
 				} else { //right side icons
 					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width/2 + 150*mobile_offset;
-					if(character == 1) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (character == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+					if(character == 1) character_icon.y = promptText2.y + 125*mobile_offset;
+					else if (character == 3) character_icon.y = promptText2.y + 145*2.1*mobile_offset;
 				} 
 				characters.addChild(character_icon);
 			}
 
-			var ready_button = new createjs.Container();
-			var ready_box = new createjs.Shape();
-			var ready_button_text = new createjs.Text("Ready", "30px DAYPBL", "white");
 			ready_box.graphics.beginFill("DarkGray").drawRoundRect(0, 0, 200, 75, 5);
 			ready_button_text.x = 100 - ready_button_text.getBounds().width/2;
 			ready_button_text.y = 75/2 - ready_button_text.getBounds().height/2;
 			ready_button.addChild(ready_box, ready_button_text);
 			ready_button.x = w/2 - 100;
-			ready_button.y = characters.getBounds().height + 150*mobile_offset;
+			ready_button.y = characters.getBounds().height + 100*mobile_offset;
 
 			ready_button.on("click", function(){
 				$.post("ControlInput", 
@@ -394,6 +432,9 @@
 						if(player.ready) {
 							color = "Gray";
 							txt_color = "DarkGray";
+						} else {
+							color = "DarkGray";
+							txt_color = "White";
 						}
 						ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
 						ready_button_text.color = txt_color;
@@ -401,7 +442,7 @@
 				})
 			})
 
-			charSelectScreen.addChild(promptText, characters, ready_button);
+			charSelectScreen.addChild(promptText1, promptText2, characters, ready_button);
 			hud_stage.addChild(charSelectScreen);
 			hud_stage.update();
 		}
@@ -424,19 +465,19 @@
 					}, 2000);
 				});
 			usernameDOMField.style.visibility = "hidden";
-			if(detectmob()){
-				var doc = window.document;
-  				var docEl = doc.documentElement;
-				var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-				var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+			// if(detectmob()){
+			// 	var doc = window.document;
+  	// 			var docEl = doc.documentElement;
+			// 	var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+			// 	var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
 
-				if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-				  requestFullScreen.call(docEl);
-				}
-				else {
-				  cancelFullScreen.call(doc);
-				}
-			} 
+			// 	if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+			// 	  requestFullScreen.call(docEl);
+			// 	}
+			// 	else {
+			// 	  cancelFullScreen.call(doc);
+			// 	}
+			// } 
 
 			//setup();
 			stage_state = "CHARSELECT";
