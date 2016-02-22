@@ -58,7 +58,7 @@
 	<!-- Script stuff to draw on canvas -->
 	<script type="text/javascript">
 		var mobile_offset = 0.75;
-		var stage_state = "STARTUP";
+		var stage_state = "STARTUP"; //replace this with player.state
 		var rows = 5;
 		var columns = 5;
 		var tilesize = 100;
@@ -70,6 +70,7 @@
 		var player = {
 			"id": 0,
 			"username": "Bon",
+			"state": 1,
 			"ready": false,
 			"character": {
 				"name": "BIGBOY",
@@ -100,6 +101,7 @@
 
 		var borders;
 		//Function to call heartbeat
+
 
 		var _extends = function(ChildClass, ParentClass)
 		{
@@ -454,17 +456,10 @@
 			$.post("PlayerRegister", player.username,
 				function(data, status){
 					console.log("Data: " + data + " Status: " + status);
-					setInterval(function(){
-						$.post("MapState", 
-						{
-							username: player.username,
-						},
-							function(data, status){
-								console.log("Success! Data: " + data);
-						})
-					}, 2000);
+					usernameDOMField.style.visibility = "hidden";	
+					heartbeat();
+					setInterval(heartbeat, 2000);
 				});
-			usernameDOMField.style.visibility = "hidden";
 			// if(detectmob()){
 			// 	var doc = window.document;
   	// 			var docEl = doc.documentElement;
@@ -478,12 +473,6 @@
 			// 	  cancelFullScreen.call(doc);
 			// 	}
 			// } 
-
-			//setup();
-			stage_state = "CHARSELECT";
-			preload_icon.on("complete", showCharacterSelect);
-			preload_icon.loadManifest(charSelect_manifest);
-			//should be showCharacterSelect();
 		}
 	
 		function tick(e){
@@ -492,12 +481,44 @@
 			stage.update();
 		}
 
+		function heartbeat() {
+			$.post("MapState", 
+			{
+				username: player.username,
+			},
+				function(data, status){
+					console.log("Success! Data: " + data);
+					data = JSON.parse(data);
+					//Redirect client to appropriate screen
+					//TODO LATER: Write functions to update player stats
+					if(data.state == 2 && player.state != 2) {
+						player.state = 2;
+						preload_icon.on("complete", showCharacterSelect);
+						preload_icon.loadManifest(charSelect_manifest);
+					}
+					if(data.state == 3 && player.state != 3) {
+						player.state = 3;
+						//do stuff
+					}
+					if(data.state == 6){
+						for(var i=0;i<data.players.length;i++){
+							if(data.players[i].username == player.username && player.state != data.state){
+								player.state = data.state;
+								setup();
+							}
+						}
+					}
+					
+			})
+		}
+
 		function init(){
 			hud = document.getElementById("hud");
 			canvas = document.getElementById("canvas");
 			
 			stage = new createjs.Stage(canvas);
 			hud_stage = new createjs.Stage(hud);
+			//hud_stage.addEventListener("reconnect", reconnect);
 			createjs.Touch.enable(stage);
 			createjs.Touch.enable(hud_stage);
 			createjs.Ticker.setFPS(60);
@@ -515,7 +536,6 @@
 		}
 
 		function setup(){
-			stage_state = "MAIN";
 			hud_stage.clear();
 			hud_stage.removeAllChildren();
 			hud_stage.removeAllEventListeners();
@@ -567,7 +587,6 @@
 			//TODO: update w/h values and tell canvas to rerender.
 			//console.log("resized!");
 			console.log("resize!");
-			console.log(stage_state);
 			if(stage_state != "STARTUP") {
 				hud_stage.clear();
 				hud_stage.removeAllEventListeners();
