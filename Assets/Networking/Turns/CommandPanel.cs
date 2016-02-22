@@ -27,7 +27,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     }
 
     [SerializeField]
-    private float timerMax = 10.0f;
+    private float timerMax = 15.0f;
     private float timerCurrent = 0.0f;
 
     // the chosen character for this controller. null indicates no character selected yet
@@ -136,6 +136,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
         {
             pc = GameObject.Instantiate(character.gameObject);
             pc.transform.position = new Vector3(0, .5f, 0);
+            CurrentUnit = pc.GetComponent<CharacterBehavior>();
         }
           
     }
