@@ -61,7 +61,7 @@
 		var stage_state = "STARTUP"; //replace this with player.state
 		var rows = 5;
 		var columns = 5;
-		var tilesize = 100;
+		var tilesize = 50;
 		var w, h, midXOffset, midYOffset;
 		var canvas, topc, botc; 	
 		var stage, top_stage, bot_stage;
@@ -120,13 +120,14 @@
 		};
 
 		//window.addEventListener('resize', resize, false);
-		Map.prototype = new createjs.Container();
-		Map.prototype.constructor = Map;
-		function Map(rows, columns){
+		var Map = function() {
+			this._super.constructor.call(this);
+			this.width = 0;
+			this.height = 0;
+		}
+		Map.prototype.generate = function(rows, columns){
 			var firstTime = true;
 			var pan = false;
-			this.x = (tilesize*columns)/2;
-			this.y = h/5;
 			for(var row = 0; row < rows; row++){
 				for(var col = 0; col < columns; col++){
 					var tile = new createjs.Shape();
@@ -177,7 +178,11 @@
 				pan = false;
 			});
 			this.on("pressmove", panMap);
+			console.log(this.getBounds());
+			this.x = 10;
+			this.y = -h/2;
 		}
+		_extends(Map, createjs.Container);
 
 		function panMap(e){
 			pan = true;
@@ -504,12 +509,30 @@
 						for(var i=0;i<data.players.length;i++){
 							if(data.players[i].username == player.username && player.state != data.state){
 								player.state = data.state;
-								setup();
+								getMapData();
 							}
 						}
 					}
 					
 			})
+		}
+
+		function getMapData(){
+			var mapdata;
+			$.post("ControlInput", {
+				username: player.username,
+				command: "GetMapData",
+			},
+				function(data, status){
+					data = JSON.parse(data);
+					console.log(status + " " + data);
+					console.log(data.width + " " + data.height);
+					map = new Map();
+					map.generate(data.width, data.height);
+					setup();
+				}
+			)
+			return mapdata;
 		}
 
 		function init(){
@@ -530,7 +553,6 @@
 			h = canvas.height;
 			if(h <= 500) mobile_offset = 0.75;
 			else mobile_offset = 1;
-			map = new Map(5, 5);
 			preload.on("complete", showStartup);
 			preload.loadManifest(startup_manifest);
 		}
