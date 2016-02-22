@@ -122,12 +122,14 @@
 		//window.addEventListener('resize', resize, false);
 		var Map = function() {
 			this._super.constructor.call(this);
-			this.width = 0;
-			this.height = 0;
+			this.rows = 0;
+			this.columns = 0;
 		}
 		Map.prototype.generate = function(rows, columns){
 			var firstTime = true;
 			var pan = false;
+			this.rows = rows;
+			this.columns = columns;
 			for(var row = 0; row < rows; row++){
 				for(var col = 0; col < columns; col++){
 					var tile = new createjs.Shape();
@@ -183,6 +185,18 @@
 			this.y = -h/2;
 		}
 		_extends(Map, createjs.Container);
+
+		function tileSelect(x, y){
+			console.log("Selected : " + (x)/tilesize + ", " + (map.columns - (y)/tilesize - 1));
+			$.post("ControlInput", 
+				{
+					username: player.username,
+					command: "SelectTile", 
+					x: (x)/tilesize, 
+				 	z: (map.columns - (y)/tilesize - 1)
+				});
+			
+		}
 
 		function panMap(e){
 			pan = true;
@@ -771,18 +785,6 @@
 				else pip.graphics.beginFill("DimGray").drawRoundRect(10*i, 0, 8, 13, 4);
 				stat.addChild(pip);
 			}
-		}
-
-		function tileSelect(x, y){
-			console.log("Selected : " + (x)/tilesize + ", " + (columns - (y)/tilesize - 1));
-			$.post("ControlInput", 
-				{
-					username: player.username,
-					command: "SelectTile", 
-					x: (x)/tilesize, 
-				 	z: (columns - (y)/tilesize - 1)
-				});
-			
 		}
 		function detectmob() { 
 			 if( navigator.userAgent.match(/Android/i)
