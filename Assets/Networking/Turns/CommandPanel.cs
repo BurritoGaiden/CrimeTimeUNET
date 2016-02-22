@@ -16,6 +16,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     public bool IsConnected
     {
         get { return connected; }
+        set { connected = value; }
     }
 
     private bool ready = false;

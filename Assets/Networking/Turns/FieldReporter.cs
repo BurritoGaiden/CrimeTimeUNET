@@ -31,11 +31,6 @@ public class FieldReporter : MonoBehaviour
         incrementTurn();
         pauseButton.interactable = false;
         scaleDisplay.text = Time.timeScale.ToString("0.00") + "x";
-
-        foreach (CommandPanel cp in PlayerRegisterRule.PlayerRegister.Values)
-        {
-            cp.SpawnPlayerCharacter();
-        }
     }
 
     // Update is called once per frame

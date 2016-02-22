@@ -14,6 +14,8 @@ public class CharacterSelectEntry {
     [SerializeField]
     private Light spotlight;
     [SerializeField]
+    private UsernameCanvas userCanvas;
+    [SerializeField]
     private CommandPanel owner;
     public CommandPanel Owner
     {
@@ -22,6 +24,15 @@ public class CharacterSelectEntry {
         {
             owner = value;
             spotlight.enabled = (owner != null);
+            if(owner != null && userCanvas != null)
+            {
+                userCanvas.Username.text = owner.PlayerName;
+                userCanvas.Canvas.enabled = true;
+            }
+            else if(userCanvas != null)
+            {
+                userCanvas.Canvas.enabled = false;
+            }
 
         }
     }

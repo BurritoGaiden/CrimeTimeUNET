@@ -10,6 +10,13 @@ public class CharacterSelectManager : MonoBehaviour {
     [SerializeField]
     private CharacterSelectEntry[] characterList = new CharacterSelectEntry[5];
 
+    [SerializeField]
+    private bool inCountdown = false;
+    public bool InCountdown
+    {
+        get { return inCountdown; }
+    }
+
     // Use this for initialization
     void Awake () {
 
@@ -102,6 +109,7 @@ public class CharacterSelectManager : MonoBehaviour {
     }
     public IEnumerator Countdown()
     {
+        inCountdown = true;
         int count = 5;
         Intertitle.Instance.TextMode();
         Intertitle.Instance.Title.text = "Let's Begin!";
@@ -129,6 +137,7 @@ public class CharacterSelectManager : MonoBehaviour {
         Intertitle.Instance.Subtitle.text = "Wait!";
         yield return new WaitForSeconds(0.5f);
         yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(1.0f, true));
+        inCountdown = false;
     }
 
 }

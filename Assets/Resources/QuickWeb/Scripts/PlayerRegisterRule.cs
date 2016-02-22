@@ -56,7 +56,9 @@ public class PlayerRegisterRule : WebServerRule
 
         if (playerRegister.ContainsKey(username) && playerRegister[username].IsConnected == false)
         {
-            dataString = "Player found!";
+            // figure out alternative to allowing IsConnected to be written to?
+            playerRegister[username].IsConnected = true;
+            dataString = "Player found, reconnecting!";
         }
         else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5 && allowNewJoins)
         {
@@ -78,6 +80,10 @@ public class PlayerRegisterRule : WebServerRule
             dataString = "Player not found; space available, adding " + username + " to the register!";
 
             firstPlayerJoined = true;
+        }
+        else if(!allowNewJoins)
+        {
+            dataString = "Game in progress; no new joins allowed, only reconnects!";
         }
         else
         {
@@ -108,6 +114,16 @@ public class PlayerRegisterRule : WebServerRule
             responseStream.Write(data, i, writeLength);
             i += writeLength;
         }
+        if (!CheckAllConnected() || GameStateManager.Instance.GameState == GameState.CharacterSelect)
+        {
+            Debug.Log("Some players still disconnected.");
+            pQR.Enable(true);
+        }
+        else
+        {
+            Debug.Log("All players connected again.");
+            pQR.Enable(false);
+        }
     }
 
     // called when a player controller sends the message upward that it has disconnected
@@ -123,6 +139,20 @@ public class PlayerRegisterRule : WebServerRule
             PlayerRegister.Remove(dcName);
             Debug.Log(dcName + " has disconnected during a non-gameplay game state, and was therefore removed from the registry");
         }
+        if (!CheckAllConnected())
+        {
+            pQR.Enable(true);
+        }
+    }
+
+    bool CheckAllConnected()
+    {
+        List<bool> connections = new List<bool>(); ;
+        foreach (CommandPanel cp in playerRegister.Values)
+        {
+            connections.Add(cp.IsConnected);
+        }
+        return !connections.Contains(false);
     }
 
     // changes parameter of how this rule functions depending on the game state
@@ -130,10 +160,12 @@ public class PlayerRegisterRule : WebServerRule
     {
         switch (newState) {
             case GameState.CharacterSelect:
+                allowNewJoins = true;
                 deleteOnDisconnect = true;
                 break;
 
             case GameState.GameBegin:
+                allowNewJoins = false;
                 deleteOnDisconnect = false;
                 break;
 
@@ -160,6 +192,10 @@ public class PlayerRegisterRule : WebServerRule
     {
         get { return playerRegister; }
     }
+
+    [SerializeField]
+    private PersistentQR pQR;
+
     // if true, delete entries from the player registry when they disconnect (for example, during pre-game)
     private bool deleteOnDisconnect = true;
 
