@@ -66,6 +66,7 @@ public class ControllerInputRule : WebServerRule
         {
             Debug.Log(user + " found, entering command switch");
             CommandPanel cp = PlayerRegisterRule.PlayerRegister[user];
+            cp.IsConnected = true;
             switch (givenCommand)
             {
                 // for getting the size (and more if needed) of the map, to generate a grid at runtime
@@ -130,8 +131,16 @@ public class ControllerInputRule : WebServerRule
                     {
                         try
                         {
+                            Debug.Log("Processing tile data: {x:" + j["x"] + "," + "z:" + j["z"] + "}");
                             cp.PathSelection(mapGenerator.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
-                            Debug.Log("Processing tile data: {x:" + j["x"] + "," + "z:" + j["z"]+"}");
+                            PathTile p = new PathTile();
+                            List<Coordinate> queuedCoords = new List<Coordinate>();
+                            foreach (TileBehavior tb in cp.QueuedPath)
+                            {
+                                queuedCoords.Add(tb.Coords);
+                            }
+                            p.path = queuedCoords.ToArray();
+                            Debug.Log(JsonUtility.ToJson(p));
                         }
                         catch (Exception e)
                         {

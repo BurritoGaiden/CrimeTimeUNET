@@ -71,6 +71,10 @@ public class CommandPanel : MonoBehaviour, IJSONable {
 	}
 
     private List<TileBehavior> queuedPath = new List<TileBehavior>();
+    public TileBehavior[] QueuedPath
+    {
+        get { return queuedPath.ToArray(); }
+    }
 
     // Use this for initialization
     void Start () {

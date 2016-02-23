@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+
 
 public class TileBehavior : MonoBehaviour {
 
-    private Coordinate coord;
+    private Coordinate coords;
     public Coordinate Coords
     {
-        get { return coord; }
-        set { coord = value; }
+        get { return coords; }
+        set { coords = value; }
     }
 
     private TileType tt;
