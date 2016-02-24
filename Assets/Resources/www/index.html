@@ -66,6 +66,7 @@
 		var canvas, topc, botc; 	
 		var stage, top_stage, bot_stage;
 		var map;
+		var map_setup = false;
 		var currentTile;
 		var player = {
 			"id": 0,
@@ -519,7 +520,7 @@
 						player.state = 3;
 						//do stuff
 					}
-					if(data.state == 6){
+					if((data.state == 6 || data.state == 4 || data.state == 5) && map_setup == false) {
 						for(var i=0;i<data.players.length;i++){
 							if(data.players[i].username == player.username && player.state != data.state){
 								player.state = data.state;
@@ -532,6 +533,7 @@
 		}
 
 		function getMapData(){
+			map_setup = true;
 			var mapdata;
 			$.post("ControlInput", {
 				username: player.username,
@@ -546,6 +548,7 @@
 					setup();
 				}
 			)
+			
 			return mapdata;
 		}
 

@@ -37,6 +37,9 @@ public class TileGen : MonoBehaviour {
     private int fieldSizeX;
     private int fieldSizeZ;
 
+    private TileBehavior copSpawn;
+    private TileBehavior gangSpawn;
+
     // Use this for initialization
     void Start () {
 
@@ -69,8 +72,6 @@ public class TileGen : MonoBehaviour {
 
         map.InitializeMap();
 
-        Debug.Log(JsonUtility.ToJson(map.ToJSON()));
-
         fieldSizeX = map.Layout.width;
         fieldSizeZ = map.Layout.height;
         tileArray = new TileBehavior[fieldSizeX, fieldSizeZ];
@@ -92,12 +93,21 @@ public class TileGen : MonoBehaviour {
                 tileArray[i, j].Coords = new Coordinate(i, j);
                 tileArray[i, j].TileType = t;
 
+                if (t == TileType.SpawnpointCops)
+                    copSpawn = TileArray[i, j];
+                else if(t == TileType.SpawnpointThieves)
+                    gangSpawn = TileArray[i, j];
+
                 if (position % 2 == 0 && t == TileType.FloorIndoor)
                     tileArray[i, j].GetComponent<MeshRenderer>().material.color = Color.grey;
             }
-        foreach(CommandPanel cp in PlayerRegisterRule.PlayerRegister.Values)
+
+        foreach (CommandPanel cp in PlayerRegisterRule.PlayerRegister.Values)
         {
-            cp.SpawnPlayerCharacter();
+            if (cp.Team == Alliance.Cops)
+                cp.SpawnPlayerCharacter(copSpawn);
+            else if (cp.Team == Alliance.Robbers)
+                cp.SpawnPlayerCharacter(gangSpawn);
         }
     }
 

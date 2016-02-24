@@ -41,7 +41,6 @@ public class PersistentQR : MonoBehaviour {
 
     public IEnumerator EaseLerp(Vector3 startpos, Vector3 endpos, float seconds)
     {
-        Debug.Log("LERPING AND SCRATCHING");
         rect.position = startpos;
         float t = 0.0f;
         while (t <= 1.0)
