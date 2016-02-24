@@ -70,7 +70,6 @@ public class MapStateRule : WebServerRule
             List<CharacterJSON> cj = new List<CharacterJSON>();
             foreach (CharacterBehavior c in FindObjectsOfType<CharacterBehavior>())
             {
-                // add conditional "if same team || isVisible"
                 cj.Add((CharacterJSON)c.ToJSON());
             }
             Heartbeat h = new Heartbeat();

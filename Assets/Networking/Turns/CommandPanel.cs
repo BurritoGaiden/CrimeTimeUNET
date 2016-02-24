@@ -16,7 +16,18 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     public bool IsConnected
     {
         get { return connected; }
-        set { connected = value; }
+        set
+        {
+            if(value != connected)
+            {
+                connected = value;
+                if (connected)
+                {
+                    SendMessageUpwards("OnPlayerHasReconnected", playerName, SendMessageOptions.RequireReceiver);
+                }
+            }
+          
+        }
     }
 
     private bool ready = false;
@@ -92,7 +103,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     // call this on the GET heartbeat rule
     public void Pulse()
     {
-        connected = true;
+        IsConnected = true;
         timerCurrent = timerMax;
         Debug.Log(PlayerName + " has a pulse!");
     }
@@ -133,13 +144,13 @@ public class CommandPanel : MonoBehaviour, IJSONable {
 	}
 
     // TODO: Add functionality!
-    public void SpawnPlayerCharacter()
+    public void SpawnPlayerCharacter(TileBehavior spawnPos)
     {
         GameObject pc;
         if (character != null)
         {
             pc = GameObject.Instantiate(character.gameObject);
-            pc.transform.position = new Vector3(0, .5f, 0);
+            pc.transform.position = new Vector3(spawnPos.transform.position.x, 0.125f, spawnPos.transform.position.z);
             CurrentUnit = pc.GetComponent<CharacterBehavior>();
         }
           
@@ -236,6 +247,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
 		FindObjectOfType<FieldReporter> ().addActionToTurn(action);
 		yield return StartCoroutine(action.Execute());
 		Reset ();
+        yield return new WaitForSeconds(0.5f);
 		FindObjectOfType<FieldReporter> ().checkToIncrememt ();
 	}
 

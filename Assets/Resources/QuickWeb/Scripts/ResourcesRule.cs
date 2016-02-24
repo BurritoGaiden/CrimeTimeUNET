@@ -77,15 +77,15 @@ public class ResourcesRule : WebServerRule
 		
 		int count = data.Length;
 		int i = 0;
-		while(i < count)
-		{
-			if (i != 0)
-				yield return null;
-			
-			int writeLength = Math.Min((int)writeStaggerCount, count - i);
-			responseStream.Write(data, i, writeLength);
-			i += writeLength;
-		}
+            while (i < count)
+            {
+                if (i != 0)
+                    yield return null;
+
+                int writeLength = Math.Min((int)writeStaggerCount, count - i);
+                responseStream.Write(data, i, writeLength);
+                i += writeLength;
+            }
 
 	}
 

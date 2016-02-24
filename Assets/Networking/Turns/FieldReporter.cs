@@ -83,6 +83,7 @@ public class FieldReporter : MonoBehaviour
 
     public void startReplay()
     {
+
         StartCoroutine(crunchTurns());
     }
 
@@ -91,10 +92,13 @@ public class FieldReporter : MonoBehaviour
         pauseButton.interactable = true;
         int i = 0;
         int j = 0;
+        turnNumber = 0;
         replayButton.interactable = false;
         for (j = 0; j < Record.Count; j++)
         {
-            updateTurnDisplay(j + 1);
+            turnNumber = 1 + j;
+            turnDisplay.text = "Turn: " + turnNumber;
+            //updateTurnDisplay(j + 1);
             for (i = 0; i < Record[j].Count; i++)
             {
                 yield return StartCoroutine(Record[j][i].Execute());
@@ -109,11 +113,12 @@ public class FieldReporter : MonoBehaviour
         incrementTurn();
     }
 
-    // Tear out the lerp subroutine and make that a single external thing instead of repeating code
+    
     public IEnumerator Transition(int turn, float seconds)
     {
+        int mod = turn % 2;
         Intertitle.Instance.TextMode();
-        if (thievesTurn)
+        if (mod == 0)
         {
             GameStateManager.Instance.GameState = GameState.GangTurn;
             Intertitle.Instance.Subtitle.text = "The Gang's\nTurn";
@@ -125,13 +130,12 @@ public class FieldReporter : MonoBehaviour
             Intertitle.Instance.Subtitle.text = "The Cop's\nTurn";
         }
 
-            turnDisplay.text = "Turn: " + turn;
+        Intertitle.Instance.Title.text = "Turn: " + turn;
+        turnDisplay.text = "Turn: " + turn;
 
         yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromBottomToCenter(seconds, true));
         yield return new WaitForSeconds(1.25f * seconds);
         yield return Intertitle.Instance.StartCoroutine(Intertitle.Instance.FromCenterToTop(seconds, true));
-
-        thievesTurn = !thievesTurn;
     }
 
 }
