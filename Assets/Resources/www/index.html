@@ -57,6 +57,7 @@
 	<input id="usernameInput" type="text">
 	<!-- Script stuff to draw on canvas -->
 	<script type="text/javascript">
+		var timeout = 15; //15 seconds timeout when heartbeat stops
 		var mobile_offset = 0.75;
 		var stage_state = "STARTUP"; //replace this with player.state
 		var rows = 5;
@@ -146,6 +147,7 @@
 			this.maparray;
 			this.currentpath = [];
 			this.pan = false;
+			this.pan_threshold = 1;
 		}
 		Map.prototype.generate = function(rows, columns){
 			var mapobj = this;
@@ -170,6 +172,7 @@
 			}
 			this.addEventListener("click", function(e){
 				var selectedTile = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
+				//console.log("CLICK EVENT: " + mapobj.pan)
 				if(firstTime) firstTime = false;
 				else if(selectedTile !== null && !mapobj.pan) {
 					var circle = new createjs.Shape();
@@ -193,13 +196,19 @@
 			})
 			this.on("mousedown", function(e){
 				mapobj.pan = false;
+				//console.log("DOWN EVENT: " + mapobj.pan);
 				this.parent.addChild(this);
 				this.offset = {x: this.x - e.stageX, y: this.y - e.stageY};
-				this.addEventListener("")
 			});
 			this.on("pressmove", function(e){
+				var mapobj = this;
 				mapobj.pan = true;
-				if(this.offset.x == 0 && this.offset.y == 0) mapobj.pan = false;
+				//console.log("PAN EVENT BEFORE: " + mapobj.pan);
+				var x_disp = Math.abs(e.stageX + this.offset.x - this.x);
+				var y_disp = Math.abs(e.stageY + this.offset.y - this.y);
+				//console.log(x_disp + " " + y_disp);
+				if(x_disp < mapobj.pan_threshold && y_disp < mapobj.pan_threshold) mapobj.pan = false;
+				//console.log("PAN EVENT AFTER: " + mapobj.pan)
 				this.x = e.stageX + this.offset.x;
 				this.y = e.stageY + this.offset.y;
 				stage.update();
@@ -517,7 +526,7 @@
 			hud_stage.addChild(charSelectScreen);
 			hud_stage.update();
 		}
-
+		var hb;
 		function registerPlayer() {
 			var usernameDOMField = document.getElementById("usernameInput");
 			player.username = usernameDOMField.value.trim();
@@ -527,7 +536,7 @@
 					console.log("Data: " + data + " Status: " + status);
 					usernameDOMField.style.visibility = "hidden";	
 					heartbeat();
-					setInterval(heartbeat, 2000);
+					hb = setInterval(heartbeat, 2000);
 				});
 			// if(detectmob()){
 			// 	var doc = window.document;
@@ -582,6 +591,11 @@
 						console.log(err);
 					}
 			})
+			.fail(function() {
+				setTimeout(function(){
+					clearInterval(hb);
+				}, timeout*1000);
+			});
 		}
 
 		function spawnPlayerAt(coords){
