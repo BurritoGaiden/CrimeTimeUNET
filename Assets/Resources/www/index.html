@@ -216,15 +216,27 @@
 				function(data, status){
 					console.log("Path data: " + data);
 					data = JSON.parse(data);
+					for(var j = 0; j < mapobj.currentpath.length; j++){
+						var row = mapobj.currentpath[j].row;
+						var col = mapobj.currentpath[j].col-1;
+						var ptile = mapobj.currentpath[j].tile;
+						console.log(mapobj.currentpath[j]);
+						console.log(ptile);
+						if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
+						else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
+						else ptile.graphics.clear().beginFill("AliceBlue").drawRect(0, 0, tilesize, tilesize);
+					}
+					mapobj.currentpath = [];
 					for(var i = 0; i < data.path.length; i++){
-						var row = data.path[i].z;
-						var col = data.path[i].x;
-						console.log(mapobj.maparray);
-						console.log(mapobj.maparray[row][mapobj.columns-col]);
-						mapobj.maparray[row][mapobj.columns-col].graphics.clear().beginFill("Red").drawRect(row*tilesize, col*tilesize, tilesize, tilesize);
+						var col = data.path[i].z+1;
+						var row = data.path[i].x;
+						//console.log(mapobj.maparray);
+						//console.log(mapobj.maparray[row][mapobj.columns-col]);
+						mapobj.maparray[row][col].graphics.clear().beginFill("Red").drawRect(0, 0, tilesize, tilesize);
+						mapobj.currentpath.push({"tile": mapobj.maparray[row][col], "col": col, "row": row});
 
 					}
-					mapobj.currentpath = data.path;
+					stage.update();
 				});
 			
 		}

@@ -141,6 +141,7 @@ public class ControllerInputRule : WebServerRule
                             }
                             p.path = queuedCoords.ToArray();
                             Debug.Log(JsonUtility.ToJson(p));
+                            dataString = JsonUtility.ToJson(p);
                         }
                         catch (Exception e)
                         {
