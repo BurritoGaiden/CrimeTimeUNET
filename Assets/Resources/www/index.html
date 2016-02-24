@@ -73,8 +73,13 @@
 			"username": "Bon",
 			"state": 1,
 			"ready": false,
+			"icon": {},
 			"character": {
 				"name": "BIGBOY",
+				"coords": {
+					"x": 0,
+					"y": 0,
+				},
 				"stats": {
 					"health": 5,
 					"punch": 6,
@@ -201,11 +206,12 @@
 			});
 			this.x = 10;
 			this.y = -h/2;
+
+			spawnPlayerAt(player.character.coords);
 		}
 
 		Map.prototype.tileSelect = function (x, y){
 			var mapobj = this;
-			console.log("Selected : " + (x)/tilesize + ", " + (mapobj.columns - (y)/tilesize - 1));
 			$.post("ControlInput", 
 				{
 					username: player.username,
@@ -214,14 +220,11 @@
 				 	z: (mapobj.columns - (y)/tilesize - 1)
 				},
 				function(data, status){
-					console.log("Path data: " + data);
 					data = JSON.parse(data);
 					for(var j = 0; j < mapobj.currentpath.length; j++){
 						var row = mapobj.currentpath[j].row;
 						var col = mapobj.currentpath[j].col-1;
 						var ptile = mapobj.currentpath[j].tile;
-						console.log(mapobj.currentpath[j]);
-						console.log(ptile);
 						if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
 						else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
 						else ptile.graphics.clear().beginFill("AliceBlue").drawRect(0, 0, tilesize, tilesize);
@@ -230,8 +233,6 @@
 					for(var i = 0; i < data.path.length; i++){
 						var col = data.path[i].z+1;
 						var row = data.path[i].x;
-						//console.log(mapobj.maparray);
-						//console.log(mapobj.maparray[row][mapobj.columns-col]);
 						mapobj.maparray[row][col].graphics.clear().beginFill("Red").drawRect(0, 0, tilesize, tilesize);
 						mapobj.currentpath.push({"tile": mapobj.maparray[row][col], "col": col, "row": row});
 
@@ -239,6 +240,20 @@
 					stage.update();
 				});
 			
+		}
+
+		Map.prototype.clearPath = function() {
+			var mapobj = this;
+			for(var j = 0; j < mapobj.currentpath.length; j++){
+				var row = mapobj.currentpath[j].row;
+				var col = mapobj.currentpath[j].col-1;
+				var ptile = mapobj.currentpath[j].tile;
+				if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
+				else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
+				else ptile.graphics.clear().beginFill("AliceBlue").drawRect(0, 0, tilesize, tilesize);
+			}
+			mapobj.currentpath = [];
+			stage.update();
 		}
 		_extends(Map, createjs.Container);
 
@@ -542,28 +557,55 @@
 			},
 				function(data, status){
 					console.log("Success! Data: " + data);
-					data = JSON.parse(data);
-					//Redirect client to appropriate screen
-					//TODO LATER: Write functions to update player stats
-					if(data.state == 2 && player.state != 2) {
-						player.state = 2;
-						preload_icon.on("complete", showCharacterSelect);
-						preload_icon.loadManifest(charSelect_manifest);
-					}
-					if(data.state == 3 && player.state != 3) {
-						player.state = 3;
-						//do stuff
-					}
-					if((data.state == 6 || data.state == 4 || data.state == 5) && map_setup == false) {
-						for(var i=0;i<data.players.length;i++){
-							if(data.players[i].username == player.username && player.state != data.state){
-								player.state = data.state;
+					try {
+						data = JSON.parse(data);
+						//Redirect client to appropriate screen
+						//TODO LATER: Write functions to update player stats
+						if(data.state == 2 && player.state != 2) {
+							preload_icon.on("complete", showCharacterSelect);
+							preload_icon.loadManifest(charSelect_manifest);
+						}
+						if(data.state == 3 && player.state != 3) {
+							//do stuff
+						}
+						if((data.state == 6 || data.state == 4 || data.state == 5)) {
+							player.character = data.myCharacter;
+							if(map_setup == false){
 								getMapData();
 							}
+							else {
+								movePlayerTo(player.character.coords);
+							}
 						}
+						player.state = data.state;
+					} catch(err) {
+						console.log(err);
 					}
-					
 			})
+		}
+
+		function spawnPlayerAt(coords){
+			player.icon = new createjs.Container();
+			player.icon.name = "Player";
+			var icon = new createjs.Shape();
+			icon.graphics.beginFill("Pink").drawCircle(0, 0, tilesize/3);
+			player.icon.addChild(icon);
+			var row = coords.x;
+			var col = coords.z+1;
+			player.icon.x = map.maparray[row][col].x + tilesize/2;
+			player.icon.y = map.maparray[row][col].y + tilesize/2;
+			map.addChild(player.icon);
+			map.x = (w - 2*tilesize*row)/2;
+			map.y = (tilesize*col)/4;
+		}
+
+		function movePlayerTo(coords){
+			var icon = player.icon.getChildAt(0);
+			icon.graphics.clear().beginFill("Pink").drawCircle(0, 0, tilesize/3);
+			var row = coords.x;
+			var col = coords.z+1;
+			player.icon.x = map.maparray[row][col].x + tilesize/2;
+			player.icon.y = map.maparray[row][col].y + tilesize/2;
 		}
 
 		function getMapData(){
@@ -642,6 +684,8 @@
 					{
 					username: player.username,
 					command: "CommitMove", 
+				}, function(data, status) {
+					map.clearPath();
 				});
 			})
 			hud_stage.addChild(bg);

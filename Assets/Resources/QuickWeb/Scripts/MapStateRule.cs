@@ -75,7 +75,8 @@ public class MapStateRule : WebServerRule
             Heartbeat h = new Heartbeat();
             h.state = GameStateManager.Instance.GameState;
             h.players = pj.ToArray();
-            h.myCharacter = (CharacterJSON) cp.Character.ToJSON();
+            if (cp.Character != null)
+                h.myCharacter = (CharacterJSON) cp.Character.ToJSON();
             h.characters = cj.ToArray();
 
             dataString = JsonUtility.ToJson(h);

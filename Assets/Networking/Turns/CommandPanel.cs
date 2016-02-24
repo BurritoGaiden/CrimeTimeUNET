@@ -153,6 +153,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
             pc.transform.position = new Vector3(spawnPos.transform.position.x, 0.125f, spawnPos.transform.position.z);
             pc.GetComponent<CharacterBehavior>().Coords = spawnPos.Coords;
             CurrentUnit = pc.GetComponent<CharacterBehavior>();
+            character = CurrentUnit;
         }
           
     }
