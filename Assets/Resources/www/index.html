@@ -119,17 +119,34 @@
 		    ChildClass.prototype._super = ParentClass.prototype;        
 		};
 
+		/* thanks yckart and mr. crumley on SO */
+		function createArray(length) {
+		    var arr = new Array(length || 0),
+		        i = length;
+
+		    if (arguments.length > 1) {
+		        var args = Array.prototype.slice.call(arguments, 1);
+		        while(i--) arr[length-1 - i] = createArray.apply(this, args);
+		    }
+
+		    return arr;
+		}
+
 		//window.addEventListener('resize', resize, false);
 		var Map = function() {
 			this._super.constructor.call(this);
 			this.rows = 0;
 			this.columns = 0;
+			this.maparray;
+			this.currentpath = [];
+			this.pan = false;
 		}
 		Map.prototype.generate = function(rows, columns){
+			var mapobj = this;
 			var firstTime = true;
-			var pan = false;
 			this.rows = rows;
 			this.columns = columns;
+			this.maparray = createArray(rows, columns);
 			for(var row = 0; row < rows; row++){
 				for(var col = 0; col < columns; col++){
 					var tile = new createjs.Shape();
@@ -139,16 +156,16 @@
 					tile.graphics.drawRect(0, 0, tilesize, tilesize);
 					tile.x = row*tilesize;
 					tile.y = col*tilesize;
+					mapobj.maparray[row][columns-col] = tile; 
 					this.addChild(tile);
 					//stage.update();
 				}	
 
 			}
 			this.addEventListener("click", function(e){
-				console.log("clicky")
 				var selectedTile = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
 				if(firstTime) firstTime = false;
-				else if(selectedTile !== null && !pan) {
+				else if(selectedTile !== null && !mapobj.pan) {
 					var circle = new createjs.Shape();
 					circle.graphics.beginFill("Crimson").drawCircle(0, 0, 10);
 					circle.x = e.stageX;
@@ -165,47 +182,52 @@
 					currentTile.x = selectedTile.x;
 					currentTile.y = selectedTile.y;
 					stage.update();
-					tileSelect(selectedTile.x, selectedTile.y);
+					mapobj.tileSelect(selectedTile.x, selectedTile.y);
 				}
 			})
 			this.on("mousedown", function(e){
-				pan = false;
-				console.log("DOWN");
+				mapobj.pan = false;
 				this.parent.addChild(this);
 				this.offset = {x: this.x - e.stageX, y: this.y - e.stageY};
 				this.addEventListener("")
 			});
-			this.on("pressup", function(){
-				console.log("UP");
-				pan = false;
+			this.on("pressmove", function(e){
+				mapobj.pan = true;
+				if(this.offset.x == 0 && this.offset.y == 0) mapobj.pan = false;
+				this.x = e.stageX + this.offset.x;
+				this.y = e.stageY + this.offset.y;
+				stage.update();
 			});
-			this.on("pressmove", panMap);
-			console.log(this.getBounds());
 			this.x = 10;
 			this.y = -h/2;
 		}
-		_extends(Map, createjs.Container);
 
-		function tileSelect(x, y){
-			console.log("Selected : " + (x)/tilesize + ", " + (map.columns - (y)/tilesize - 1));
+		Map.prototype.tileSelect = function (x, y){
+			var mapobj = this;
+			console.log("Selected : " + (x)/tilesize + ", " + (mapobj.columns - (y)/tilesize - 1));
 			$.post("ControlInput", 
 				{
 					username: player.username,
 					command: "SelectTile", 
 					x: (x)/tilesize, 
-				 	z: (map.columns - (y)/tilesize - 1)
+				 	z: (mapobj.columns - (y)/tilesize - 1)
+				},
+				function(data, status){
+					console.log("Path data: " + data);
+					data = JSON.parse(data);
+					for(var i = 0; i < data.path.length; i++){
+						var row = data.path[i].z;
+						var col = data.path[i].x;
+						console.log(mapobj.maparray);
+						console.log(mapobj.maparray[row][mapobj.columns-col]);
+						mapobj.maparray[row][mapobj.columns-col].graphics.clear().beginFill("Red").drawRect(row*tilesize, col*tilesize, tilesize, tilesize);
+
+					}
+					mapobj.currentpath = data.path;
 				});
 			
 		}
-
-		function panMap(e){
-			pan = true;
-			console.log("panpna");
-			if(this.offset.x == 0 && this.offset.y == 0) pan = false;
-			this.x = e.stageX + this.offset.x;
-			this.y = e.stageY + this.offset.y;
-			stage.update();
-		}
+		_extends(Map, createjs.Container);
 
 
 		
