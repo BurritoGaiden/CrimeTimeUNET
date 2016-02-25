@@ -62,7 +62,7 @@
 		var stage_state = "STARTUP"; //replace this with player.state
 		var rows = 5;
 		var columns = 5;
-		var tilesize = 50;
+		var tilesize = 75;
 		var w, h, midXOffset, midYOffset;
 		var canvas, topc, botc; 	
 		var stage, top_stage, bot_stage;
@@ -89,6 +89,7 @@
 				},
 			}
 		}
+		var players = [];
 		//Referenced strings
 		var character_conversion = ["BigBoy", "Graves", "Lulu", "Regards", "Fisticop"];
 		//
@@ -171,7 +172,16 @@
 
 			}
 			this.addEventListener("click", function(e){
-				var selectedTile = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
+				var selectedTile;
+				var obj = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
+				if(obj == player.icon.getChildAt(0)){
+					console.log("selected player");
+					var row = player.character.coords.x;
+					var col = player.character.coords.z+1;
+					selectedTile = map.maparray[row][col];
+				} else {
+					selectedTile = obj;
+				}
 				//console.log("CLICK EVENT: " + mapobj.pan)
 				if(firstTime) firstTime = false;
 				else if(selectedTile !== null && !mapobj.pan) {
@@ -230,15 +240,7 @@
 				},
 				function(data, status){
 					data = JSON.parse(data);
-					for(var j = 0; j < mapobj.currentpath.length; j++){
-						var row = mapobj.currentpath[j].row;
-						var col = mapobj.currentpath[j].col-1;
-						var ptile = mapobj.currentpath[j].tile;
-						if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
-						else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
-						else ptile.graphics.clear().beginFill("AliceBlue").drawRect(0, 0, tilesize, tilesize);
-					}
-					mapobj.currentpath = [];
+					mapobj.clearPath();
 					for(var i = 0; i < data.path.length; i++){
 						var col = data.path[i].z+1;
 						var row = data.path[i].x;
@@ -251,7 +253,7 @@
 			
 		}
 
-		Map.prototype.clearPath = function() {
+		Map.prototype.clearPath = function(newpath) {
 			var mapobj = this;
 			for(var j = 0; j < mapobj.currentpath.length; j++){
 				var row = mapobj.currentpath[j].row;
@@ -580,6 +582,11 @@
 						if((data.state == 6 || data.state == 4 || data.state == 5)) {
 							player.character = data.myCharacter;
 							if(map_setup == false){
+								for(var i = 0; i < data.characters.length; i++){
+									if(data.characters[i].username != player.username){
+										players.pop(data.characters[i]);
+									}	
+								}
 								getMapData();
 							}
 							else {
@@ -587,6 +594,7 @@
 							}
 						}
 						player.state = data.state;
+						
 					} catch(err) {
 						console.log(err);
 					}
@@ -608,9 +616,10 @@
 			var col = coords.z+1;
 			player.icon.x = map.maparray[row][col].x + tilesize/2;
 			player.icon.y = map.maparray[row][col].y + tilesize/2;
+			console.log(row + " " + col);
 			map.addChild(player.icon);
 			map.x = (w - 2*tilesize*row)/2;
-			map.y = (tilesize*col)/4;
+			map.y = (h - 2*tilesize*(map.columns-col))/2;
 		}
 
 		function movePlayerTo(coords){
@@ -620,6 +629,7 @@
 			var col = coords.z+1;
 			player.icon.x = map.maparray[row][col].x + tilesize/2;
 			player.icon.y = map.maparray[row][col].y + tilesize/2;
+			console.log(map.currentpath.length);
 		}
 
 		function getMapData(){
@@ -699,8 +709,11 @@
 					username: player.username,
 					command: "CommitMove", 
 				}, function(data, status) {
+					console.log(data);
 					map.clearPath();
 				});
+				map.clearPath();
+				console.log("cleared");
 			})
 			hud_stage.addChild(bg);
 			hud_stage.addChild(top);
@@ -738,8 +751,8 @@
 		function setupTopHud(){
 			//loadPlayers();
 			var teamicons = [];
-			if(player.character.name == "Fisticop")
-				for(m = 0; m < 5; m++){
+			if(player.character.name == "Fisticop"){
+				for(m = 0; m < players.length; m++){
 					var member_display = new createjs.Container();
 					member_display.x = m*(w/5);
 					member_display.y = (h/5)/2 - 10;
@@ -765,10 +778,10 @@
 					member_stats.addChild(name, health, range, melee, movespeed);
 					member_display.addChild(member_icon, member_stats);
 					hud_stage.addChild(member_display);
-					hud_stage.update();
 				}
-			else
-				for(m = 0; m < 3; m++){
+			}
+			else{
+				for(m = 0; m < players.length; m++){
 					var member_display = new createjs.Container();
 					member_display.x = m*(w/5 - 20);
 					member_display.y = (h/5)/2 - 10;
@@ -829,7 +842,8 @@
 				fisticop_stats.addChild(name, health, range, melee, movespeed);
 				fisticop_display.addChild(fisticop_icon, fisticop_stats);
 				hud_stage.addChild(seperator, fisticop_display, seperator_settings);
-				hud_stage.update();
+			}
+			hud_stage.update();
 		}
 
 
