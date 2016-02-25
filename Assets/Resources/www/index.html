@@ -385,6 +385,18 @@
 			var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
 			character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
 			character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
+			switch(character){
+				case 1: //Graves
+					character_icon_bitmap.x -= 7/4;
+					character_icon_bitmap.y -= 8/2;
+					break;
+				case 2: //Lulu
+					character_icon_bitmap.y += 6/2;
+					break;
+				case 4: //Fisticop
+					character_icon_bitmap.y -= 22/2;
+					break;
+			}
 			// var character_details_img = preload.getResult("detailsIcon");
 			// var character_details_bitmap = new createjs.Bitmap(character_details_img);
 			// character_details_bitmap.on("click", displayCharacterDetail, i);
