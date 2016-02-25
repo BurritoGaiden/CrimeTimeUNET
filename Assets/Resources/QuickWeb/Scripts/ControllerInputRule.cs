@@ -163,6 +163,7 @@ public class ControllerInputRule : WebServerRule
             }
         }
 
+        Debug.Log("Sending " + user + ": " + dataString);
         byte[] data = Encoding.ASCII.GetBytes(dataString);
 
         yield return null;

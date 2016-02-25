@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using UnityEditor;
 
 [System.Serializable]
 public class Map : MonoBehaviour, IJSONable{
@@ -36,7 +37,7 @@ public class Map : MonoBehaviour, IJSONable{
         MapJSON json = new MapJSON();
         json.width = layout.width;
         json.height = layout.height;
-
+        json.imagePath = "./Resources/maps/"+layout.name+".png";
         return json;
     }
 }

@@ -17,6 +17,7 @@ public class MapJSON : IJSON
 {
     public int width;
     public int height;
+    public string imagePath;
     
 }
 
