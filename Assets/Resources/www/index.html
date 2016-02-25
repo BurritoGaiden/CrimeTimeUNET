@@ -76,7 +76,7 @@
 			"ready": false,
 			"icon": {},
 			"character": {
-				"name": "BIGBOY",
+				"name": "",
 				"coords": {
 					"x": 0,
 					"y": 0,
@@ -92,7 +92,38 @@
 		var players = [];
 		//Referenced strings
 		var character_conversion = ["BigBoy", "Graves", "Lulu", "Regards", "Fisticop"];
-		//
+		var characters = {
+			"BigBoy" : {
+				"name" : "BigBoy",
+				"color": "#aba000",
+				"icon": {},
+				"index": -1
+			},
+			"Graves" : {
+				"name": "Graves",
+				"color": "#790000",
+				"icon": {},
+				"index": -1
+			},
+			"Lulu" : {
+				"name": "Lulu",
+				"color": "#8560a8",
+				"icon": {},
+				"index": -1
+			},
+			"Regards" : {
+				"name": "Regards",
+				"color": "#005e20",
+				"icon": {},
+				"index": -1
+			},
+			"Fisticop" : {
+				"name": "Fisticop",
+				"color": "#295194",
+				"icon": {},
+				"index": -1
+			}
+		};
 		var preload = new createjs.LoadQueue(true, "./Resources/www/");
 		var startup_manifest = [
 			{src: "sprites/titleborder.png", id: "startupBorderImg", type: "image"},
@@ -239,14 +270,18 @@
 				 	z: (mapobj.columns - (y)/tilesize - 1)
 				},
 				function(data, status){
-					data = JSON.parse(data);
-					mapobj.clearPath();
-					for(var i = 0; i < data.path.length; i++){
-						var col = data.path[i].z+1;
-						var row = data.path[i].x;
-						mapobj.maparray[row][col].graphics.clear().beginFill("Red").drawRect(0, 0, tilesize, tilesize);
-						mapobj.currentpath.push({"tile": mapobj.maparray[row][col], "col": col, "row": row});
+					try{
+						data = JSON.parse(data);
+						mapobj.clearPath();
+						for(var i = 0; i < data.path.length; i++){
+							var col = data.path[i].z+1;
+							var row = data.path[i].x;
+							mapobj.maparray[row][col].graphics.clear().beginFill("Red").drawRect(0, 0, tilesize, tilesize);
+							mapobj.currentpath.push({"tile": mapobj.maparray[row][col], "col": col, "row": row});
 
+						}
+					} catch(err) {
+						console.log(err);
 					}
 					stage.update();
 				});
@@ -594,21 +629,29 @@
 						if((data.state == 6 || data.state == 4 || data.state == 5)) {
 							player.character = data.myCharacter;
 							if(map_setup == false){
-								for(var i = 0; i < data.characters.length; i++){
-									if(data.characters[i].username != player.username){
-										players.pop(data.characters[i]);
-									}	
-								}
-								getMapData();
+								initOtherPlayers();
+								getMapData(data);
+
 							}
 							else {
 								movePlayerTo(player.character.coords);
+								for(var c in characters){
+									if(c == player.character.name) continue;
+									var character = characters[c];
+									map.removeChildAt(character.index);
+									character.index = -1;	
+								}
+								for(var i = 0; i < data.characters.length; i++){
+									if(data.characters[i].username != player.username){
+										updatePlayer(data.characters[i]);
+									}	
+								}
 							}
 						}
 						player.state = data.state;
 						
 					} catch(err) {
-						console.log(err);
+						console.log(err + " " + err.lineNumber);
 					}
 			})
 			.fail(function() {
@@ -617,34 +660,58 @@
 				}, timeout*1000);
 			});
 		}
-
+		function initOtherPlayers(){
+			for(var c in characters){
+				var character = characters[c];
+				character.icon = new createjs.Container();
+				character.icon.name = "Player";
+				var icon = new createjs.Shape();
+				icon.graphics.beginFill(character.color).drawCircle(0, 0, tilesize/3);
+				character.icon.addChild(icon);	
+			}
+		}
 		function spawnPlayerAt(coords){
+			var pchar = characters[player.character.name];
 			player.icon = new createjs.Container();
 			player.icon.name = "Player";
 			var icon = new createjs.Shape();
-			icon.graphics.beginFill("Pink").drawCircle(0, 0, tilesize/3);
+			icon.graphics.beginFill(pchar.color).drawCircle(0, 0, tilesize/3);
 			player.icon.addChild(icon);
 			var row = coords.x;
 			var col = coords.z+1;
-			player.icon.x = map.maparray[row][col].x + tilesize/2;
-			player.icon.y = map.maparray[row][col].y + tilesize/2;
+			player.icon.x = pchar.icon.x = map.maparray[row][col].x + tilesize/2;
+			player.icon.y = pchar.icon.y = map.maparray[row][col].y + tilesize/2;
 			console.log(row + " " + col);
-			map.addChild(player.icon);
+			var child = map.addChild(player.icon);
+			pchar.index = map.getChildIndex(child);
 			map.x = (w - 2*tilesize*row)/2;
 			map.y = (h - 2*tilesize*(map.columns-col))/2;
 		}
 
+		function updatePlayer(p) {
+			console.log("Updating " + p.name);
+			var pchar = characters[p.name];
+			var row = p.coords.x;
+			var col = p.coords.z+1;
+			pchar.icon.x = map.maparray[row][col].x + tilesize/2;
+			pchar.icon.y = map.maparray[row][col].y + tilesize/2;
+			if(pchar.index == -1){
+				var child = map.addChild(pchar.icon);
+				pchar.index = map.getChildIndex(child);
+			}
+		}
+
 		function movePlayerTo(coords){
-			var icon = player.icon.getChildAt(0);
-			icon.graphics.clear().beginFill("Pink").drawCircle(0, 0, tilesize/3);
+			//var icon = player.icon.getChildAt(0);
+			//icon.graphics.clear().beginFill("Pink").drawCircle(0, 0, tilesize/3);
 			var row = coords.x;
 			var col = coords.z+1;
 			player.icon.x = map.maparray[row][col].x + tilesize/2;
 			player.icon.y = map.maparray[row][col].y + tilesize/2;
-			console.log(map.currentpath.length);
+			//console.log(map.currentpath.length);
 		}
 
-		function getMapData(){
+		function getMapData(characterData){
 			map_setup = true;
 			var mapdata;
 			$.post("ControlInput", {
@@ -657,6 +724,12 @@
 					console.log(data.width + " " + data.height);
 					map = new Map();
 					map.generate(data.width, data.height);
+					for(var i = 0; i < characterData.characters.length; i++){
+						if(characterData.characters[i].username != player.username){
+							players.pop(characterData.characters[i]);
+							updatePlayer(characterData.characters[i]);
+						}	
+					}
 					setup();
 				}
 			)
@@ -712,7 +785,7 @@
 			action_graphic.graphics.beginFill("DimGray").drawCircle(0, 0, 50);
 			action_button.addChild(action_graphic, action_text);
 			action_button.x = w - action_button.getBounds().width;
-			action_button.y = h - (h/5) - action_button.getBounds().width;
+			action_button.y = h - action_button.getBounds().width/1.75;
 			action_button.on("click", function(){
 				//send post
 				console.log("Committing movements");
@@ -861,14 +934,28 @@
 
 
 		function setupBotHud(){
-			var player_icon = new createjs.Shape();
-			var player_icon_img = new Image();
-			player_icon_img.onload = function(){
-				
+			var player_icon = new createjs.Container();
+			var icon_bg = new createjs.Shape();
+			var index = character_conversion.indexOf(player.character.name);
+			var character_icon_img = preload_icon.getResult("characterSelectIcon" + index);
+			var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
+			icon_bg.graphics.beginFill("DimGray").drawCircle(0, 0, 100);
+			character_icon_bitmap.scaleX = character_icon_bitmap.scaleY = 100/90;
+			character_icon_bitmap.x -= ((character_icon_bitmap.image.width)/2) * 100/90;
+			character_icon_bitmap.y -= ((character_icon_bitmap.image.height)/2) * 100/90;
+			switch(index){
+				case 1: //Graves
+					character_icon_bitmap.x -= 7/4;
+					character_icon_bitmap.y -= 8/2;
+					break;
+				case 2: //Lulu
+					character_icon_bitmap.y += 6/2;
+					break;
+				case 4: //Fisticop
+					character_icon_bitmap.y -= 22/2;
+					break;
 			}
-
-			player_icon_img.src = "./sprites/josephine_player_icon.png";
-			player_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 100, 100);
+			player_icon.addChild(icon_bg, character_icon_bitmap);
 			player_icon.x = 120;
 			player_icon.y = h-(h/5) + 50;
 			//add mask for player sprite/portrait
