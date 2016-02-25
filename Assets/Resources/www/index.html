@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=320" initial-scale="1.0" maximum-scale="1.0" user-scalable="0">
+	<meta name="viewport" content="width=device-width" initial-scale="0.6" maximum-scale="0.6" user-scalable="0">
 	<title>HeistNight!</title>
 	<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
@@ -137,7 +137,8 @@
 			{src: "characterSelectIcon3.png", id: "characterSelectIcon3", type: "image"},
 			{src: "characterSelectIcon4.png", id: "characterSelectIcon4", type: "image"},
 		]
-
+		var preload_map = new createjs.LoadQueue(true, "");
+		var map_manifest;
 		var borders;
 		//Function to call heartbeat
 
@@ -183,6 +184,10 @@
 		}
 		Map.prototype.generate = function(rows, columns){
 			var mapobj = this;
+			var mapimg = preload_map.getResult("mapimg");
+			var mapimg_bitmap = new createjs.Bitmap(mapimg);
+			mapimg_bitmap.scaleX = mapimg_bitmap.scaleY = tilesize;
+			//this.addChild(mapimg_bitmap);
 			var firstTime = true;
 			this.rows = rows;
 			this.columns = columns;
@@ -190,10 +195,11 @@
 			for(var row = 0; row < rows; row++){
 				for(var col = 0; col < columns; col++){
 					var tile = new createjs.Shape();
-					if(row % 2 === 0 && col % 2 === 0) tile.graphics.beginFill("DeepSkyBlue");
-					else if(row % 2 !== 0 && col % 2 !== 0) tile.graphics.beginFill("DeepSkyBlue");
-					else tile.graphics.beginFill("AliceBlue");
+					if(row % 2 === 0 && col % 2 === 0) tile.graphics.beginFill("DimGray");
+					else if(row % 2 !== 0 && col % 2 !== 0) tile.graphics.beginFill("DimGray");
+					else tile.graphics.beginFill("Silver");
 					tile.graphics.drawRect(0, 0, tilesize, tilesize);
+					//tile.alpha = 0.2;
 					tile.x = row*tilesize;
 					tile.y = col*tilesize;
 					mapobj.maparray[row][columns-col] = tile; 
@@ -294,9 +300,9 @@
 				var row = mapobj.currentpath[j].row;
 				var col = mapobj.currentpath[j].col-1;
 				var ptile = mapobj.currentpath[j].tile;
-				if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
-				else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DeepSkyBlue").drawRect(0, 0, tilesize, tilesize);
-				else ptile.graphics.clear().beginFill("AliceBlue").drawRect(0, 0, tilesize, tilesize);
+				if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DimGray").drawRect(0, 0, tilesize, tilesize);
+				else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DimGray").drawRect(0, 0, tilesize, tilesize);
+				else ptile.graphics.clear().beginFill("Silver").drawRect(0, 0, tilesize, tilesize);
 			}
 			mapobj.currentpath = [];
 			stage.update();
@@ -629,8 +635,17 @@
 						if((data.state == 6 || data.state == 4 || data.state == 5)) {
 							player.character = data.myCharacter;
 							if(map_setup == false){
-								initOtherPlayers();
-								getMapData(data);
+								if(!preload_icon.loaded){
+									preload_icon.on("complete", function(){
+										initOtherPlayers();
+										getMapData(data);
+									});
+									preload_icon.loadManifest(charSelect_manifest);
+								}
+								else{
+									initOtherPlayers();
+									getMapData(data);
+								}
 
 							}
 							else {
@@ -712,6 +727,9 @@
 		}
 
 		function getMapData(characterData){
+			var bg = new createjs.Shape();
+			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
+			stage.addChild(bg);
 			map_setup = true;
 			var mapdata;
 			$.post("ControlInput", {
@@ -719,18 +737,23 @@
 				command: "GetMapData",
 			},
 				function(data, status){
+					console.log(data);
 					data = JSON.parse(data);
-					console.log(status + " " + data);
-					console.log(data.width + " " + data.height);
-					map = new Map();
-					map.generate(data.width, data.height);
-					for(var i = 0; i < characterData.characters.length; i++){
-						if(characterData.characters[i].username != player.username){
-							players.pop(characterData.characters[i]);
-							updatePlayer(characterData.characters[i]);
-						}	
-					}
-					setup();
+					map_manifest = [
+						{src: data.imagePath, id: "mapimg", type: "image"}
+					];
+					preload_map.on("complete", function(){
+						map = new Map();
+						map.generate(data.width, data.height);
+						for(var i = 0; i < characterData.characters.length; i++){
+							if(characterData.characters[i].username != player.username){
+								players.pop(characterData.characters[i]);
+								updatePlayer(characterData.characters[i]);
+							}	
+						}
+						setup();
+					});
+					preload_map.loadManifest(map_manifest);
 				}
 			)
 			
@@ -784,8 +807,9 @@
 			action_text.y -= action_text.getBounds().height/2;
 			action_graphic.graphics.beginFill("DimGray").drawCircle(0, 0, 50);
 			action_button.addChild(action_graphic, action_text);
-			action_button.x = w - action_button.getBounds().width;
-			action_button.y = h - action_button.getBounds().width/1.75;
+			action_button.scaleX = action_button.scaleY = mobile_offset;
+			action_button.x = (w - action_button.getBounds().width)*mobile_offset;
+			action_button.y = (h - action_button.getBounds().width/1.75)*mobile_offset;
 			action_button.on("click", function(){
 				//send post
 				console.log("Committing movements");
@@ -796,16 +820,17 @@
 				}, function(data, status) {
 					console.log(data);
 					map.clearPath();
+					map.currentpath = [];
 				});
 				map.clearPath();
 				console.log("cleared");
 			})
 			hud_stage.addChild(bg);
-			hud_stage.addChild(top);
+			//hud_stage.addChild(top);
 			hud_stage.addChild(bot);
 			hud_stage.addChild(action_button);
 			setupBotHud();
-			setupTopHud();
+			//setupTopHud();
 		}
 
 		function toMap(e){
