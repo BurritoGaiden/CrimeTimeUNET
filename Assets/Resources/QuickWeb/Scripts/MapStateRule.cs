@@ -70,7 +70,9 @@ public class MapStateRule : WebServerRule
             List<CharacterJSON> cj = new List<CharacterJSON>();
             foreach (CharacterBehavior c in FindObjectsOfType<CharacterBehavior>())
             {
-                cj.Add((CharacterJSON)c.ToJSON());
+                // if you're allies OR you're made visible
+                if(c.Team == cp.Team || c.IsVisible)
+                    cj.Add((CharacterJSON)c.ToJSON());
             }
             Heartbeat h = new Heartbeat();
             h.state = GameStateManager.Instance.GameState;

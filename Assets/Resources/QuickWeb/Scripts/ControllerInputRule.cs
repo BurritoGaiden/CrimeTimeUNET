@@ -122,30 +122,36 @@ public class ControllerInputRule : WebServerRule
 
                 // commit their movement path and execute a move
                 case "CommitMove":
-                    cp.CommitToMove();
+                    if(IsYourTurn(cp))
+                    {
+                        cp.CommitToMove();
+                    }
                     break;
 
                 // select a tile to add to the movement path
                 case "SelectTile":
-                    if (mapGenerator != null)
+                    if (IsYourTurn(cp))
                     {
-                        try
+                        if (mapGenerator != null)
                         {
-                            Debug.Log("Processing tile data: {x:" + j["x"] + "," + "z:" + j["z"] + "}");
-                            cp.PathSelection(mapGenerator.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
-                            PathTile p = new PathTile();
-                            List<Coordinate> queuedCoords = new List<Coordinate>();
-                            foreach (TileBehavior tb in cp.QueuedPath)
+                            try
                             {
-                                queuedCoords.Add(tb.Coords);
+                                Debug.Log("Processing tile data: {x:" + j["x"] + "," + "z:" + j["z"] + "}");
+                                cp.PathSelection(mapGenerator.TileArray[int.Parse(j["x"]), int.Parse(j["z"])]);
+                                PathTile p = new PathTile();
+                                List<Coordinate> queuedCoords = new List<Coordinate>();
+                                foreach (TileBehavior tb in cp.QueuedPath)
+                                {
+                                    queuedCoords.Add(tb.Coords);
+                                }
+                                p.path = queuedCoords.ToArray();
+                                Debug.Log(JsonUtility.ToJson(p));
+                                dataString = JsonUtility.ToJson(p);
                             }
-                            p.path = queuedCoords.ToArray();
-                            Debug.Log(JsonUtility.ToJson(p));
-                            dataString = JsonUtility.ToJson(p);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.Log(e.Message);
+                            catch (Exception e)
+                            {
+                                Debug.Log(e.Message);
+                            }
                         }
                     }
                     break;
@@ -178,6 +184,11 @@ public class ControllerInputRule : WebServerRule
             responseStream.Write(data, i, writeLength);
             i += writeLength;
         }
+    }
+
+    bool IsYourTurn(CommandPanel cp)
+    {
+        return (cp.Team == Alliance.Cops && GameStateManager.Instance.GameState == GameState.CopsTurn) || (cp.Team == Alliance.Robbers && GameStateManager.Instance.GameState == GameState.GangTurn);
     }
 
     // auto-hook to gameplay managers when they show up

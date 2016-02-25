@@ -11,6 +11,13 @@ public abstract class MapActor : MonoBehaviour, IJSONable {
         set { coord = value; }
     }
 
+    private bool isVisible = true;
+    public bool IsVisible
+    {
+        get { return isVisible; }
+        set { isVisible = value; }
+    }
+
     public virtual IJSON ToJSON()
     {
         ActorJSON json = new ActorJSON();
