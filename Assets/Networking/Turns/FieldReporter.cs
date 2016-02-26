@@ -89,7 +89,16 @@ public class FieldReporter : MonoBehaviour
 
     public IEnumerator crunchTurns()
     {
-        pauseButton.interactable = true;
+        FindObjectOfType<CopVision>().enabled = false;
+        foreach (MapActor spotted in FindObjectsOfType<MapActor>())
+        {
+            spotted.GetComponent<Renderer>().enabled = true;
+            foreach (Transform child in spotted.transform)
+            {
+                child.gameObject.SetActive(true);
+            }
+        }
+            pauseButton.interactable = true;
         int i = 0;
         int j = 0;
         turnNumber = 0;
@@ -106,11 +115,25 @@ public class FieldReporter : MonoBehaviour
         }
         replayButton.interactable = true;
         pauseButton.interactable = false;
+        FindObjectOfType<CopVision>().enabled = true;
     }
 
     public void checkToIncrememt()
     {
-        incrementTurn();
+        List<bool> readyList = new List<bool>();
+        foreach(CommandPanel cp in FindObjectsOfType<CommandPanel>())
+        {
+            if (GameStateManager.Instance.GameState == GameState.GangTurn && cp.Team == Alliance.Robbers)
+                readyList.Add(cp.TurnFinished);
+            else if (GameStateManager.Instance.GameState == GameState.CopsTurn && cp.Team == Alliance.Cops)
+                readyList.Add(cp.TurnFinished);
+        }
+        if (!readyList.Contains(false))
+        {
+            incrementTurn();
+            foreach (CommandPanel cp in FindObjectsOfType<CommandPanel>())
+                cp.TurnFinished = false;
+        }
     }
 
     

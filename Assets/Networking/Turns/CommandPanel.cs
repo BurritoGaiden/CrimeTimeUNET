@@ -37,6 +37,16 @@ public class CommandPanel : MonoBehaviour, IJSONable {
         set { ready = value; }
     }
 
+
+    // A bool that is flipped to true when a user has finished executing their turn
+    // When all of these on a team are true, the turn can advance
+    private bool turnFinished = false;
+    public bool TurnFinished
+    {
+        get { return turnFinished; }
+        set { turnFinished = value; }
+    }
+
     [SerializeField]
     private float timerMax = 15.0f;
     private float timerCurrent = 0.0f;
@@ -195,7 +205,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
                 }
                 else if ((((dx == 1 && dz == 0) || (dx == 0 && dz == 1))
                           && (dx + dz <= 1))
-                          && queuedPath.Count - 1 < 4)
+                          && queuedPath.Count - 1 < unit.Stats.movement)
                 {
                     queuedPath.Add(tile);
                 }
@@ -212,7 +222,10 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     public void CommitToMove(){
 
 		Movement move = new Movement (unit, queuedPath, true);
-		StartCoroutine(Execute (move));
+        // eventually have a
+        turnFinished = true;
+        StartCoroutine(Execute (move));
+       
 	}
 
 	void UpdateMovesLeft(){
