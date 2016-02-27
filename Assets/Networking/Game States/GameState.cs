@@ -3,9 +3,12 @@ using System.Collections;
 
 public enum GameState
 {
+    Launcher,
     MainMenu,
     CharacterSelect,
     Planning,
-    Heist,
+    GameBegin,
+    CopsTurn,
+    GangTurn,
     PostGame,
 }

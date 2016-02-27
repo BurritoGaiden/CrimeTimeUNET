@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=320" initial-scale="1.0" maximum-scale="1.0" user-scalable="0">
+	<meta name="viewport" content="width=device-width" initial-scale="0.6" maximum-scale="0.6" user-scalable="0">
 	<title>HeistNight!</title>
 	<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
@@ -57,21 +57,30 @@
 	<input id="usernameInput" type="text">
 	<!-- Script stuff to draw on canvas -->
 	<script type="text/javascript">
+		var timeout = 15; //15 seconds timeout when heartbeat stops
 		var mobile_offset = 0.75;
-		var stage_state = "STARTUP";
+		var stage_state = "STARTUP"; //replace this with player.state
 		var rows = 5;
 		var columns = 5;
-		var tilesize = 100;
+		var tilesize = 75;
 		var w, h, midXOffset, midYOffset;
 		var canvas, topc, botc; 	
 		var stage, top_stage, bot_stage;
 		var map;
+		var map_setup = false;
 		var currentTile;
 		var player = {
 			"id": 0,
 			"username": "Bon",
+			"state": 1,
+			"ready": false,
+			"icon": {},
 			"character": {
-				"name": "BIGBOY",
+				"name": "",
+				"coords": {
+					"x": 0,
+					"y": 0,
+				},
 				"stats": {
 					"health": 5,
 					"punch": 6,
@@ -80,6 +89,41 @@
 				},
 			}
 		}
+		var players = [];
+		//Referenced strings
+		var character_conversion = ["BigBoy", "Graves", "Lulu", "Regards", "Fisticop"];
+		var characters = {
+			"BigBoy" : {
+				"name" : "BigBoy",
+				"color": "#aba000",
+				"icon": {},
+				"index": -1
+			},
+			"Graves" : {
+				"name": "Graves",
+				"color": "#790000",
+				"icon": {},
+				"index": -1
+			},
+			"Lulu" : {
+				"name": "Lulu",
+				"color": "#8560a8",
+				"icon": {},
+				"index": -1
+			},
+			"Regards" : {
+				"name": "Regards",
+				"color": "#005e20",
+				"icon": {},
+				"index": -1
+			},
+			"Fisticop" : {
+				"name": "Fisticop",
+				"color": "#295194",
+				"icon": {},
+				"index": -1
+			}
+		};
 		var preload = new createjs.LoadQueue(true, "./Resources/www/");
 		var startup_manifest = [
 			{src: "sprites/titleborder.png", id: "startupBorderImg", type: "image"},
@@ -93,37 +137,91 @@
 			{src: "characterSelectIcon3.png", id: "characterSelectIcon3", type: "image"},
 			{src: "characterSelectIcon4.png", id: "characterSelectIcon4", type: "image"},
 		]
-
-
+		var preload_map = new createjs.LoadQueue(true, "");
+		var map_manifest;
+		var borders;
 		//Function to call heartbeat
 
-		window.addEventListener('resize', resize, false);
-		Map.prototype = new createjs.Container();
-		Map.prototype.constructor = Map;
-		function Map(rows, columns){
+
+		var _extends = function(ChildClass, ParentClass)
+		{
+		    var f = function() { };
+		    f.prototype = ParentClass.prototype;
+
+		    // copy child prototype methods in case there are some defined already
+		    for(var m in ChildClass.prototype)
+		    {
+		        f.prototype[m] = ChildClass.prototype[m];
+		    }
+
+		    ChildClass.prototype = new f();
+		    ChildClass.prototype.constructor = ChildClass;
+		    ChildClass.prototype._super = ParentClass.prototype;        
+		};
+
+		/* thanks yckart and mr. crumley on SO */
+		function createArray(length) {
+		    var arr = new Array(length || 0),
+		        i = length;
+
+		    if (arguments.length > 1) {
+		        var args = Array.prototype.slice.call(arguments, 1);
+		        while(i--) arr[length-1 - i] = createArray.apply(this, args);
+		    }
+
+		    return arr;
+		}
+
+		//window.addEventListener('resize', resize, false);
+		var Map = function() {
+			this._super.constructor.call(this);
+			this.rows = 0;
+			this.columns = 0;
+			this.maparray;
+			this.currentpath = [];
+			this.pan = false;
+			this.pan_threshold = 1;
+		}
+		Map.prototype.generate = function(rows, columns){
+			var mapobj = this;
+			var mapimg = preload_map.getResult("mapimg");
+			var mapimg_bitmap = new createjs.Bitmap(mapimg);
+			mapimg_bitmap.scaleX = mapimg_bitmap.scaleY = tilesize;
+			//this.addChild(mapimg_bitmap);
 			var firstTime = true;
-			var pan = false;
-			this.x = (tilesize*columns)/2;
-			this.y = h/5;
+			this.rows = rows;
+			this.columns = columns;
+			this.maparray = createArray(rows, columns);
 			for(var row = 0; row < rows; row++){
 				for(var col = 0; col < columns; col++){
 					var tile = new createjs.Shape();
-					if(row % 2 === 0 && col % 2 === 0) tile.graphics.beginFill("DeepSkyBlue");
-					else if(row % 2 !== 0 && col % 2 !== 0) tile.graphics.beginFill("DeepSkyBlue");
-					else tile.graphics.beginFill("AliceBlue");
+					if(row % 2 === 0 && col % 2 === 0) tile.graphics.beginFill("DimGray");
+					else if(row % 2 !== 0 && col % 2 !== 0) tile.graphics.beginFill("DimGray");
+					else tile.graphics.beginFill("Silver");
 					tile.graphics.drawRect(0, 0, tilesize, tilesize);
+					//tile.alpha = 0.2;
 					tile.x = row*tilesize;
 					tile.y = col*tilesize;
+					mapobj.maparray[row][columns-col] = tile; 
 					this.addChild(tile);
 					//stage.update();
 				}	
 
 			}
 			this.addEventListener("click", function(e){
-				console.log("clicky")
-				var selectedTile = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
+				var selectedTile;
+				var obj = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
+				if(obj == player.icon.getChildAt(0)){
+					console.log("selected player");
+					var row = player.character.coords.x;
+					var col = player.character.coords.z+1;
+					selectedTile = map.maparray[row][col];
+				} else {
+					selectedTile = obj;
+				}
+				//console.log("CLICK EVENT: " + mapobj.pan)
 				if(firstTime) firstTime = false;
-				else if(selectedTile !== null && !pan) {
+				else if(selectedTile !== null && !mapobj.pan) {
 					var circle = new createjs.Shape();
 					circle.graphics.beginFill("Crimson").drawCircle(0, 0, 10);
 					circle.x = e.stageX;
@@ -140,31 +238,76 @@
 					currentTile.x = selectedTile.x;
 					currentTile.y = selectedTile.y;
 					stage.update();
-					tileSelect(selectedTile.x, selectedTile.y);
+					mapobj.tileSelect(selectedTile.x, selectedTile.y);
 				}
 			})
 			this.on("mousedown", function(e){
-				pan = false;
-				console.log("DOWN");
+				mapobj.pan = false;
+				//console.log("DOWN EVENT: " + mapobj.pan);
 				this.parent.addChild(this);
 				this.offset = {x: this.x - e.stageX, y: this.y - e.stageY};
-				this.addEventListener("")
 			});
-			this.on("pressup", function(){
-				console.log("UP");
-				pan = false;
+			this.on("pressmove", function(e){
+				var mapobj = this;
+				mapobj.pan = true;
+				//console.log("PAN EVENT BEFORE: " + mapobj.pan);
+				var x_disp = Math.abs(e.stageX + this.offset.x - this.x);
+				var y_disp = Math.abs(e.stageY + this.offset.y - this.y);
+				//console.log(x_disp + " " + y_disp);
+				if(x_disp < mapobj.pan_threshold && y_disp < mapobj.pan_threshold) mapobj.pan = false;
+				//console.log("PAN EVENT AFTER: " + mapobj.pan)
+				this.x = e.stageX + this.offset.x;
+				this.y = e.stageY + this.offset.y;
+				stage.update();
 			});
-			this.on("pressmove", panMap);
+			this.x = 10;
+			this.y = -h/2;
+
+			spawnPlayerAt(player.character.coords);
 		}
 
-		function panMap(e){
-			pan = true;
-			console.log("panpna");
-			if(this.offset.x == 0 && this.offset.y == 0) pan = false;
-			this.x = e.stageX + this.offset.x;
-			this.y = e.stageY + this.offset.y;
+		Map.prototype.tileSelect = function (x, y){
+			var mapobj = this;
+			$.post("ControlInput", 
+				{
+					username: player.username,
+					command: "SelectTile", 
+					x: (x)/tilesize, 
+				 	z: (mapobj.columns - (y)/tilesize - 1)
+				},
+				function(data, status){
+					try{
+						data = JSON.parse(data);
+						mapobj.clearPath();
+						for(var i = 0; i < data.path.length; i++){
+							var col = data.path[i].z+1;
+							var row = data.path[i].x;
+							mapobj.maparray[row][col].graphics.clear().beginFill("Red").drawRect(0, 0, tilesize, tilesize);
+							mapobj.currentpath.push({"tile": mapobj.maparray[row][col], "col": col, "row": row});
+
+						}
+					} catch(err) {
+						console.log(err);
+					}
+					stage.update();
+				});
+			
+		}
+
+		Map.prototype.clearPath = function(newpath) {
+			var mapobj = this;
+			for(var j = 0; j < mapobj.currentpath.length; j++){
+				var row = mapobj.currentpath[j].row;
+				var col = mapobj.currentpath[j].col-1;
+				var ptile = mapobj.currentpath[j].tile;
+				if(row % 2 === 0 && col % 2 === 0) ptile.graphics.clear().beginFill("DimGray").drawRect(0, 0, tilesize, tilesize);
+				else if(row % 2 !== 0 && col % 2 !== 0) ptile.graphics.clear().beginFill("DimGray").drawRect(0, 0, tilesize, tilesize);
+				else ptile.graphics.clear().beginFill("Silver").drawRect(0, 0, tilesize, tilesize);
+			}
+			mapobj.currentpath = [];
 			stage.update();
 		}
+		_extends(Map, createjs.Container);
 
 
 		
@@ -174,7 +317,7 @@
 			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
 			startPopup.graphics.beginFill("DimGray").drawRoundRect(w/16, h/16, w - w/8, h - h/8, 5);
 			var borderimg = preload.getResult("startupBorderImg");
-			var borders = new createjs.Container();
+			borders = new createjs.Container();
 			var borderBitmap = new createjs.Bitmap(borderimg);
 			var border_offset = 20;
 			for(i = 1; i <= 4; i++){
@@ -272,61 +415,173 @@
 			//update player(s) data
 		}
 
+		var CharacterSelectIcon = function() {
+			this._super.constructor.call(this);
+			this.bg = new createjs.Shape();
+			this.selected = false;
+		}
+		CharacterSelectIcon.prototype.generateIcon = function(character) {
+			this.bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
+			var character_icon_img = preload_icon.getResult("characterSelectIcon" + character);
+			var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
+			character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
+			character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
+			switch(character){
+				case 1: //Graves
+					character_icon_bitmap.x -= 7/4;
+					character_icon_bitmap.y -= 8/2;
+					break;
+				case 2: //Lulu
+					character_icon_bitmap.y += 6/2;
+					break;
+				case 4: //Fisticop
+					character_icon_bitmap.y -= 22/2;
+					break;
+			}
+			// var character_details_img = preload.getResult("detailsIcon");
+			// var character_details_bitmap = new createjs.Bitmap(character_details_img);
+			// character_details_bitmap.on("click", displayCharacterDetail, i);
+			// character_details_bitmap.x = character_icon_bitmap.x;
+			// character_details_bitmap.y = ??????? Not sure if put on icon corner, or below it, or on top, etcetc...
+			this.addChild(this.bg, character_icon_bitmap); //REMEMBER TO PUT BACK IN CHARACTER DETAILS
+			//add event listener here that if someone has already selected this character, disable it/grey it out
+			this.scaleX = this.scaleY = mobile_offset - 0.15;
+			this.x -= this.getBounds().width/2;
+			this.name = character;
+		}
+		_extends(CharacterSelectIcon, createjs.Container);
+
 		function showCharacterSelect(){
+			var ready_button = new createjs.Container();
+			var ready_box = new createjs.Shape();
+			var ready_button_text = new createjs.Text("Ready", "30px DAYPBL", "white");
+			
 
 			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
 			charSelectScreen.name = "charSelectScreen";
-			var promptText = new createjs.Text("Please select your character:", "42px cinzel", "white");
-			promptText.x = w/2 - promptText.getBounds().width/2;
-			promptText.y = h/5;
+			var promptText1 = new createjs.Text("Choose your", "50px DAYPBL", "white");
+			var promptText2 = new createjs.Text("character", "50px DAYPBL", "white");
+			promptText1.x = w/2 - promptText1.getBounds().width/2;
+			promptText1.y = h/16;
+			promptText2.x = w/2 - promptText2.getBounds().width/2;
+			promptText2.y = promptText1.y + promptText1.getBounds().height/2 + 10;
+
 			var characters = new createjs.Container();
-			for(i = 4; i >= 0; i--){
-				var character_icon = new createjs.Container();
-				var character_icon_bg = new createjs.Shape();
-				character_icon_bg.graphics.beginFill("Gray").drawCircle(0, 0, 90);
-				var character_icon_img = preload_icon.getResult("characterSelectIcon" + i);
-				var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
-				character_icon_bitmap.x -= (character_icon_bitmap.image.width)/2;
-				character_icon_bitmap.y -= (character_icon_bitmap.image.height)/2;
-				// var character_details_img = preload.getResult("detailsIcon");
-				// var character_details_bitmap = new createjs.Bitmap(character_details_img);
-				// character_details_bitmap.on("click", displayCharacterDetail, i);
-				// character_details_bitmap.x = character_icon_bitmap.x;
-				// character_details_bitmap.y = ??????? Not sure if put on icon corner, or below it, or on top, etcetc...
-				character_icon.addChild(character_icon_bg, character_icon_bitmap); //REMEMBER TO PUT BACK IN CHARACTER DETAILS
-				//add event listener here that if someone has already selected this character, disable it/grey it out
-				character_icon.scaleX = character_icon.scaleY = mobile_offset - 0.15;
+			for(character = 4; character >= 0; character--){
+				var character_icon = new CharacterSelectIcon();
+				character_icon.generateIcon(character);
+				
+				character_icon.on("click", function(){
+					var icon = this;
+					//sent POST request to select
+					$.post("ControlInput", 
+					{
+						username: player.username,
+						command: "ChooseCharacter",
+						character: character_conversion[this.name],
+					},
+						function(data, status){
+							console.log("SELECTED CHARACTER " + character_conversion[icon.name]);
+							for(var i=0; i<characters.children.length;i++){
+								var other = characters.children[i];
+								if(other!=icon){
+									other.selected = false;
+									other.bg.graphics.clear().beginFill("Gray").drawCircle(0, 0, 90);
+								}
+							}
+							console.log(icon.selected);
+							if(icon.selected) {
+								icon.selected = false;
+								icon.bg.graphics.clear().beginFill("Gray").drawCircle(0, 0, 90);
+							}
+							else {
+								icon.selected = true;
+								icon.bg.graphics.clear().beginFill("White").drawCircle(0, 0, 90);
+							}
+							if(player.ready){
+								$.post("ControlInput", 
+								{
+									username: player.username,
+									command: "ToggleReady",
+								},
+									function(data, status){
+										console.log("Success! Data: " + data);
+										var color = "DarkGray";
+										var txt_color = "White";
+										player.ready = !player.ready;
+										if(player.ready) {
+											color = "Gray";
+											txt_color = "DarkGray";
+										} else {
+											color = "DarkGray";
+											txt_color = "White";
+										}
+										ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
+										ready_button_text.color = txt_color;
+										hud_stage.update();
+								})
+							}
+							hud_stage.update();
+					})
+				})
 				var fisticop_icon;
-				if(i == 4) {
+				if(character == 4) {
 					fisticop_icon = character_icon;
 					var bounds = character_icon.getBounds();
 					console.log(character_icon.getBounds());
-					character_icon.x = w/2 + bounds.width/2;
+					character_icon.x = w/2;
 					character_icon.y = h/2;
 					character_icon.scaleX = character_icon.scaleY = mobile_offset;
 				}
-				else if(i % 2 == 0){
-					character_icon.x = fisticop_icon.x - 150*mobile_offset;
-					if(i/2 == 0) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (i/2 == 1) character_icon.y = promptText.y + 150*2.1*mobile_offset;
-				} else {
-					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width + 150*mobile_offset;
-					if(i == 1) character_icon.y = promptText.y + 150*mobile_offset;
-					else if (i == 3) character_icon.y = promptText.y + 150*2.1*mobile_offset;
+				else if(character % 2 == 0){ //left side icons
+					character_icon.x = fisticop_icon.x - fisticop_icon.getBounds().width/2 - 150*mobile_offset;
+					if(character/2 == 0) character_icon.y = promptText2.y + 125*mobile_offset;
+					else if (character/2 == 1) character_icon.y = promptText2.y + 145*2.1*mobile_offset;
+				} else { //right side icons
+					character_icon.x = fisticop_icon.x + fisticop_icon.getBounds().width/2 + 150*mobile_offset;
+					if(character == 1) character_icon.y = promptText2.y + 125*mobile_offset;
+					else if (character == 3) character_icon.y = promptText2.y + 145*2.1*mobile_offset;
 				} 
-				character_icon.x -= character_icon.getBounds().width/2;
-				character_icon.on("click", function(){
-					//sent POST request to select
-					console.log("SELECTED CHARACTER");
-				})
 				characters.addChild(character_icon);
 			}
-			charSelectScreen.addChild(promptText, characters);
+
+			ready_box.graphics.beginFill("DarkGray").drawRoundRect(0, 0, 200, 75, 5);
+			ready_button_text.x = 100 - ready_button_text.getBounds().width/2;
+			ready_button_text.y = 75/2 - ready_button_text.getBounds().height/2;
+			ready_button.addChild(ready_box, ready_button_text);
+			ready_button.x = w/2 - 100;
+			ready_button.y = characters.getBounds().height + 100*mobile_offset;
+
+			ready_button.on("click", function(){
+				$.post("ControlInput", 
+				{
+					username: player.username,
+					command: "ToggleReady",
+				},
+					function(data, status){
+						console.log("Success! Data: " + data);
+						var color = "DarkGray";
+						var txt_color = "White";
+						player.ready = !player.ready;
+						if(player.ready) {
+							color = "Gray";
+							txt_color = "DarkGray";
+						} else {
+							color = "DarkGray";
+							txt_color = "White";
+						}
+						ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
+						ready_button_text.color = txt_color;
+						hud_stage.update();
+				})
+			})
+
+			charSelectScreen.addChild(promptText1, promptText2, characters, ready_button);
 			hud_stage.addChild(charSelectScreen);
 			hud_stage.update();
 		}
-
+		var hb;
 		function registerPlayer() {
 			var usernameDOMField = document.getElementById("usernameInput");
 			player.username = usernameDOMField.value.trim();
@@ -334,36 +589,23 @@
 			$.post("PlayerRegister", player.username,
 				function(data, status){
 					console.log("Data: " + data + " Status: " + status);
-					setInterval(function(){
-						$.post("MapState", 
-						{
-							username: player.username,
-						},
-							function(data, status){
-								console.log("Success! Data: " + data);
-						})
-					}, 2000);
+					usernameDOMField.style.visibility = "hidden";	
+					heartbeat();
+					hb = setInterval(heartbeat, 2000);
 				});
-			usernameDOMField.style.visibility = "hidden";
-			if(detectmob()){
-				var doc = window.document;
-  				var docEl = doc.documentElement;
-				var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-				var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+			// if(detectmob()){
+			// 	var doc = window.document;
+  	// 			var docEl = doc.documentElement;
+			// 	var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+			// 	var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
 
-				if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-				  requestFullScreen.call(docEl);
-				}
-				else {
-				  cancelFullScreen.call(doc);
-				}
-			} 
-
-			//setup();
-			stage_state = "CHARSELECT";
-			preload_icon.on("complete", showCharacterSelect);
-			preload_icon.loadManifest(charSelect_manifest);
-			//should be showCharacterSelect();
+			// 	if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+			// 	  requestFullScreen.call(docEl);
+			// 	}
+			// 	else {
+			// 	  cancelFullScreen.call(doc);
+			// 	}
+			// } 
 		}
 	
 		function tick(e){
@@ -372,12 +614,159 @@
 			stage.update();
 		}
 
+		function heartbeat() {
+			$.post("MapState", 
+			{
+				username: player.username,
+			},
+				function(data, status){
+					console.log("Success! Data: " + data);
+					try {
+						data = JSON.parse(data);
+						//Redirect client to appropriate screen
+						//TODO LATER: Write functions to update player stats
+						if(data.state == 2 && player.state != 2) {
+							preload_icon.on("complete", showCharacterSelect);
+							preload_icon.loadManifest(charSelect_manifest);
+						}
+						if(data.state == 3 && player.state != 3) {
+							//do stuff
+						}
+						if((data.state == 6 || data.state == 4 || data.state == 5)) {
+							player.character = data.myCharacter;
+							if(map_setup == false){
+								if(!preload_icon.loaded){
+									preload_icon.on("complete", function(){
+										initOtherPlayers();
+										getMapData(data);
+									});
+									preload_icon.loadManifest(charSelect_manifest);
+								}
+								else{
+									initOtherPlayers();
+									getMapData(data);
+								}
+
+							}
+							else {
+								movePlayerTo(player.character.coords);
+								for(var c in characters){
+									if(c == player.character.name) continue;
+									var character = characters[c];
+									map.removeChildAt(character.index);
+									character.index = -1;	
+								}
+								for(var i = 0; i < data.characters.length; i++){
+									if(data.characters[i].username != player.username){
+										updatePlayer(data.characters[i]);
+									}	
+								}
+							}
+						}
+						player.state = data.state;
+						
+					} catch(err) {
+						console.log(err + " " + err.lineNumber);
+					}
+			})
+			.fail(function() {
+				setTimeout(function(){
+					clearInterval(hb);
+				}, timeout*1000);
+			});
+		}
+		function initOtherPlayers(){
+			for(var c in characters){
+				var character = characters[c];
+				character.icon = new createjs.Container();
+				character.icon.name = "Player";
+				var icon = new createjs.Shape();
+				icon.graphics.beginFill(character.color).drawCircle(0, 0, tilesize/3);
+				character.icon.addChild(icon);	
+			}
+		}
+		function spawnPlayerAt(coords){
+			var pchar = characters[player.character.name];
+			player.icon = new createjs.Container();
+			player.icon.name = "Player";
+			var icon = new createjs.Shape();
+			icon.graphics.beginFill(pchar.color).drawCircle(0, 0, tilesize/3);
+			player.icon.addChild(icon);
+			var row = coords.x;
+			var col = coords.z+1;
+			player.icon.x = pchar.icon.x = map.maparray[row][col].x + tilesize/2;
+			player.icon.y = pchar.icon.y = map.maparray[row][col].y + tilesize/2;
+			console.log(row + " " + col);
+			var child = map.addChild(player.icon);
+			pchar.index = map.getChildIndex(child);
+			map.x = (w - 2*tilesize*row)/2;
+			map.y = (h - 2*tilesize*(map.columns-col))/2;
+		}
+
+		function updatePlayer(p) {
+			console.log("Updating " + p.name);
+			var pchar = characters[p.name];
+			var row = p.coords.x;
+			var col = p.coords.z+1;
+			pchar.icon.x = map.maparray[row][col].x + tilesize/2;
+			pchar.icon.y = map.maparray[row][col].y + tilesize/2;
+			if(pchar.index == -1){
+				var child = map.addChild(pchar.icon);
+				pchar.index = map.getChildIndex(child);
+			}
+		}
+
+		function movePlayerTo(coords){
+			//var icon = player.icon.getChildAt(0);
+			//icon.graphics.clear().beginFill("Pink").drawCircle(0, 0, tilesize/3);
+			var row = coords.x;
+			var col = coords.z+1;
+			player.icon.x = map.maparray[row][col].x + tilesize/2;
+			player.icon.y = map.maparray[row][col].y + tilesize/2;
+			//console.log(map.currentpath.length);
+		}
+
+		function getMapData(characterData){
+			var bg = new createjs.Shape();
+			bg.graphics.beginFill("#000").drawRect(0,0,w,h);
+			stage.addChild(bg);
+			map_setup = true;
+			var mapdata;
+			$.post("ControlInput", {
+				username: player.username,
+				command: "GetMapData",
+			},
+				function(data, status){
+					console.log(data);
+					data = JSON.parse(data);
+					map_manifest = [
+						{src: data.imagePath, id: "mapimg", type: "image"}
+					];
+					preload_map.on("complete", function(){
+						map = new Map();
+						map.generate(data.width, data.height);
+						for(var i = 0; i < characterData.characters.length; i++){
+							if(characterData.characters[i].username != player.username){
+								players.pop(characterData.characters[i]);
+								updatePlayer(characterData.characters[i]);
+							}	
+						}
+						setup();
+					});
+					preload_map.loadManifest(map_manifest);
+				}
+			)
+			
+			return mapdata;
+		}
+
 		function init(){
 			hud = document.getElementById("hud");
 			canvas = document.getElementById("canvas");
 			
 			stage = new createjs.Stage(canvas);
 			hud_stage = new createjs.Stage(hud);
+			//hud_stage.addEventListener("reconnect", reconnect);
 			createjs.Touch.enable(stage);
 			createjs.Touch.enable(hud_stage);
 			createjs.Ticker.setFPS(60);
@@ -389,13 +778,11 @@
 			h = canvas.height;
 			if(h <= 500) mobile_offset = 0.75;
 			else mobile_offset = 1;
-			map = new Map(5, 5);
 			preload.on("complete", showStartup);
 			preload.loadManifest(startup_manifest);
 		}
 
 		function setup(){
-			stage_state = "MAIN";
 			hud_stage.clear();
 			hud_stage.removeAllChildren();
 			hud_stage.removeAllEventListeners();
@@ -420,8 +807,9 @@
 			action_text.y -= action_text.getBounds().height/2;
 			action_graphic.graphics.beginFill("DimGray").drawCircle(0, 0, 50);
 			action_button.addChild(action_graphic, action_text);
-			action_button.x = w - action_button.getBounds().width;
-			action_button.y = h - (h/5) - action_button.getBounds().width;
+			action_button.scaleX = action_button.scaleY = mobile_offset;
+			action_button.x = (w - action_button.getBounds().width)*mobile_offset;
+			action_button.y = (h - action_button.getBounds().width/1.75)*mobile_offset;
 			action_button.on("click", function(){
 				//send post
 				console.log("Committing movements");
@@ -429,14 +817,20 @@
 					{
 					username: player.username,
 					command: "CommitMove", 
+				}, function(data, status) {
+					console.log(data);
+					map.clearPath();
+					map.currentpath = [];
 				});
+				map.clearPath();
+				console.log("cleared");
 			})
 			hud_stage.addChild(bg);
-			hud_stage.addChild(top);
+			//hud_stage.addChild(top);
 			hud_stage.addChild(bot);
 			hud_stage.addChild(action_button);
 			setupBotHud();
-			setupTopHud();
+			//setupTopHud();
 		}
 
 		function toMap(e){
@@ -447,7 +841,6 @@
 			//TODO: update w/h values and tell canvas to rerender.
 			//console.log("resized!");
 			console.log("resize!");
-			console.log(stage_state);
 			if(stage_state != "STARTUP") {
 				hud_stage.clear();
 				hud_stage.removeAllEventListeners();
@@ -468,8 +861,8 @@
 		function setupTopHud(){
 			//loadPlayers();
 			var teamicons = [];
-			if(player.character.name == "Fisticop")
-				for(m = 0; m < 5; m++){
+			if(player.character.name == "Fisticop"){
+				for(m = 0; m < players.length; m++){
 					var member_display = new createjs.Container();
 					member_display.x = m*(w/5);
 					member_display.y = (h/5)/2 - 10;
@@ -495,10 +888,10 @@
 					member_stats.addChild(name, health, range, melee, movespeed);
 					member_display.addChild(member_icon, member_stats);
 					hud_stage.addChild(member_display);
-					hud_stage.update();
 				}
-			else
-				for(m = 0; m < 3; m++){
+			}
+			else{
+				for(m = 0; m < players.length; m++){
 					var member_display = new createjs.Container();
 					member_display.x = m*(w/5 - 20);
 					member_display.y = (h/5)/2 - 10;
@@ -559,20 +952,35 @@
 				fisticop_stats.addChild(name, health, range, melee, movespeed);
 				fisticop_display.addChild(fisticop_icon, fisticop_stats);
 				hud_stage.addChild(seperator, fisticop_display, seperator_settings);
-				hud_stage.update();
+			}
+			hud_stage.update();
 		}
 
 
 
 		function setupBotHud(){
-			var player_icon = new createjs.Shape();
-			var player_icon_img = new Image();
-			player_icon_img.onload = function(){
-				
+			var player_icon = new createjs.Container();
+			var icon_bg = new createjs.Shape();
+			var index = character_conversion.indexOf(player.character.name);
+			var character_icon_img = preload_icon.getResult("characterSelectIcon" + index);
+			var character_icon_bitmap = new createjs.Bitmap(character_icon_img);
+			icon_bg.graphics.beginFill("DimGray").drawCircle(0, 0, 100);
+			character_icon_bitmap.scaleX = character_icon_bitmap.scaleY = 100/90;
+			character_icon_bitmap.x -= ((character_icon_bitmap.image.width)/2) * 100/90;
+			character_icon_bitmap.y -= ((character_icon_bitmap.image.height)/2) * 100/90;
+			switch(index){
+				case 1: //Graves
+					character_icon_bitmap.x -= 7/4;
+					character_icon_bitmap.y -= 8/2;
+					break;
+				case 2: //Lulu
+					character_icon_bitmap.y += 6/2;
+					break;
+				case 4: //Fisticop
+					character_icon_bitmap.y -= 22/2;
+					break;
 			}
-
-			player_icon_img.src = "./sprites/josephine_player_icon.png";
-			player_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 100, 100);
+			player_icon.addChild(icon_bg, character_icon_bitmap);
 			player_icon.x = 120;
 			player_icon.y = h-(h/5) + 50;
 			//add mask for player sprite/portrait
@@ -610,18 +1018,6 @@
 				else pip.graphics.beginFill("DimGray").drawRoundRect(10*i, 0, 8, 13, 4);
 				stat.addChild(pip);
 			}
-		}
-
-		function tileSelect(x, y){
-			console.log("Selected : " + (x)/tilesize + ", " + (columns - (y)/tilesize - 1));
-			$.post("ControlInput", 
-				{
-					username: player.username,
-					command: "SelectTile", 
-					x: (x)/tilesize, 
-				 	z: (columns - (y)/tilesize - 1)
-				});
-			
 		}
 		function detectmob() { 
 			 if( navigator.userAgent.match(/Android/i)

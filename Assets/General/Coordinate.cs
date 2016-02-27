@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+[Serializable]
 public class Coordinate {
 
-    private int x, z;
+    public int x, z;
     public int X
     {
         get { return x; }

@@ -36,7 +36,7 @@ public class Movement : Action{
 				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (xPos, 0.125f, zPos), t);
 				yield return 0;
 			}
-                actor.Coord = tb.Coord;
+                actor.Coords = tb.Coords;
 
             yield return null;
 		}

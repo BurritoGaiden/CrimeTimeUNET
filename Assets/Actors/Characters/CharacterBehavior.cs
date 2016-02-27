@@ -10,6 +10,13 @@ public class CharacterBehavior : MapActor {
         get { return label; }
     }
 
+    private string owner;
+    public string Owner
+    {
+        get { return owner; }
+        set { owner = value; }
+    }
+
     private string firstName, lastName;
 
     [SerializeField]
@@ -19,24 +26,11 @@ public class CharacterBehavior : MapActor {
         get { return team; }
     }
 
-	[SerializeField]
-	private int hp, moveStat, gunStat, cqcStat = 0;
-
-    public int HP
+    [SerializeField]
+    private Stats stats;
+    public Stats Stats
     {
-        get { return hp; }
-    }
-    public int MoveStat
-    {
-        get { return moveStat; }
-    }
-    public int GunStat
-    {
-        get { return gunStat; }
-    }
-    public int CQCStat
-    {
-        get { return cqcStat; }
+        get { return stats; }
     }
 
     private bool finishedMoving = false;
@@ -56,12 +50,16 @@ public class CharacterBehavior : MapActor {
 	
 	}
 
-    /*
-	public void initCharacter(){
-		firstName = txtLookup.updateString (label+"_firstname");
-		lastName = txtLookup.updateString (label+"_lastname");
-		helpTextLookup = txtLookup.updateString (label+"_helptext");
-	}
-    */
+    public override IJSON ToJSON()
+    {
+        CharacterJSON json = new CharacterJSON();
+        json.coords = Coords;
+        json.username = owner;
+        json.team = team;
+        json.name = label;
+        json.stats = stats;
+
+        return json;
+    }
 
 }

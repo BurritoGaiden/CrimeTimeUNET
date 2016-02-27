@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class CommandPanel : MonoBehaviour {
+public class CommandPanel : MonoBehaviour, IJSONable {
 
     private string playerName;
     public string PlayerName
@@ -16,10 +16,39 @@ public class CommandPanel : MonoBehaviour {
     public bool IsConnected
     {
         get { return connected; }
+        set
+        {
+            if(value != connected)
+            {
+                connected = value;
+                if (connected)
+                {
+                    SendMessageUpwards("OnPlayerHasReconnected", playerName, SendMessageOptions.RequireReceiver);
+                }
+            }
+          
+        }
+    }
+
+    private bool ready = false;
+    public bool IsReady
+    {
+        get { return ready; }
+        set { ready = value; }
+    }
+
+
+    // A bool that is flipped to true when a user has finished executing their turn
+    // When all of these on a team are true, the turn can advance
+    private bool turnFinished = false;
+    public bool TurnFinished
+    {
+        get { return turnFinished; }
+        set { turnFinished = value; }
     }
 
     [SerializeField]
-    private float timerMax = 10.0f;
+    private float timerMax = 15.0f;
     private float timerCurrent = 0.0f;
 
     // the chosen character for this controller. null indicates no character selected yet
@@ -31,7 +60,8 @@ public class CommandPanel : MonoBehaviour {
         set
         {
             character = value;
-            team = character.Team;
+            if(character!= null)
+                team = character.Team;
         }
     }
 
@@ -62,6 +92,10 @@ public class CommandPanel : MonoBehaviour {
 	}
 
     private List<TileBehavior> queuedPath = new List<TileBehavior>();
+    public TileBehavior[] QueuedPath
+    {
+        get { return queuedPath.ToArray(); }
+    }
 
     // Use this for initialization
     void Start () {
@@ -79,9 +113,18 @@ public class CommandPanel : MonoBehaviour {
     // call this on the GET heartbeat rule
     public void Pulse()
     {
-        connected = true;
+        IsConnected = true;
         timerCurrent = timerMax;
         Debug.Log(PlayerName + " has a pulse!");
+    }
+
+    public IJSON ToJSON()
+    {
+        PlayerJSON json = new PlayerJSON();
+        json.username = playerName;
+        json.connected = IsConnected;
+
+        return json;
     }
 
     void TickDown()
@@ -111,9 +154,19 @@ public class CommandPanel : MonoBehaviour {
 	}
 
     // TODO: Add functionality!
-    public void SpawnPlayerCharacter()
+    public void SpawnPlayerCharacter(TileBehavior spawnPos)
     {
-
+        GameObject pc;
+        if (character != null)
+        {
+            pc = GameObject.Instantiate(character.gameObject);
+            pc.transform.position = new Vector3(spawnPos.transform.position.x, 0.125f, spawnPos.transform.position.z);
+            pc.GetComponent<CharacterBehavior>().Coords = spawnPos.Coords;
+            pc.GetComponent<CharacterBehavior>().Owner = playerName;
+            CurrentUnit = pc.GetComponent<CharacterBehavior>();
+            character = CurrentUnit;
+        }
+          
     }
 
     public void PathSelection(TileBehavior tile)
@@ -136,7 +189,7 @@ public class CommandPanel : MonoBehaviour {
                 }
                 int currentPos = queuedPath.Count;
                 // checks the distance between the selected tile indexes (moves are only valid if this number is one)
-                Coordinate distance = queuedPath[currentPos - 1].Coord - tile.Coord;
+                Coordinate distance = queuedPath[currentPos - 1].Coords - tile.Coords;
                 int dx = Mathf.Abs(distance.X);
                 int dz = Mathf.Abs(distance.Z);
                 //if you click on an already-existant tile, remove everything past there
@@ -146,20 +199,20 @@ public class CommandPanel : MonoBehaviour {
                     Debug.Log("Duplicate tile found at " + index + "/" + currentPos);
                     for (int i = queuedPath.Count - 1; i > index; i--)
                     {
-                        Debug.Log("Removing index " + i + ":" + queuedPath[i].Coord.ToString());
+                        Debug.Log("Removing index " + i + ":" + queuedPath[i].Coords.ToString());
                         queuedPath.RemoveAt(i);
                     }
                 }
                 else if ((((dx == 1 && dz == 0) || (dx == 0 && dz == 1))
                           && (dx + dz <= 1))
-                          && queuedPath.Count - 1 < 4)
+                          && queuedPath.Count - 1 < unit.Stats.movement)
                 {
                     queuedPath.Add(tile);
                 }
 
                 foreach (TileBehavior tb in queuedPath)
                 {
-                    Debug.Log("Next Step: " + tb.Coord.ToString());
+                    Debug.Log("Next Step: " + tb.Coords.ToString());
                 }
 
                 UpdateMovesLeft();
@@ -169,7 +222,10 @@ public class CommandPanel : MonoBehaviour {
     public void CommitToMove(){
 
 		Movement move = new Movement (unit, queuedPath, true);
-		StartCoroutine(Execute (move));
+        // eventually have a
+        turnFinished = true;
+        StartCoroutine(Execute (move));
+       
 	}
 
 	void UpdateMovesLeft(){
@@ -207,6 +263,7 @@ public class CommandPanel : MonoBehaviour {
 		FindObjectOfType<FieldReporter> ().addActionToTurn(action);
 		yield return StartCoroutine(action.Execute());
 		Reset ();
+        yield return new WaitForSeconds(0.5f);
 		FindObjectOfType<FieldReporter> ().checkToIncrememt ();
 	}
 
