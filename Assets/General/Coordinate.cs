@@ -15,6 +15,11 @@ public class Coordinate {
         get { return z; }
     }
 
+    public float magnitude
+    {
+        get { return Mathf.Sqrt(Mathf.Pow(x, 2) + Mathf.Pow(z, 2)); }
+    }
+
     public Coordinate(int xPos, int zPos)
     {
         x = xPos;

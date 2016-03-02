@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;   
+using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Net.Sockets;
 
 public class MapStateRule : WebServerRule
 {
@@ -100,24 +101,25 @@ public class MapStateRule : WebServerRule
         response.ContentType = "text/plain";
 
         Stream responseStream = response.OutputStream;
-        try {
+       
             int count = data.Length;
             int i = 0;
             while (i < count)
             {
                 if (i != 0)
                     yield return null;
-
-                int writeLength = Math.Min((int)writeStaggerCount, count - i);
-                responseStream.Write(data, i, writeLength);
-                i += writeLength;
+                try
+                {
+                    int writeLength = Math.Min((int)writeStaggerCount, count - i);
+                    responseStream.Write(data, i, writeLength);
+                    i += writeLength;
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
             }
-        }
-        finally {
-            // Nothing needs to go here, try-finally used to safely fail if a client disconnects mid-write
-            // Which doesn't really have any negative consequences
-        }
-    }
+       }
 
 #endif
 

@@ -4,7 +4,7 @@ using System.Collections;
 public class CopVision : MonoBehaviour {
 
     [SerializeField]
-    private float visionRange = 5f;
+    private float visionRange = 3f;
 
 	// Use this for initialization
 	void Start () {
@@ -18,16 +18,22 @@ public class CopVision : MonoBehaviour {
 
     void OnPreCull()
     {
+        VisionMethod1();
+
+    }
+
+    void VisionMethod1()
+    {
         RaycastHit hit = new RaycastHit();
         foreach (CharacterBehavior spotter in FindObjectsOfType<CharacterBehavior>())
         {
-            if(spotter.Team == Alliance.Cops)
+            if (spotter.Team == Alliance.Cops)
             {
                 foreach (MapActor spotted in FindObjectsOfType<MapActor>())
                 {
-                    if(Physics.Raycast(spotter.transform.position, (spotted.gameObject.transform.position - spotter.transform.position).normalized, out hit, visionRange))
+                    if (Physics.Raycast(spotter.transform.position, (spotted.gameObject.transform.position - spotter.transform.position).normalized, out hit, 2*visionRange))
                     {
-                        if (hit.collider.gameObject == spotted.gameObject)
+                        if (hit.collider.gameObject == spotted.gameObject && (spotted.Coords - spotter.Coords).magnitude <= visionRange)
                         {
                             spotted.GetComponent<Renderer>().enabled = true;
                             spotted.IsVisible = true;
@@ -50,6 +56,6 @@ public class CopVision : MonoBehaviour {
                 }
             }
         }
-
     }
+
 }

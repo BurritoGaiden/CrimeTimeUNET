@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 public static class ExtensionMethods {
 
-	public static List<int> AllIndexesOf(this string str, string value) {
+    public static List<int> AllIndexesOf(this string str, string value) {
 		if (String.IsNullOrEmpty(value))
 			throw new ArgumentException("the string to find may not be empty", "value");
 		List<int> indexes = new List<int>();

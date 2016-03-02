@@ -13,6 +13,13 @@ public interface IJSON
 }
 
 [Serializable]
+public class ConnectionJSON : IJSON
+{
+    public bool pass;
+    public string message;
+}
+
+[Serializable]
 public class MapJSON : IJSON
 {
     public int width;

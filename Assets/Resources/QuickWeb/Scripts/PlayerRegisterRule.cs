@@ -46,7 +46,9 @@ public class PlayerRegisterRule : WebServerRule
 
     protected override IEnumerator OnRequest(HttpListenerContext context)
     {
+        ConnectionJSON conJSON = new ConnectionJSON();
         string dataString = "";
+        string debugMessage = "";
 
         HttpListenerRequest request = context.Request;
         StreamReader reader = new StreamReader(request.InputStream);
@@ -58,7 +60,10 @@ public class PlayerRegisterRule : WebServerRule
         {
             // figure out alternative to allowing IsConnected to be written to?
             playerRegister[username].IsConnected = true;
-            dataString = "Player found, reconnecting!";
+
+            conJSON.pass = true;
+            debugMessage = "Player found, reconnecting!";
+            
         }
         else if (!playerRegister.ContainsKey(username) && playerRegister.Count < 5 && allowNewJoins)
         {
@@ -74,26 +79,32 @@ public class PlayerRegisterRule : WebServerRule
 
             CommandPanel newControllerCP = newController.GetComponent<CommandPanel>();
             newControllerCP.PlayerName = username;
-            newControllerCP.Pulse();
+            newControllerCP.IsConnected = true;
 
             playerRegister.Add(username, newControllerCP);
-            dataString = "Player not found; space available, adding " + username + " to the register!";
+
+            conJSON.pass = true;
+            debugMessage = "Player not found; space available, adding " + username + " to the register!";
 
             firstPlayerJoined = true;
         }
         else if(!allowNewJoins)
         {
-            dataString = "Game in progress; no new joins allowed, only reconnects!";
+            conJSON.pass = false;
+            debugMessage = "Game in progress; no new joins allowed, only reconnects!";
         }
         else
         {
             //reject the request to join
-            dataString = "Maximum player count reached or player still connected!";
+            conJSON.pass = false;
+            debugMessage = "Maximum player count reached or player still connected!";
         }
 
+        Debug.Log(debugMessage);
         CheckAllConnected();
 
-        Debug.Log(dataString);
+        conJSON.message = debugMessage;
+        dataString = JsonUtility.ToJson(conJSON);
 
         byte[] data = Encoding.ASCII.GetBytes(dataString);
 

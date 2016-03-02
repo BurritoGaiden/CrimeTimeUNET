@@ -81,10 +81,16 @@ public class ResourcesRule : WebServerRule
             {
                 if (i != 0)
                     yield return null;
-
-                int writeLength = Math.Min((int)writeStaggerCount, count - i);
-                responseStream.Write(data, i, writeLength);
-                i += writeLength;
+                try
+                {
+                    int writeLength = Math.Min((int)writeStaggerCount, count - i);
+                    responseStream.Write(data, i, writeLength);
+                    i += writeLength;
+                }
+                catch(Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
             }
 
 	}
