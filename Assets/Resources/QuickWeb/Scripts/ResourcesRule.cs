@@ -71,7 +71,7 @@ public class ResourcesRule : WebServerRule
 		
 		HttpListenerResponse response = context.Response;
 		
-		response.ContentType = "text/html";
+		response.ContentType = "text/css";
 		
 		Stream responseStream = response.OutputStream;
 		

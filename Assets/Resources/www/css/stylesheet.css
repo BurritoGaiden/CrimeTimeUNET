@@ -1,0 +1,34 @@
+/**
+ *	This is where all the fonts will be created.
+ *
+ */
+@font-face{
+	font-family: DAYPBL;
+	src: url(../fonts/DAYPBL.ttf) format("truetype");
+}
+@font-face{
+	font-family: cinzel;
+	src: url(../fonts/Cinzel-Regular.otf) format("opentype");
+}
+@font-face{
+	font-family: great-vibes;
+	src: url(../fonts/GreatVibes-Regular.otf) format("opentype");
+}
+html, body {
+	font-family: DAYPBL, great-vibes, cinzel;
+	width: 100%;
+	margin: 0 auto;
+	height: 100%;
+	padding: 0;
+}
+canvas {
+	position: absolute;
+}
+input[type="text"]{
+	text-align: center;
+	width: 500px;
+	height: 50px;
+	font-size: 32px;
+	border-radius: 10px;
+	position: absolute;
+}
