@@ -52,10 +52,12 @@ public class ResourcesRule : WebServerRule
 		//Debug.Log ("ITEM: " + item);
 		
 		string itemName = item.Substring(0, item.IndexOf('.'));
-		//Debug.Log ("NAME: " + itemName);
+        //Debug.Log ("NAME: " + itemName);
+
+        string extension = item.Substring(item.IndexOf("."));
 
 		string path = string.Format ("{0}{1}", subFolder, itemName);
-		Debug.Log ("PATH: " + path);
+		//Debug.Log ("PATH: " + path);
 
 		try {
 			//Debug.Log (Resources.Load (path).GetType ().ToString ());
@@ -70,8 +72,16 @@ public class ResourcesRule : WebServerRule
 		///
 		
 		HttpListenerResponse response = context.Response;
-		
-		response.ContentType = "text/css";
+
+        switch (extension)
+        {
+            case ".css":
+                response.ContentType = "text/css";
+                break;
+            default:
+                response.ContentType = "text/html";
+                break;
+        }
 		
 		Stream responseStream = response.OutputStream;
 		

@@ -145,7 +145,7 @@ public class ControllerInputRule : WebServerRule
                                     queuedCoords.Add(tb.Coords);
                                 }
                                 p.path = queuedCoords.ToArray();
-                                Debug.Log(JsonUtility.ToJson(p));
+                                //Debug.Log(JsonUtility.ToJson(p));
                                 dataString = JsonUtility.ToJson(p);
                             }
                             catch (Exception e)

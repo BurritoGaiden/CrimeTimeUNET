@@ -210,11 +210,12 @@ public class CommandPanel : MonoBehaviour, IJSONable {
                     queuedPath.Add(tile);
                 }
 
+                /*
                 foreach (TileBehavior tb in queuedPath)
                 {
                     Debug.Log("Next Step: " + tb.Coords.ToString());
                 }
-
+                */
                 UpdateMovesLeft();
             }
     }
