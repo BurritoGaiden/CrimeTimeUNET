@@ -320,7 +320,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				username: player.username,
 			},
 				function(data, status){
-					console.log("Success! Data: " + data);
+					//console.log("Success! Data: " + data);
 					try {
 						data = JSON.parse(data);
 						//Redirect client to appropriate screen
@@ -401,6 +401,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			pchar.index = map.getChildIndex(child);
 			map.x = (w - 2*tilesize*row)/2;
 			map.y = (h - 2*tilesize*(map.columns-col))/2;
+			map.updateCache();
 		}
 
 		function updatePlayer(p) {
@@ -414,6 +415,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				var child = map.addChild(pchar.icon);
 				pchar.index = map.getChildIndex(child);
 			}
+			map.updateCache();
 		}
 
 		function movePlayerTo(coords){
