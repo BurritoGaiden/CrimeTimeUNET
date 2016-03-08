@@ -45,7 +45,7 @@ public class WebServer : MonoBehaviour
             {
                 HttpListenerContext context = listener.GetContext();
 
-                Debug.LogFormat("Recieved request from {0}.", context.Request.RemoteEndPoint.ToString());
+                //Debug.LogFormat("Recieved request from {0}.", context.Request.RemoteEndPoint.ToString());
 
                 context.Response.StatusCode = 200;
 
@@ -78,7 +78,7 @@ public class WebServer : MonoBehaviour
 
             if(nextContext != null)
             {
-                Debug.LogFormat("Processing request for {0}.", nextContext.Request.RemoteEndPoint.ToString());
+                //Debug.LogFormat("Processing request for {0}.", nextContext.Request.RemoteEndPoint.ToString());
 
                 WebServerRule[] rules = GetComponents<WebServerRule>();
                 foreach(WebServerRule rule in rules)
@@ -108,7 +108,7 @@ public class WebServer : MonoBehaviour
     {
         HttpListenerContext context = (HttpListenerContext)arg;
 
-        Debug.LogFormat("Request for {0} finished.", context.Request.RemoteEndPoint.ToString());
+        //Debug.LogFormat("Request for {0} finished.", context.Request.RemoteEndPoint.ToString());
 
         context.Response.Close();
     }
