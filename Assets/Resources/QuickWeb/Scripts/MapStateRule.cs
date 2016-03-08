@@ -5,9 +5,16 @@ using System;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Threading;
 
 public class MapStateRule : WebServerRule
 {
+
+    protected class Job
+    {
+        public Heartbeat heartbeat;
+        public HttpListenerResponse response;
+    }
 
     [Serializable]
     public struct HtmlKeyValue
@@ -36,23 +43,27 @@ public class MapStateRule : WebServerRule
 
     }
 
-#if UNITY_STANDALONE || UNITY_EDITOR
 
     protected virtual string ModifyHtml(string html)
     {
         return html;
     }
 
+    void Awake()
+    {
+        Thread t = new Thread(ConsumerThread);
+        t.Start();
+    }
+
     protected override IEnumerator OnRequest(HttpListenerContext context)
     {
-        string dataString = "";
-
         HttpListenerRequest request = context.Request;
         StreamReader reader = new StreamReader(request.InputStream);
         string s = reader.ReadToEnd();
 
         JSONWrapper j = new JSONWrapper(s);
         CommandPanel cp;
+        Heartbeat h = new Heartbeat();
         try {
 
             cp = PlayerRegisterRule.PlayerRegister[j["username"]];
@@ -74,14 +85,11 @@ public class MapStateRule : WebServerRule
                 if(c.Team == cp.Team || c.IsVisible)
                     cj.Add((CharacterJSON)c.ToJSON());
             }
-            Heartbeat h = new Heartbeat();
             h.state = GameStateManager.Instance.GameState;
             h.players = pj.ToArray();
             if (cp.Character != null)
                 h.myCharacter = (CharacterJSON) cp.Character.ToJSON();
             h.characters = cj.ToArray();
-
-            dataString = JsonUtility.ToJson(h);
 
         }
         catch (Exception e)
@@ -90,36 +98,48 @@ public class MapStateRule : WebServerRule
             Debug.Log(e.Message);
         }
 
-        Debug.Log(dataString);
-        byte[] data = Encoding.ASCII.GetBytes(dataString);
+        // TODO: Merge Job and Heartbeat in to a single class maybe?
+
+        Job newJob = new Job();
+        newJob.heartbeat = h;
+        newJob.response = context.Response;
+        m_jobs.Enqueue(newJob);
 
         yield return null;
+   }
 
-        HttpListenerResponse response = context.Response;
+    void WriteResponse(Job job)
+    {
+        string dataString = JsonUtility.ToJson(job.heartbeat);
+
+        byte[] data = Encoding.ASCII.GetBytes(dataString);
+
+        HttpListenerResponse response = job.response;
 
         response.ContentType = "text/plain";
 
         Stream responseStream = response.OutputStream;
-        try {
-            int count = data.Length;
-            int i = 0;
-            while (i < count)
-            {
-                if (i != 0)
-                    yield return null;
+        
+        responseStream.Write(data, 0, data.Length);
 
-                int writeLength = Math.Min((int)writeStaggerCount, count - i);
-                responseStream.Write(data, i, writeLength);
-                i += writeLength;
+        //Debug.Log(dataString);
+    }
+
+    void ConsumerThread()
+    {
+        while (true)
+        {
+            while (m_jobs.Count > 0)
+            {
+                Job job = m_jobs.Dequeue();
+                WriteResponse(job);
+                //Debug.Log("Heartbeat Complete");
             }
-        }
-        finally {
-            // Nothing needs to go here, try-finally used to safely fail if a client disconnects mid-write
-            // Which doesn't really have any negative consequences
+            Thread.Sleep(2);
         }
     }
 
-#endif
+    private Queue<Job> m_jobs = new Queue<Job>();
 
     [SerializeField]
     private HtmlKeyValue[] substitutions;
