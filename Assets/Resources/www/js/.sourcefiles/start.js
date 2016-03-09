@@ -1,3 +1,5 @@
+var curr_data = "";
+var hb_lock = false;
 define(["jquery", "preloader", "createjs", "map"], function($) {
     $(function() {
         $(document).ready(function(){
@@ -290,7 +292,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 						console.log("Data: " + data + " Status: " + status);
 						usernameDOMField.style.visibility = "hidden";	
 						heartbeat();
-						hb = setInterval(heartbeat, 2000);
+						hb = setInterval(heartbeat, 500);
 					}
 				});
 			// if(detectmob()){
@@ -315,6 +317,11 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 		}
 
 		function heartbeat() {
+			if(hb_lock) {
+				console.log("HB LOCKED!");
+				return;
+			}
+			else hb_lock = true;
 			$.post("MapState", 
 			{
 				username: player.username,
@@ -322,48 +329,52 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				function(data, status){
 					//console.log("Success! Data: " + data);
 					try {
-						data = JSON.parse(data);
-						//Redirect client to appropriate screen
-						//TODO LATER: Write functions to update player stats
-						if(data.state == 2 && player.state != 2) {
-							preloader.preload_icon.on("complete", showCharacterSelect);
-							preloader.preload_icon.loadManifest(preloader.charSelect_manifest);
-						}
-						if(data.state == 3 && player.state != 3) {
-							//do stuff
-						}
-						if((data.state == 6 || data.state == 4 || data.state == 5)) {
-							player.character = data.myCharacter;
-							if(map_setup == false){
-								if(!preloader.preload_icon.loaded){
-									preloader.preload_icon.on("complete", function(){
+						if(curr_data != data){
+							curr_data = data;
+							data = JSON.parse(data);
+							//Redirect client to appropriate screen
+							//TODO LATER: Write functions to update player stats
+							if(data.state == 2 && player.state != 2) {
+								preloader.preload_icon.on("complete", showCharacterSelect);
+								preloader.preload_icon.loadManifest(preloader.charSelect_manifest);
+							}
+							if(data.state == 3 && player.state != 3) {
+								//do stuff
+							}
+							if((data.state == 6 || data.state == 4 || data.state == 5)) {
+								player.character = data.myCharacter;
+								if(map_setup == false){
+									if(!preloader.preload_icon.loaded){
+										preloader.preload_icon.on("complete", function(){
+											initOtherPlayers();
+											getMapData(data);
+										});
+										preloader.preload_icon.loadManifest(preloader.charSelect_manifest);
+									}
+									else{
 										initOtherPlayers();
 										getMapData(data);
-									});
-									preloader.preload_icon.loadManifest(preloader.charSelect_manifest);
-								}
-								else{
-									initOtherPlayers();
-									getMapData(data);
-								}
+									}
 
-							}
-							else {
-								movePlayerTo(player.character.coords);
-								for(var c in characters){
-									if(c == player.character.name) continue;
-									var character = characters[c];
-									map.removeChildAt(character.index);
-									character.index = -1;	
 								}
-								for(var i = 0; i < data.characters.length; i++){
-									if(data.characters[i].username != player.username){
-										updatePlayer(data.characters[i]);
-									}	
+								else {
+									movePlayerTo(player.character.coords);
+									for(var c in characters){
+										if(c == player.character.name) continue;
+										var character = characters[c];
+										map.removeChildAt(character.index);
+										character.index = -1;	
+									}
+									for(var i = 0; i < data.characters.length; i++){
+										if(data.characters[i].username != player.username){
+											updatePlayer(data.characters[i]);
+										}	
+									}
 								}
 							}
+							player.state = data.state;
 						}
-						player.state = data.state;
+						
 						
 					} catch(err) {
 						console.log(err + " " + err.lineNumber);
@@ -373,6 +384,9 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				setTimeout(function(){
 					clearInterval(hb);
 				}, timeout*1000);
+			})
+			.always(function() {
+				hb_lock = false;
 			});
 		}
 		function initOtherPlayers(){
@@ -445,7 +459,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 						{src: data.imagePath, id: "mapimg", type: "image"}
 					];
 
-					map = new Map();
+					map = new GameMap();
 					map.generate(data.width, data.height);
 					spawnPlayerAt(player.character.coords);
 					for(var i = 0; i < characterData.characters.length; i++){
