@@ -115,7 +115,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     {
         IsConnected = true;
         timerCurrent = timerMax;
-       // Debug.Log(PlayerName + " has a pulse!");
+        //Debug.Log(PlayerName + " has a pulse!");
     }
 
     public IJSON ToJSON()
@@ -143,7 +143,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
                 {
                     Debug.Log("CATASTROPHIC ERROR: Server missing???");
                 }
-                Debug.Log(playerName + " has disconnected");
+                //Debug.Log(playerName + " has disconnected");
             }
         }
     }

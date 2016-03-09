@@ -290,7 +290,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 						console.log("Data: " + data + " Status: " + status);
 						usernameDOMField.style.visibility = "hidden";	
 						heartbeat();
-						hb = setInterval(heartbeat, 2000);
+						hb = setInterval(heartbeat, 1000);
 					}
 				});
 			// if(detectmob()){
@@ -445,7 +445,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 						{src: data.imagePath, id: "mapimg", type: "image"}
 					];
 
-					map = new Map();
+					map = new GameMap();
 					map.generate(data.width, data.height);
 					spawnPlayerAt(player.character.coords);
 					for(var i = 0; i < characterData.characters.length; i++){

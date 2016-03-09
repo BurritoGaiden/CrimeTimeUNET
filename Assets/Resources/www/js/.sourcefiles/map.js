@@ -1,5 +1,5 @@
 var tilesize = 75;
-var Map = function() {
+var GameMap = function() {
 	this._super.constructor.call(this);
 	this.rows = 0;
 	this.columns = 0;
@@ -8,7 +8,7 @@ var Map = function() {
 	this.pan = false;
 	this.pan_threshold = 1;
 }
-Map.prototype.generate = function(rows, columns){
+GameMap.prototype.generate = function(rows, columns){
 	var mapobj = this;
 	//var mapimg = preload_map.getResult("mapimg");
 	//var mapimg_bitmap = new createjs.Bitmap(mapimg);
@@ -94,7 +94,7 @@ Map.prototype.generate = function(rows, columns){
 	this.y = -h/2;
 }
 
-Map.prototype.tileSelect = function (x, y){
+GameMap.prototype.tileSelect = function (x, y){
 	var mapobj = this;
 	$.post("ControlInput", 
 		{
@@ -122,7 +122,7 @@ Map.prototype.tileSelect = function (x, y){
 	
 }
 
-Map.prototype.clearPath = function(newpath) {
+GameMap.prototype.clearPath = function(newpath) {
 	var mapobj = this;
 	for(var j = 0; j < mapobj.currentpath.length; j++){
 		var row = mapobj.currentpath[j].row;
@@ -136,7 +136,7 @@ Map.prototype.clearPath = function(newpath) {
 	mapobj.updateCache();
 	stage.update();
 }
-_extends(Map, createjs.Container);
+_extends(GameMap, createjs.Container);
 
 /* thanks yckart and mr. crumley on SO */
 function createArray(length) {
