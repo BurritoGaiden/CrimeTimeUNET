@@ -19,11 +19,11 @@ public class CopVision : MonoBehaviour {
     void OnPreCull()
     {
         RaycastHit hit = new RaycastHit();
-        foreach (CharacterBehavior spotter in FindObjectsOfType<CharacterBehavior>())
+        foreach (CharacterBehavior spotter in ActorRegistry.Instance.ActorRegister)
         {
             if(spotter.Team == Alliance.Cops)
             {
-                foreach (MapActor spotted in FindObjectsOfType<MapActor>())
+                foreach (MapActor spotted in ActorRegistry.Instance.ActorRegister)
                 {
                     if(Physics.Raycast(spotter.transform.position, (spotted.gameObject.transform.position - spotter.transform.position).normalized, out hit, visionRange))
                     {

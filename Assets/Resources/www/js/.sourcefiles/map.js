@@ -34,7 +34,6 @@ GameMap.prototype.generate = function(rows, columns){
 		}	
 
 	}
-	mapobj.cache(mapobj.x, mapobj.y, tilesize*rows, tilesize*columns);
 	this.addEventListener("click", function(e){
 		var selectedTile;
 		var obj = map.getObjectUnderPoint(e.stageX-map.x, e.stageY-map.y, 1);
@@ -61,11 +60,9 @@ GameMap.prototype.generate = function(rows, columns){
 				selectBox.graphics.setStrokeStyle(3).beginStroke("Crimson").drawRect(0, 0, tilesize, tilesize);
 				currentTile = selectBox;
 				map.addChild(selectBox);
-				mapobj.updateCache();
 			}
 			currentTile.x = selectedTile.x;
 			currentTile.y = selectedTile.y;
-			mapobj.updateCache();
 			stage.update();
 			mapobj.tileSelect(selectedTile.x, selectedTile.y);
 		}
@@ -73,7 +70,7 @@ GameMap.prototype.generate = function(rows, columns){
 	this.on("mousedown", function(e){
 		mapobj.pan = false;
 		//console.log("DOWN EVENT: " + mapobj.pan);
-		//this.parent.addChild(this);
+		this.parent.addChild(this);
 		this.offset = {x: this.x - e.stageX, y: this.y - e.stageY};
 	});
 	this.on("pressmove", function(e){
@@ -87,7 +84,6 @@ GameMap.prototype.generate = function(rows, columns){
 		//console.log("PAN EVENT AFTER: " + mapobj.pan)
 		this.x = e.stageX + this.offset.x;
 		this.y = e.stageY + this.offset.y;
-
 		stage.update();
 	});
 	this.x = 10;
@@ -112,7 +108,7 @@ GameMap.prototype.tileSelect = function (x, y){
 					var row = data.path[i].x;
 					mapobj.maparray[row][col].graphics.clear().beginFill("Red").drawRect(0, 0, tilesize, tilesize);
 					mapobj.currentpath.push({"tile": mapobj.maparray[row][col], "col": col, "row": row});
-					mapobj.updateCache();
+
 				}
 			} catch(err) {
 				console.log(err);
@@ -133,7 +129,6 @@ GameMap.prototype.clearPath = function(newpath) {
 		else ptile.graphics.clear().beginFill("Silver").drawRect(0, 0, tilesize, tilesize);
 	}
 	mapobj.currentpath = [];
-	mapobj.updateCache();
 	stage.update();
 }
 _extends(GameMap, createjs.Container);

@@ -10,12 +10,6 @@ using System.Threading;
 public class MapStateRule : WebServerRule
 {
 
-    protected class Job
-    {
-        public Heartbeat heartbeat;
-        public HttpListenerResponse response;
-    }
-
     [Serializable]
     public struct HtmlKeyValue
     {
@@ -70,16 +64,19 @@ public class MapStateRule : WebServerRule
             cp.Pulse();
             Alliance playerTeam = cp.Team;
 
+            if (cp.Character != null)
+                h.myCharacter = (CharacterJSON)cp.Character.ToJSON();
+
             // List of other players
             List<PlayerJSON> pj = new List<PlayerJSON>();
             foreach (CommandPanel c in PlayerRegisterRule.PlayerRegister.Values)
             {
-                pj.Add((PlayerJSON)c.ToJSON());
+                pj.Add((PlayerJSON) c.ToJSON());
             }
 
             // List of characters
             List<CharacterJSON> cj = new List<CharacterJSON>();
-            foreach (CharacterBehavior c in FindObjectsOfType<CharacterBehavior>())
+            foreach (CharacterBehavior c in ActorRegistry.Instance.ActorRegister)
             {
                 // if you're allies OR you're made visible
                 if(c.Team == cp.Team || c.IsVisible)
@@ -87,8 +84,6 @@ public class MapStateRule : WebServerRule
             }
             h.state = GameStateManager.Instance.GameState;
             h.players = pj.ToArray();
-            if (cp.Character != null)
-                h.myCharacter = (CharacterJSON) cp.Character.ToJSON();
             h.characters = cj.ToArray();
 
         }
@@ -101,7 +96,7 @@ public class MapStateRule : WebServerRule
         // TODO: Merge Job and Heartbeat in to a single class maybe?
 
         Job newJob = new Job();
-        newJob.heartbeat = h;
+        newJob.data = h;
         newJob.response = context.Response;
         m_jobs.Enqueue(newJob);
 
@@ -110,7 +105,7 @@ public class MapStateRule : WebServerRule
 
     void WriteResponse(Job job)
     {
-        string dataString = JsonUtility.ToJson(job.heartbeat);
+        string dataString = JsonUtility.ToJson(job.data);
 
         byte[] data = Encoding.ASCII.GetBytes(dataString);
 
@@ -122,7 +117,7 @@ public class MapStateRule : WebServerRule
         
         responseStream.Write(data, 0, data.Length);
 
-        //Debug.Log(dataString);
+        Debug.Log(dataString);
     }
 
     void ConsumerThread()
@@ -135,7 +130,7 @@ public class MapStateRule : WebServerRule
                 WriteResponse(job);
                 //Debug.Log("Heartbeat Complete");
             }
-            Thread.Sleep(2);
+            Thread.Sleep(1);
         }
     }
 

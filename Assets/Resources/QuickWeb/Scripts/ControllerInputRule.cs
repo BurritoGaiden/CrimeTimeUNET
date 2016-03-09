@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Threading;
 
 public class ControllerInputRule : WebServerRule
 {
@@ -187,6 +188,41 @@ public class ControllerInputRule : WebServerRule
         }
     }
 
+    // --- For Multi-threading Support ---
+
+    void WriteResponse(Job job)
+    {
+        string dataString = JsonUtility.ToJson(job.data);
+
+        byte[] data = Encoding.ASCII.GetBytes(dataString);
+
+        HttpListenerResponse response = job.response;
+
+        response.ContentType = "text/plain";
+
+        Stream responseStream = response.OutputStream;
+
+        responseStream.Write(data, 0, data.Length);
+
+        //Debug.Log(dataString);
+    }
+
+    void ConsumerThread()
+    {
+        while (true)
+        {
+            while (m_jobs.Count > 0)
+            {
+                Job job = m_jobs.Dequeue();
+                WriteResponse(job);
+                //Debug.Log("Heartbeat Complete");
+            }
+            Thread.Sleep(1);
+        }
+    }
+
+    // -------------------------------------
+
     bool IsYourTurn(CommandPanel cp)
     {
         return (cp.Team == Alliance.Cops && GameStateManager.Instance.GameState == GameState.CopsTurn) || (cp.Team == Alliance.Robbers && GameStateManager.Instance.GameState == GameState.GangTurn);
@@ -206,6 +242,8 @@ public class ControllerInputRule : WebServerRule
     }
 
 #endif
+
+    private Queue<Job> m_jobs = new Queue<Job>();
 
     [SerializeField]
     private HtmlKeyValue[] substitutions;
