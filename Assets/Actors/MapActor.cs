@@ -24,5 +24,15 @@ public abstract class MapActor : MonoBehaviour, IJSONable {
         json.coords = Coords;
         return json;
     }
+
+    void Awake()
+    {
+        ActorRegistry.Instance.ActorRegister.Add(this);
+    }
+
+    void OnDestroy()
+    {
+        ActorRegistry.Instance.ActorRegister.Remove(this);
+    }
   
 }

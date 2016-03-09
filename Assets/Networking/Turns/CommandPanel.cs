@@ -115,7 +115,7 @@ public class CommandPanel : MonoBehaviour, IJSONable {
     {
         IsConnected = true;
         timerCurrent = timerMax;
-        Debug.Log(PlayerName + " has a pulse!");
+       // Debug.Log(PlayerName + " has a pulse!");
     }
 
     public IJSON ToJSON()

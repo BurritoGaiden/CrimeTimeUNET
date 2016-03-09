@@ -290,7 +290,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 						console.log("Data: " + data + " Status: " + status);
 						usernameDOMField.style.visibility = "hidden";	
 						heartbeat();
-						hb = setInterval(heartbeat, 250);
+						hb = setInterval(heartbeat, 2000);
 					}
 				});
 			// if(detectmob()){

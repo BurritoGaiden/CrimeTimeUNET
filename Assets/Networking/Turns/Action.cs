@@ -32,7 +32,7 @@ public class Movement : Action{
             float zPos = tb.transform.position.z;
             actor.transform.LookAt(Vector3.Lerp(actor.transform.position, new Vector3(xPos, 0.125f, zPos), t));
             while (t < 1.0f) {
-				t += Time.deltaTime / 0.25f; // Sweeps from 0 to 1 in time seconds
+				t += Time.deltaTime / 0.5f; // Sweeps from 0 to 1 in time seconds
 				actor.transform.position = Vector3.Lerp(actor.transform.position, new Vector3 (xPos, 0.125f, zPos), t);
 				yield return 0;
 			}

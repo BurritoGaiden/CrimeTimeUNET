@@ -7,9 +7,6 @@ using System;
 
 public class WebServer : MonoBehaviour
 {
-	// The high and mighty player registry, formatted in <IP, Controller> format
-	// Look up incomming connections by IP to see if they have an existing controller
-	public static Dictionary<string, GameObject> controllerRoster = new Dictionary<string, GameObject>();
 
 #if UNITY_STANDALONE || UNITY_EDITOR
 

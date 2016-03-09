@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 
 [Serializable]
-public class Heartbeat {
+public class Heartbeat: IJSON {
 
     public GameState state;
     public PlayerJSON[] players;
