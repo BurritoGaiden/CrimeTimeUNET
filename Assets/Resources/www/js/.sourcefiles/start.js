@@ -439,6 +439,7 @@ define(["jquery", "preloader", "createjs", "map", "uilib"], function($) {
 			pchar.index = map.getChildIndex(child);
 			map.x = (w - 2*tilesize*row)/2;
 			map.y = (h - 2*tilesize*(map.columns-col))/2;
+			map.updateCache();
 		}
 
 		function updatePlayer(p) {
@@ -452,6 +453,7 @@ define(["jquery", "preloader", "createjs", "map", "uilib"], function($) {
 				var child = map.addChild(pchar.icon);
 				pchar.index = map.getChildIndex(child);
 			}
+			map.updateCache();
 		}
 
 		function movePlayerTo(coords){
