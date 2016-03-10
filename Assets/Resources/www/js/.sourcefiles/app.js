@@ -22,6 +22,7 @@ var player = {
     "state": 1,
     "ready": false,
     "icon": {},
+    "stat_ui": {},
     "character": {
         "name": "",
         "coords": {
@@ -29,10 +30,11 @@ var player = {
             "y": 0,
         },
         "stats": {
-            "health": 5,
-            "punch": 6,
+            "hp": 5,
+            "melee": 6,
+            "defense": 5,
             "gun": 3,
-            "move": 3
+            "movement": 3
         },
     }
 }

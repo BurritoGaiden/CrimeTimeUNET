@@ -1,12 +1,39 @@
 var curr_data = "";
 var hb_lock = false;
-define(["jquery", "preloader", "createjs", "map"], function($) {
+define(["jquery", "preloader", "createjs", "map", "uilib"], function($) {
     $(function() {
         $(document).ready(function(){
         	preloader.init();
 			init();
 		});
 		
+        function init(){
+			hud = document.getElementById("hud");
+			canvas = document.getElementById("canvas");
+			
+			stage = new createjs.Stage(canvas);
+			hud_stage = new createjs.Stage(hud);
+			//hud_stage.addEventListener("reconnect", reconnect);
+			createjs.Touch.enable(stage);
+			createjs.Touch.enable(hud_stage);
+			//createjs.Ticker.setFPS(60);
+			//createjs.Ticker.addEventListener("tick", tick);
+			//createjs.Ticker.addEventListener("tick", stage);
+			canvas.width = hud.width = window.innerWidth
+			canvas.height = hud.height = window.innerHeight;
+
+			UI.width = canvas.width;
+			UI.height = canvas.height;
+
+			w = canvas.width;
+			h = canvas.height;
+			if(h <= 500) mobile_offset = 0.75; //TODO think of a better way to do this
+			else mobile_offset = 1;
+
+			preloader.preload.on("complete", showStartup);
+			preloader.preload.loadManifest(preloader.startup_manifest);
+		}
+
 		//Function to call heartbeat
 
 		function setupStartupBg(){
@@ -66,13 +93,9 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			prompt.color = "white";
 			prompt.x = w/2 - (prompt.getBounds().width/2);
 			prompt.y = usernameField.y - 100*mobile_offset;
-			var join_button = new createjs.Container();
-			var join_box = new createjs.Shape();
-			var join_button_text = new createjs.Text("Join the Heist!", "30px DAYPBL", "white");
-			join_box.graphics.beginFill("Grey").drawRoundRect(0, 0, 300, 75, 5);
-			join_button_text.x = 150 - join_button_text.getBounds().width/2;
-			join_button_text.y = 75/2 - join_button_text.getBounds().height/2;
-			join_button.addChild(join_box, join_button_text);
+			var join_button_settings = {width:300, height:75, radius:5, color:"Grey"};
+			var join_button_text_settings = {text:"Join the Heist!", size:30, font:"DAYPBL", color:"white"};
+			var join_button = new Button(join_button_settings, join_button_text_settings);
 			join_button.x = w/2 - 150;
 			join_button.y = usernameField.y + 100*mobile_offset;
 			usernameDOMField.onkeypress = function(e){
@@ -150,11 +173,6 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 		_extends(CharacterSelectIcon, createjs.Container);
 
 		function showCharacterSelect(){
-			var ready_button = new createjs.Container();
-			var ready_box = new createjs.Shape();
-			var ready_button_text = new createjs.Text("Ready", "30px DAYPBL", "white");
-			
-
 			hud_stage.removeChild(hud_stage.getChildByName("startupScreen"));
 			var charSelectScreen = new createjs.Container();
 			charSelectScreen.name = "charSelectScreen";
@@ -164,6 +182,10 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			promptText1.y = h/16;
 			promptText2.x = w/2 - promptText2.getBounds().width/2;
 			promptText2.y = promptText1.y + promptText1.getBounds().height/2 + 10;
+
+			var ready_button_settings = {width:200, height:75, radius:5, color:"Grey"};
+			var ready_button_text_settings = {text:"Ready", size:30, font:"DAYPBL", color:"white"};
+			var ready_button;
 
 			var characters = new createjs.Container();
 			for(character = 4; character >= 0; character--){
@@ -215,8 +237,9 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 											color = "DarkGray";
 											txt_color = "White";
 										}
-										ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
-										ready_button_text.color = txt_color;
+										ready_button.highlight(color, txt_color);
+										//ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
+										//ready_button_text.color = txt_color;
 										hud_stage.update();
 								})
 							}
@@ -244,13 +267,9 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				characters.addChild(character_icon);
 			}
 
-			ready_box.graphics.beginFill("DarkGray").drawRoundRect(0, 0, 200, 75, 5);
-			ready_button_text.x = 100 - ready_button_text.getBounds().width/2;
-			ready_button_text.y = 75/2 - ready_button_text.getBounds().height/2;
-			ready_button.addChild(ready_box, ready_button_text);
+			ready_button = new Button(ready_button_settings, ready_button_text_settings);
 			ready_button.x = w/2 - 100;
 			ready_button.y = characters.getBounds().height + 100*mobile_offset;
-
 			ready_button.on("click", function(){
 				$.post("ControlInput", 
 				{
@@ -269,8 +288,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 							color = "DarkGray";
 							txt_color = "White";
 						}
-						ready_box.graphics.beginFill(color).drawRoundRect(0, 0, 200, 75, 5);
-						ready_button_text.color = txt_color;
+						ready_button.highlight(color, txt_color);
 						hud_stage.update();
 				})
 			})
@@ -327,10 +345,9 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				username: player.username,
 			},
 				function(data, status){
-					console.log("Success! Data: " + data);
+					//console.log("Success! Data: " + data);
 					try {
 						if(curr_data != data){
-							curr_data = data;
 							data = JSON.parse(data);
 							//Redirect client to appropriate screen
 							//TODO LATER: Write functions to update player stats
@@ -342,6 +359,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 								//do stuff
 							}
 							if((data.state == 6 || data.state == 4 || data.state == 5)) {
+								var stat_change = !(JSON.stringify(player.character.stats) == JSON.stringify(data.myCharacter.stats));
 								player.character = data.myCharacter;
 								if(map_setup == false){
 									if(!preloader.preload_icon.loaded){
@@ -358,6 +376,10 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 
 								}
 								else {
+									if(player.stat_ui.name != undefined && stat_change) {
+										console.log("Player stat change!");
+										player.stat_ui.update(player);
+									}
 									movePlayerTo(player.character.coords);
 									for(var c in characters){
 										if(c == player.character.name) continue;
@@ -373,6 +395,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 								}
 							}
 							player.state = data.state;
+							curr_data = data;
 						}
 						
 						
@@ -388,6 +411,7 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			.always(function() {
 				hb_lock = false;
 			});
+			stage.update();
 		}
 		function initOtherPlayers(){
 			for(var c in characters){
@@ -473,28 +497,6 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			return mapdata;
 		}
 
-		function init(){
-			hud = document.getElementById("hud");
-			canvas = document.getElementById("canvas");
-			
-			stage = new createjs.Stage(canvas);
-			hud_stage = new createjs.Stage(hud);
-			//hud_stage.addEventListener("reconnect", reconnect);
-			createjs.Touch.enable(stage);
-			createjs.Touch.enable(hud_stage);
-			createjs.Ticker.setFPS(60);
-			createjs.Ticker.addEventListener("tick", tick);
-			createjs.Ticker.addEventListener("tick", stage);
-			canvas.width = hud.width = window.innerWidth
-			canvas.height = hud.height = window.innerHeight;
-			w = canvas.width;
-			h = canvas.height;
-			if(h <= 500) mobile_offset = 0.75;
-			else mobile_offset = 1;
-			preloader.preload.on("complete", showStartup);
-			preloader.preload.loadManifest(preloader.startup_manifest);
-		}
-
 		function setup(){
 			hud_stage.clear();
 			hud_stage.removeAllChildren();
@@ -511,18 +513,17 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			hud_stage.addEventListener("click", toMap);
 			hud_stage.addEventListener("mousedown", toMap);
 			hud_stage.addEventListener("pressmove", toMap);
-			var action_button = new createjs.Container();
-			var action_graphic = new createjs.Shape();
+
 			var txtSize = 32;
 			if(w < 500) txtSize = 28;
-			var action_text = new createjs.Text("Move", txtSize + "px DAYPBL", 'white');
-			action_text.x -= action_text.getBounds().width/2;
-			action_text.y -= action_text.getBounds().height/2;
-			action_graphic.graphics.beginFill("DimGray").drawRoundRect(0, 0, 150, 75, 5);
-			action_button.addChild(action_graphic, action_text);
+
+			var action_button_settings = {width:150, height:75, radius:5, color:"DimGrey"};
+			var action_button_text_settings = {text:"Move", size:txtSize, font:"DAYPBL", color:"white"};
+			var action_button = new Button(action_button_settings, action_button_text_settings);
+
 			action_button.scaleX = action_button.scaleY = mobile_offset;
-			action_button.x = (w - 10 - action_button.getBounds().width)*mobile_offset;
-			action_button.y = (h - 10 - action_button.getBounds().height)*mobile_offset;
+			action_button.x = (w - action_button_settings.width - 20)*mobile_offset;
+			action_button.y = (h - action_button_settings.height - 20)*mobile_offset;
 			action_button.on("click", function(){
 				//send post
 				console.log("C ommitting movements");
@@ -571,105 +572,6 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 				//setup();
 			}
 		}
-		function setupTopHud(){
-			//loadPlayers();
-			var teamicons = [];
-			if(player.character.name == "Fisticop"){
-				for(m = 0; m < players.length; m++){
-					var member_display = new createjs.Container();
-					member_display.x = m*(w/5);
-					member_display.y = (h/5)/2 - 10;
-					var member_icon = new createjs.Shape();
-					member_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
-					member_icon.x = 50;
-					var member_stats = new createjs.Container();
-					var name = new createjs.Text("player " + (m+1), "18px cinzel", "Black");
-					var health = new createjs.Container();
-					var range = new createjs.Container();
-					var melee = new createjs.Container();
-					var movespeed = new createjs.Container();
-					generatePips(health, 2, false);
-					generatePips(range, 2, false);
-					generatePips(melee, 2, false);
-					generatePips(movespeed, 2, false);
-					member_stats.x = 100;
-					member_stats.y = -40;
-					health.y = 25;
-					range.y = health.y + 15;
-					melee.y = range.y + 15;
-					movespeed.y = melee. y + 15;
-					member_stats.addChild(name, health, range, melee, movespeed);
-					member_display.addChild(member_icon, member_stats);
-					hud_stage.addChild(member_display);
-				}
-			}
-			else{
-				for(m = 0; m < players.length; m++){
-					var member_display = new createjs.Container();
-					member_display.x = m*(w/5 - 20);
-					member_display.y = (h/5)/2 - 10;
-					var member_icon = new createjs.Shape();
-					member_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
-					member_icon.x = 50;
-					var member_stats = new createjs.Container();
-					var name = new createjs.Text("player " + (m+1), "18px Impact", "Black");
-					var health = new createjs.Container();
-					var range = new createjs.Container();
-					var melee = new createjs.Container();
-					var movespeed = new createjs.Container();
-					generatePips(health, 2, false);
-					generatePips(range, 2, false);
-					generatePips(melee, 2, false);
-					generatePips(movespeed, 2, false);
-					member_stats.x = 100;
-					member_stats.y = -40;
-					health.y = 25;
-					range.y = health.y + 15;
-					melee.y = range.y + 15;
-					movespeed.y = melee. y + 15;
-					member_stats.addChild(name, health, range, melee, movespeed);
-					member_display.addChild(member_icon, member_stats);
-					hud_stage.addChild(member_display);
-					hud_stage.update();
-				}
-				var seperator = new createjs.Shape();
-				seperator.graphics.beginFill("DimGray").drawRoundRect(0, 0, 4, (h/5) - 20, 2);
-				var seperator_settings = seperator.clone();
-				seperator.x = w - 2*(w/5) - 30;
-				seperator.y = 10;
-				seperator_settings.x = w - (w/5) + 100;
-				seperator_settings.y = 10;
-				var fisticop_display = new createjs.Container();
-				fisticop_display.x = 3*(w/5) + 30;
-				fisticop_display.y = (h/5)/2 - 10;
-				var fisticop_icon = new createjs.Shape();
-				fisticop_icon.graphics.beginFill("DimGray").drawCircle(0, 0, 40, 40);
-				fisticop_icon.x = 0;
-				
-				var fisticop_stats = new createjs.Container();
-				var name = new createjs.Text("player " + 5, "18px Impact", "Black");
-				var health = new createjs.Container();
-				var range = new createjs.Container();
-				var melee = new createjs.Container();
-				var movespeed = new createjs.Container();
-				generatePips(health, 2, false);
-				generatePips(range, 2, false);
-				generatePips(melee, 2, false);
-				generatePips(movespeed, 2, false);
-				fisticop_stats.x = 50;
-				fisticop_stats.y = -40;
-				health.y = 25;
-				range.y = health.y + 15;
-				melee.y = range.y + 15;
-				movespeed.y = melee. y + 15;
-				fisticop_stats.addChild(name, health, range, melee, movespeed);
-				fisticop_display.addChild(fisticop_icon, fisticop_stats);
-				hud_stage.addChild(seperator, fisticop_display, seperator_settings);
-			}
-			hud_stage.update();
-		}
-
-
 
 		function setupBotHud(){
 			var player_icon = new createjs.Container();
@@ -701,37 +603,17 @@ define(["jquery", "preloader", "createjs", "map"], function($) {
 			// player_icon_img_bitmap.x = 32;
 			// player_icon_img_bitmap.y = h-(h/5) - 35;
 			// player_icon_img_bitmap.scaleX = player_icon_img_bitmap.scaleY = 0.35;
-			var player_stats = new createjs.Container();
-			var name = new createjs.Text(player.username, "bold 30px Impact", "Black");
-			var health = new createjs.Container();
-			var range = new createjs.Container();
-			var melee = new createjs.Container();
-			var movespeed = new createjs.Container();
-			generatePips(health, player.character.stats.health, true);
-			generatePips(range, player.character.stats.gun, true);
-			generatePips(melee, player.character.stats.punch, true);
-			generatePips(movespeed, player.character.stats.move, true);
-			health.y = 40;
-			range.y = health.y + 25;
-			melee.y = range.y + 25;
-			movespeed.y = melee. y + 25;
-			player_stats.addChild(name, health, range, melee, movespeed);
+
+			var player_stats = new Stats(player);
 			player_stats.x = 230;
-			player_stats.y = h-(h/5) + 5;
+			player_stats.y = h-(h/5);
+			player.stat_ui = player_stats;
 			//TODO: Should have bottom section of HUD be it's own container, then child
 			//everything that's setup here. Makes positioning items easiers
 			hud_stage.addChild(player_icon, player_stats);
 			hud_stage.update();
 		}
 
-		function generatePips(stat, pipAmt, isPlayer){
-			for(var i = 0; i < pipAmt; i++){
-				var pip = new createjs.Shape();
-				if(isPlayer) pip.graphics.beginFill("DimGray").drawRoundRect(11*i, 0, 9, 20, 5);
-				else pip.graphics.beginFill("DimGray").drawRoundRect(10*i, 0, 8, 13, 4);
-				stat.addChild(pip);
-			}
-		}
 		function detectmob() { 
 			 if( navigator.userAgent.match(/Android/i)
 			 || navigator.userAgent.match(/webOS/i)

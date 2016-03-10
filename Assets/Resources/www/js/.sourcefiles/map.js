@@ -3,10 +3,12 @@ var GameMap = function() {
 	this._super.constructor.call(this);
 	this.rows = 0;
 	this.columns = 0;
-	this.maparray;
+	this.maparray = [];
 	this.currentpath = [];
 	this.pan = false;
 	this.pan_threshold = 1;
+	this.firstTime = true;
+	return this;
 }
 GameMap.prototype.generate = function(rows, columns){
 	var mapobj = this;
@@ -14,10 +16,10 @@ GameMap.prototype.generate = function(rows, columns){
 	//var mapimg_bitmap = new createjs.Bitmap(mapimg);
 	//mapimg_bitmap.scaleX = mapimg_bitmap.scaleY = tilesize;
 	//this.addChild(mapimg_bitmap);
-	var firstTime = true;
-	this.rows = rows;
-	this.columns = columns;
-	this.maparray = createArray(rows, columns);
+	
+	mapobj.rows = rows;
+	mapobj.columns = columns;
+	mapobj.maparray = createArray(rows, columns);
 	for(var row = 0; row < rows; row++){
 		for(var col = 0; col < columns; col++){
 			var tile = new createjs.Shape();
@@ -45,9 +47,8 @@ GameMap.prototype.generate = function(rows, columns){
 		} else {
 			selectedTile = obj;
 		}
-		//console.log("CLICK EVENT: " + mapobj.pan)
-		if(firstTime) firstTime = false;
-		else if(selectedTile !== null && !mapobj.pan) {
+		
+		if(selectedTile !== null && !mapobj.pan) {
 			var circle = new createjs.Shape();
 			circle.graphics.beginFill("Crimson").drawCircle(0, 0, 10);
 			circle.x = e.stageX;
@@ -72,6 +73,7 @@ GameMap.prototype.generate = function(rows, columns){
 		//console.log("DOWN EVENT: " + mapobj.pan);
 		this.parent.addChild(this);
 		this.offset = {x: this.x - e.stageX, y: this.y - e.stageY};
+		stage.update();
 	});
 	this.on("pressmove", function(e){
 		var mapobj = this;
@@ -101,8 +103,10 @@ GameMap.prototype.tileSelect = function (x, y){
 		},
 		function(data, status){
 			try{
+				console.log(mapobj.maparray);
 				data = JSON.parse(data);
 				mapobj.clearPath();
+				if(mapobj.maparray == undefined) return;
 				for(var i = 0; i < data.path.length; i++){
 					var col = data.path[i].z+1;
 					var row = data.path[i].x;
